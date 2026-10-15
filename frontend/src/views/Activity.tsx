@@ -1,3 +1,4 @@
+import { PageTag } from '../components/PageTag';
 import { useEffect, useMemo, useState } from 'react';
 import { SEEN_ACTIVITY } from '../components/GettingStarted';
 import { useQuery } from '@tanstack/react-query';
@@ -75,9 +76,7 @@ export function Activity() {
   return (
     <div className="page au" tabIndex={0}>
       <header className="page-head">
-        <p className="page-tag">
-          <span>[09]</span> Activity
-        </p>
+        <PageTag view="activity">Activity</PageTag>
         <h1>What your agents did</h1>
         <p>A plain record for people who do not read graphs: who did what, when, and what it cost. Nothing here needs a diagram to understand, and it exports as a spreadsheet for audit.</p>
       </header>

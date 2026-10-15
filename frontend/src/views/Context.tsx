@@ -1,3 +1,4 @@
+import { PageTag } from '../components/PageTag';
 import { useDeferredValue, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getContextPreview, getTokenStats } from '../workspace/server';
@@ -19,9 +20,7 @@ type Source = 'live' | '120' | '400' | '1200';
 function Header() {
   return (
     <header className="page-head">
-      <p className="page-tag">
-        <span>[06]</span> Context
-      </p>
+      <PageTag view="context">Context</PageTag>
       <h1>Send the AI a map, not the library</h1>
       <p>One organized memory, two views: the mind map is for you, the compact map and packed context are what the agent reads. Every number below is computed from the graph you are looking at.</p>
     </header>
@@ -162,7 +161,9 @@ export function Context() {
               </div>
               <p className="muted">
                 {!dq
-                  ? 'This memory is empty, so there is nothing to pack and compare yet. Once an agent has saved facts, ask a question about them here.'
+                  ? live.nodes.length > 0 && source === 'live'
+                    ? `Every belief here (${live.nodes.length}) is quarantined or replaced, so agents are shown nothing and there is nothing to pack. Restore one, or let an agent save a new fact, and the comparison appears.`
+                    : 'This memory is empty, so there is nothing to pack and compare yet. Once an agent has saved facts, ask a question about them here.'
                   : noMatch
                   ? `Nothing in this memory matches "${dq}", so there is nothing to pack and no fair comparison. Ask about something an agent has actually saved${suggested && source === 'live' ? ', for example:' : '.'}`
                   : `For this question a plain retriever sends ${fmt(sv.ragTokens)} tokens, less than Quorum's map plus answer (${fmt(sentTokens)}). The map is sent once per session and the saving appears on larger memories and across many questions.`}
