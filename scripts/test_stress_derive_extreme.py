@@ -8,8 +8,6 @@ Tests:
 
 import time
 import threading
-import concurrent.futures
-from typing import List, Dict, Any
 from graph import queries
 
 TENANT = "stress_derive_extreme"

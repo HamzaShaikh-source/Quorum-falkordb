@@ -1,7 +1,7 @@
 export const copy = {
   appName: 'Quorum',
   tagline: 'Git revert for agent beliefs',
-  nav: { overview: 'Overview', console: 'Console', memory: 'Memory', brain: 'Brain', tenants: 'Tenants', benchmark: 'Bench', context: 'Context', connect: 'Connect', team: 'Team', activity: 'Activity' },
+  nav: { overview: 'Overview', console: 'Console', memory: 'Memory', brain: 'Brain', tenants: 'Tenants', benchmark: 'Benchmarks', context: 'Context', connect: 'Connect', team: 'Team', activity: 'Activity' },
   sampleData: 'Sample data',
   sampleHint: 'A scripted scenario running in this browser. Connect a Quorum backend to see real memory.',
   mockBanner: 'Mock data, not from Quorum',
@@ -36,8 +36,8 @@ export const copy = {
     replay: 'Agents play cached outputs, so every run is identical.',
     live: 'Agents call the model for real.',
   } as Record<string, string>,
-  epoch: (n: number) => `Epoch ${n}`,
-  invariants: { ok: 'Invariants hold', bad: (n: number) => `${n} invariant violation${n === 1 ? '' : 's'}`, unknown: 'Invariants pending' },
+  epoch: (n: number) => `Memory version ${n}`,
+  invariants: { ok: 'Safety checks pass', bad: (n: number) => `${n} safety check${n === 1 ? '' : 's'} failing`, unknown: 'Safety checks' },
   connection: {
     connecting: 'Connecting',
     live: 'Connected',
@@ -335,6 +335,7 @@ export const copy = {
       ['Alt Left', 'Previous selection'],
       ['Alt Right', 'Next selection'],
       ['?', 'Show this list'],
+      ['G', 'Open the guide and A to Z glossary'],
     ] as [string, string][],
   },
   dev: {

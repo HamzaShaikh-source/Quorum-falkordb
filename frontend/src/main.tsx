@@ -15,6 +15,7 @@ import './styles/workspace.css';
 import './landing/landing.css';
 import './styles/overview.css';
 import './styles/responsive.css';
+import './styles/clarity.css';
 import { App } from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 

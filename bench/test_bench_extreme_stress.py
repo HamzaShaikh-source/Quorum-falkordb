@@ -7,13 +7,11 @@ Tests:
 4. Deeper Causal Poison Depth: Testing up to causal depth 5 (5-hop ancestor chain containment).
 """
 
-import os
-import sys
 import time
 import random
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, Any, List
+from typing import List
 import numpy as np
 
 from graph import queries
@@ -112,7 +110,7 @@ def test_extreme_handoff_contention(num_handoffs: int = 200, num_claimers: int =
 
 
 def test_extreme_execute_vs_quarantine(timing_scenarios: List[float]):
-    print(f"\n[Extreme Test 3] Execute-vs-Quarantine Across Multiple Timing Windows...")
+    print("\n[Extreme Test 3] Execute-vs-Quarantine Across Multiple Timing Windows...")
     g = queries.get_graph(TENANT, "commons")
 
     for q_delay in timing_scenarios:

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { API_MODE } from '../api/client';
 import { Bars, Donut, EmptyGraphArt, Legend, StackBar, type Slice } from '../components/charts';
+import { AgentStrip } from '../components/AgentStrip';
 import { Icon } from '../components/Icon';
 import { fmt } from '../context/tokens';
 import { useStore, type View } from '../state/store';
@@ -101,6 +102,8 @@ export function Overview() {
           <Icon name="link" size={14} /> Connect an AI
         </Go>
       </section>
+
+      <AgentStrip rows={5} />
 
       {empty ? (
         <section className="ov-empty card wide" aria-label="Get started">
