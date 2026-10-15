@@ -73,6 +73,17 @@ def get_query_log(limit: int = 50) -> List[Dict[str, Any]]:
     return list(reversed(QUERY_LOG[-limit:]))
 
 
+def _robust_query(g, cypher: str, params: Optional[Dict[str, Any]] = None):
+    for attempt in range(6):
+        try:
+            return g.query(cypher, params) if params else g.query(cypher)
+        except Exception as e:
+            if "Max pending queries exceeded" in str(e) and attempt < 5:
+                time.sleep(0.005 * (2 ** attempt))
+                continue
+            raise
+
+
 def get_graph(tenant_id: str, kind: str = "commons"):
     clean_tenant = tenant_id[7:] if tenant_id.startswith("tenant_") else tenant_id
     graph_name = f"tenant_{clean_tenant}:{kind}"
@@ -80,9 +91,9 @@ def get_graph(tenant_id: str, kind: str = "commons"):
     g = db.select_graph(graph_name)
     # Ensure Meta node exists
     try:
-        res = g.query("MATCH (m:Meta {id: 'meta'}) RETURN m.epoch")
+        res = _robust_query(g, "MATCH (m:Meta {id: 'meta'}) RETURN m.epoch")
         if not res.result_set:
-            g.query("CREATE (:Meta {id: 'meta', epoch: 1})")
+            _robust_query(g, "CREATE (:Meta {id: 'meta', epoch: 1})")
     except Exception:
         pass
     return g
@@ -601,7 +612,7 @@ def claim_handoff(
     name = "claim_handoff"
 
     # Pre-check kind permissions
-    res_kind = g.query("MATCH (h:Handoff {id: $id}) RETURN h.kind", {"id": handoff_id})
+    res_kind = _robust_query(g, "MATCH (h:Handoff {id: $id}) RETURN h.kind", {"id": handoff_id})
     if not res_kind.result_set:
         return {"success": False, "error": "Handoff not found"}
 
@@ -622,7 +633,7 @@ def claim_handoff(
     RETURN h.id, h.status, h.claimed_by, h.lease_until
     """
     t0 = time.time()
-    res = g.query(cypher, {"id": handoff_id, "agent_id": agent_id})
+    res = _robust_query(g, cypher, {"id": handoff_id, "agent_id": agent_id})
     ms = (time.time() - t0) * 1000
     rows = len(res.result_set)
     log_query(name, cypher, ms, rows, request_id)

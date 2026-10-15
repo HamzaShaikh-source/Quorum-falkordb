@@ -1,0 +1,37 @@
+# A real deployment: docker compose -f docker-compose.yml -f docker-compose.production.yml --env-file .env.production up -d --build
+#
+#  - the hub runs with production rules: no demo or ad-hoc tokens, header auth required on /mcp
+#  - FalkorDB needs a password and is not published on the host
+#  - the console is reached through the HTTPS proxy only (add --profile tls); the plain ports are not published
+#
+# Make tokens with: python scripts/make_token.py --tenant acme --role human --name ops
+# Copy .env.production.example to .env.production and fill it in.
+services:
+  falkordb:
+    container_name: !reset null
+    ports: !reset []
+    environment:
+      # the image's entrypoint reads REDIS_ARGS (it ignores `command`)
+      - REDIS_ARGS=--requirepass ${FALKORDB_PASSWORD:?set FALKORDB_PASSWORD}
+      - FALKORDB_PASSWORD=${FALKORDB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$FALKORDB_PASSWORD\" ping | grep -q PONG"]
+
+  mock-helpdesk:
+    ports: !reset []
+
+  backend:
+    ports: !reset []
+    environment:
+      - QUORUM_ENV=production
+      - QUORUM_DEMO=0
+      - QUORUM_FALKORDB_URL=redis://:${FALKORDB_PASSWORD}@falkordb:6379
+      - QUORUM_TOKENS_JSON=${QUORUM_TOKENS_JSON:?set QUORUM_TOKENS_JSON (scripts/make_token.py)}
+      - QUORUM_PUBLIC_URL=${QUORUM_PUBLIC_URL:-}
+      - QUORUM_CORS_ORIGINS=${QUORUM_CORS_ORIGINS:-}
+      - QUORUM_MEMBER_TOKEN_TTL_DAYS=${QUORUM_MEMBER_TOKEN_TTL_DAYS:-90}
+      - QUORUM_TRUSTED_PROXIES=${QUORUM_TRUSTED_PROXIES:-127.0.0.1,::1,172.29.77.10}
+
+  frontend:
+    container_name: !reset null
+    ports: !reset []
