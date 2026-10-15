@@ -184,6 +184,8 @@ def _is_trusted_proxy(host: str) -> bool:
         return False
     try:
         ip = ipaddress.ip_address(host)
+        if getattr(ip, "ipv4_mapped", None):
+            ip = ip.ipv4_mapped
     except ValueError:
         return False
     for t in trusted:
@@ -191,8 +193,12 @@ def _is_trusted_proxy(host: str) -> bool:
             if "/" in t:
                 if ip in ipaddress.ip_network(t, strict=False):
                     return True
-            elif ip == ipaddress.ip_address(t):
-                return True
+            else:
+                tip = ipaddress.ip_address(t)
+                if getattr(tip, "ipv4_mapped", None):
+                    tip = tip.ipv4_mapped
+                if ip == tip:
+                    return True
         except ValueError:
             continue
     return False
@@ -203,10 +209,22 @@ def _client_ip(request: Request) -> str:
     if _is_trusted_proxy(direct):
         forwarded = request.headers.get("x-forwarded-for")
         if forwarded:
-            return forwarded.split(",")[0].strip()
+            ips = [p.strip() for p in forwarded.split(",") if p.strip()]
+            for candidate in reversed(ips):
+                if not _is_trusted_proxy(candidate):
+                    try:
+                        ipaddress.ip_address(candidate)
+                        return candidate
+                    except ValueError:
+                        continue
         real_ip = request.headers.get("x-real-ip")
         if real_ip:
-            return real_ip.strip()
+            candidate = real_ip.strip()
+            try:
+                ipaddress.ip_address(candidate)
+                return candidate
+            except ValueError:
+                pass
     return direct
 
 
@@ -220,15 +238,20 @@ async def edge_guard(request: Request, call_next):
     is_mcp = path == "/mcp" or path.startswith("/mcp/")
     if request.method == "OPTIONS" or not (is_mcp or path.startswith("/api/")) or _is_open_path(path):
         return await call_next(request)
-    if int(request.headers.get("content-length") or 0) > settings.MAX_BODY_BYTES:
+    try:
+        content_length = int(request.headers.get("content-length") or 0)
+    except (ValueError, TypeError):
+        content_length = 0
+    if content_length > settings.MAX_BODY_BYTES:
         return _problem(413, "PAYLOAD_TOO_LARGE", f"Requests are limited to {settings.MAX_BODY_BYTES} bytes.")
     ip = _client_ip(request)
     wait = auth_failures.locked(ip)
     if wait:
         return _problem(429, "LOCKED_OUT", f"Too many failed sign-ins. Try again in {int(wait) + 1}s.", {"Retry-After": str(int(wait) + 1)})
     token = _bearer(request)
+    limiter_key = token if (token and resolve_token(token)) else ip
     if path != "/api/events":
-        ok, wait = http_limiter.allow(token or ip)
+        ok, wait = http_limiter.allow(limiter_key)
         if not ok:
             return _problem(429, "RATE_LIMITED", f"Too many requests. Retry in {wait:.1f}s.", {"Retry-After": str(max(1, int(wait + 0.999)))})
     if is_mcp:

@@ -60,40 +60,50 @@ class ActionExecutorService:
         except Exception as exc:
             action.action.delivery_error = type(exc).__name__
             store.commit(request_id)
-            raise HTTPException(502, "External service unavailable; execution outcome requires reconciliation.") from exc
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail={"error": {"code": ErrorCode.SERVICE_UNAVAILABLE.value, "message": "External service unavailable; execution outcome requires reconciliation."}},
+            ) from exc
 
-        if resp.get("status") == 200:
-            action.action.confirmed = True
-            action.action.executed_at = int(time.time() * 1000)
-            action.action.delivery_error = None
-            action.action.execution_lease_until = None
-            store.commit(request_id)
-            event_bus.publish(
-                tenant,
-                "action_executed",
-                {"action_id": action.id, "confirmed": True},
-                request_id=request_id,
-            )
-            return action
-        elif resp.get("status") == 409:
-            # Action was tombstoned!
-            action.action.confirmed = False
-            event_bus.publish(
-                tenant,
-                "action_executed",
-                {"action_id": action.id, "confirmed": False},
-                request_id=request_id,
-            )
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail={"error": {"code": ErrorCode.CONFLICT.value, "message": resp.get("message")}},
-            )
-        else:
-            action.action.confirmed = False
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail={"error": {"code": ErrorCode.INTERNAL.value, "message": "Failed calling external service."}},
-            )
+        with store._lock:
+            if resp.get("status") == 200:
+                action.action.confirmed = True
+                action.action.executed_at = int(time.time() * 1000)
+                action.action.delivery_error = None
+                action.action.execution_lease_until = None
+                store.commit(request_id)
+                event_bus.publish(
+                    tenant,
+                    "action_executed",
+                    {"action_id": action.id, "confirmed": True},
+                    request_id=request_id,
+                )
+                return action
+            elif resp.get("status") == 409:
+                # Action was tombstoned!
+                action.action.confirmed = False
+                action.action.execution_lease_until = None
+                store.commit(request_id)
+                event_bus.publish(
+                    tenant,
+                    "action_executed",
+                    {"action_id": action.id, "confirmed": False},
+                    request_id=request_id,
+                )
+                msg = resp.get("message") or resp.get("detail") or "Action tombstoned."
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail={"error": {"code": ErrorCode.CONFLICT.value, "message": msg}},
+                )
+            else:
+                action.action.confirmed = False
+                action.action.delivery_error = str(resp.get("status") or 500)
+                action.action.execution_lease_until = None
+                store.commit(request_id)
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail={"error": {"code": ErrorCode.INTERNAL.value, "message": "Failed calling external service."}},
+                )
 
 
 action_executor = ActionExecutorService()

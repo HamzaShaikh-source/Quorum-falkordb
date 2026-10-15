@@ -125,7 +125,7 @@ export function applyEvent(prev: CoreState, ev: SseEvent): { state: CoreState; e
   let s: CoreState = {
     ...prev,
     seq: Math.max(prev.seq, ev.seq),
-    epoch: ev.epoch,
+    epoch: Math.max(prev.epoch, ev.epoch),
     eventLog: [
       ...prev.eventLog,
       {

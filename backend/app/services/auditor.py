@@ -33,14 +33,15 @@ class AuditorService:
         tenant: str = "acme",
         request_id: Optional[str] = None,
     ) -> Optional[Dict[str, Any]]:
-        if not new_fact.key or not new_fact.value:
+        if new_fact.key is None or new_fact.value is None:
             return None
 
         # Find existing healthy facts with same key
-        conflicting_facts = [
-            f for f in store.nodes.values()
-            if f.kind == NodeKind.FACT and f.status == Status.HEALTHY and set(inherited_scopes([f])) <= set(inherited_scopes([new_fact])) and f.id != new_fact.id and f.key == new_fact.key and f.value is not None and new_fact.value is not None and f.value != new_fact.value
-        ]
+        with store._lock:
+            conflicting_facts = [
+                f for f in list(store.nodes.values())
+                if f.kind == NodeKind.FACT and f.status == Status.HEALTHY and set(inherited_scopes([f])) <= set(inherited_scopes([new_fact])) and f.id != new_fact.id and f.key == new_fact.key and f.value is not None and new_fact.value is not None and f.value != new_fact.value
+            ]
 
         if not conflicting_facts:
             return None
@@ -56,9 +57,14 @@ class AuditorService:
             self.quarantine(store, new_fact.id, reason="Contradicts root-tier policy fact", tenant=tenant, request_id=request_id)
             return {"verdict": "CHALLENGER_QUARANTINED", "quarantined_id": new_fact.id}
 
-        if new_tier == Tier.ROOT and old_tier != Tier.ROOT:
-            self.quarantine(store, old_fact.id, reason="Contradicted by root-tier assertion", tenant=tenant, request_id=request_id)
-            return {"verdict": "OLD_FACT_QUARANTINED", "quarantined_id": old_fact.id}
+        if new_tier == Tier.ROOT and any((f.asserted_by.tier if f.asserted_by else Tier.NEW) != Tier.ROOT for f in conflicting_facts):
+            quarantined = []
+            for cf in conflicting_facts:
+                cf_tier = cf.asserted_by.tier if cf.asserted_by else Tier.NEW
+                if cf_tier != Tier.ROOT:
+                    self.quarantine(store, cf.id, reason="Contradicted by root-tier assertion", tenant=tenant, request_id=request_id)
+                    quarantined.append(cf.id)
+            return {"verdict": "OLD_FACT_QUARANTINED", "quarantined_ids": quarantined, "quarantined_id": quarantined[0] if quarantined else old_fact.id}
 
         # Rule 2: Compare tier weights
         tier_weights = {Tier.ROOT: 10.0, Tier.ESTABLISHED: 3.0, Tier.NEW: 0.5}
@@ -147,6 +153,8 @@ class AuditorService:
             node = store.nodes.get(node_info["id"])
             if node and node.kind == NodeKind.ACTION and node.action and node.action.executed:
                 if node.action.reversibility == Reversibility.IRREVERSIBLE:
+                    if node.action.correction_notice is not None:
+                        continue
                     # Automated damage control: generate structured CorrectionNotice
                     from app.services.saga import generate_correction_notice
                     notice = generate_correction_notice(node, store, tenant=tenant)
@@ -217,25 +225,27 @@ class AuditorService:
         tenant: str = "acme",
         request_id: Optional[str] = None,
     ) -> List[str]:
-        restored_ids = store.restore_node(root_id, request_id=request_id)
+        with store._lock:
+            restored_ids = store.restore_node(root_id, request_id=request_id)
 
-        for rid in restored_ids:
-            event_bus.publish(
-                tenant,
-                "status_changed",
-                {"id": rid, "status": Status.HEALTHY.value},
-                request_id=request_id,
-            )
+            for rid in restored_ids:
+                event_bus.publish(
+                    tenant,
+                    "status_changed",
+                    {"id": rid, "status": Status.HEALTHY.value},
+                    request_id=request_id,
+                )
 
-        if restored_ids:
-            event_bus.publish(
-                tenant,
-                "epoch_changed",
-                {"epoch": store.epoch, "reason": "restore"},
-                request_id=request_id,
-            )
+            if restored_ids:
+                event_bus.publish(
+                    tenant,
+                    "epoch_changed",
+                    {"epoch": store.epoch, "reason": "restore"},
+                    request_id=request_id,
+                )
+                store.commit(request_id)
 
-        return restored_ids
+            return restored_ids
 
 
 auditor_service = AuditorService()

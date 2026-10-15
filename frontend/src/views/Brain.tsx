@@ -122,7 +122,7 @@ function WhoKnows() {
       </form>
       {q.isLoading && <Skeleton lines={3} />}
       {q.isError && <ErrorState error={q.error} onRetry={() => void q.refetch()} />}
-      {q.data && q.data.length === 0 && <Empty>{copy.brain.traceNone}</Empty>}
+      {q.data && q.data.length === 0 && <Empty>{copy.brain.whoKnowsNone}</Empty>}
       <ol className="board">
         {q.data?.map((p, i) => (
           <li key={p.person}>

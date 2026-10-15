@@ -63,3 +63,17 @@ from app.models.system import (
     DeniedDemoResponse,
     BenchmarkResultsResponse,
 )
+from app.models.workspace import (
+    WorkspacePatch,
+    TeamIn,
+    SeatsIn,
+    MemberIn,
+    MemberPatch,
+    LinkIn,
+    PausedIn,
+    TeamItem,
+    MemberItem,
+    LinkItem,
+    WorkspaceLimits,
+    WorkspaceResponse,
+)

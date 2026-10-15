@@ -36,7 +36,12 @@ def build_mcp_app():
     server = MCPServer("quorum")
     for name in TOOLS:
         server.tool()(mcp_tools.guarded(getattr(mcp_tools, name)))
-    return server.streamable_http_app()
+    try:
+        from mcp.server.transport_security import TransportSecuritySettings
+        security = TransportSecuritySettings(enable_dns_rebinding_protection=False)
+        return server.streamable_http_app(transport_security=security)
+    except Exception:
+        return server.streamable_http_app()
 
 
 def mount(app, mcp_app) -> Optional[object]:

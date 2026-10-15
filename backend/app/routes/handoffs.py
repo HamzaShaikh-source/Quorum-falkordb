@@ -50,7 +50,13 @@ def claim_handoff(
 
         # Atomic lease check (Brief Section 5.8)
         # Allowed if PENDING or if IN_PROGRESS with expired lease
-        is_claimable = (
+        anchor_ok = True
+        if target.kind == HandoffKind.TASK and target.context_root_id:
+            anchor = store.nodes.get(target.context_root_id)
+            if anchor and anchor.status != Status.HEALTHY:
+                anchor_ok = False
+
+        is_claimable = anchor_ok and (
             target.status == HandoffStatus.PENDING
             or target.status == HandoffStatus.TIMED_OUT
             or (target.status == HandoffStatus.IN_PROGRESS and target.lease_until is not None and target.lease_until < now_ms)
@@ -62,7 +68,7 @@ def claim_handoff(
                 detail={
                     "error": {
                         "code": ErrorCode.CONFLICT.value,
-                        "message": f"Handoff '{handoff_id}' already claimed by '{target.claimed_by}' with active lease until {target.lease_until}.",
+                        "message": f"Handoff '{handoff_id}' already claimed by '{target.claimed_by}' with active lease until {target.lease_until}." if not anchor_ok else f"Anchor node for handoff '{handoff_id}' is not HEALTHY.",
                     }
                 },
             )
@@ -109,6 +115,9 @@ def review_handoff(
                 )
 
             target.status = HandoffStatus.COMPLETED
+            note_val = body.note or body.notes
+            if note_val:
+                target.note = note_val
 
             if body.decision in [ReviewDecision.APPROVE, "approve", "APPROVE"] and target.context_root_id:
                 from app.models.common import GateStatus
@@ -119,6 +128,7 @@ def review_handoff(
                     if notice:
                         notice["status"] = "APPROVED_PENDING_DELIVERY"
                         action_node.correction_notice = notice
+                    event_bus.publish(auth.tenant, "node_updated", {"node": action_node.model_dump()})
                 if target.correction_notice:
                     target.correction_notice["status"] = "APPROVED_PENDING_DELIVERY"
 

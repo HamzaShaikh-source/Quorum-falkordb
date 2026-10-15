@@ -18,7 +18,7 @@ function PageHead({ page }: { page: keyof typeof copy.pages }) {
 }
 
 function Avatar({ name, tier }: { name: string; tier: string }) {
-  return <span className={`avatar tier-${tier}`}>{name.slice(0, 1)}</span>;
+  return <span className={`avatar tier-${tier}`}>{[...name][0] ?? ''}</span>;
 }
 
 function Agents({ selected, onPick }: { selected: string | null; onPick: (id: string) => void }) {
@@ -62,7 +62,7 @@ function Procedures() {
       </header>
       {q.isLoading && <Skeleton lines={4} />}
       {q.isError && <ErrorState error={q.error} onRetry={() => void q.refetch()} />}
-      {q.data && q.data.length === 0 && <Empty>{copy.memory.noAgents}</Empty>}
+      {q.data && q.data.length === 0 && <Empty>{copy.memory.noProcedures}</Empty>}
       <ol className="procs">
         {list.map((p, i) => (
           <li key={p.id} className={i === 0 ? 'top' : ''}>

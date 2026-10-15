@@ -21,7 +21,7 @@ def quarantine(root_id: str, token: str = "", reason: str = "Manual auditor quar
     except HTTPException:
         return {"error": "Node not found.", "success": False}
     affected = auditor_service.quarantine(store, root_id, reason=reason, tenant=auth["tenant"])
-    affected = [item for item in affected if _viewer(auth, store).can_see(store.nodes[item["id"]])]
+    affected = [item for item in affected if item["id"] in store.nodes and _viewer(auth, store).can_see(store.nodes[item["id"]])]
     return {
         "epoch": store.epoch,
         "root_id": root_id,
@@ -43,7 +43,7 @@ def restore(root_id: str, token: str = "") -> Dict[str, Any]:
     except HTTPException:
         return {"error": "Node not found.", "success": False}
     restored_ids = auditor_service.restore(store, root_id, tenant=auth["tenant"])
-    restored_ids = [nid for nid in restored_ids if _viewer(auth, store).can_see(store.nodes[nid])]
+    restored_ids = [nid for nid in restored_ids if nid in store.nodes and _viewer(auth, store).can_see(store.nodes[nid])]
     return {
         "epoch": store.epoch,
         "root_id": root_id,

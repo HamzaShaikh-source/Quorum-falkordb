@@ -54,8 +54,8 @@ function Glossary() {
     const n = q.trim().toLowerCase();
     return n ? GLOSSARY_SORTED.filter((t) => t.term.toLowerCase().includes(n) || t.plain.toLowerCase().includes(n)) : GLOSSARY_SORTED;
   }, [q]);
-  const letters = useMemo(() => Array.from(new Set(rows.map((t) => t.term[0]!.toUpperCase()))), [rows]);
-  const firsts = useMemo(() => new Set(rows.filter((t, i) => i === 0 || rows[i - 1]!.term[0]!.toUpperCase() !== t.term[0]!.toUpperCase()).map((t) => t.term)), [rows]);
+  const letters = useMemo(() => Array.from(new Set(rows.map((t) => [...t.term][0]?.toUpperCase() ?? ''))), [rows]);
+  const firsts = useMemo(() => new Set(rows.filter((t, i) => i === 0 || ([...rows[i - 1]!.term][0]?.toUpperCase() ?? '') !== ([...t.term][0]?.toUpperCase() ?? '')).map((t) => t.term)), [rows]);
   return (
     <div>
       <label className="field gd-search">
@@ -75,7 +75,7 @@ function Glossary() {
       {rows.length === 0 && <p className="muted">No word matches that. Try a shorter search.</p>}
       <dl className="gd-terms">
         {rows.map((t) => {
-          const l = t.term[0]!.toUpperCase();
+          const l = [...t.term][0]?.toUpperCase() ?? '';
           const head = firsts.has(t.term);
           return (
             <div key={t.term} className="gd-term">

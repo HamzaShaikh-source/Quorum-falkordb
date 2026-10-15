@@ -43,6 +43,8 @@ def remember_fact(
         scope_team = auth["team_id"]
     elif scope != "commons":
         return {"error": "scope must be commons or team.", "success": False}
+    if not isinstance(text, str) or not text.strip():
+        return {"error": "text is required and must be a non-empty string.", "success": False}
 
     fact = GraphNode(
         id=fact_id,
@@ -176,6 +178,13 @@ def derive(
 
     viewer = _viewer(auth, store)
 
+    if not isinstance(text, str) or not text.strip():
+        return {
+            "epoch": store.epoch,
+            "error": "Atomic derivation check failed: text must be a non-empty string.",
+            "success": False,
+        }
+
     if not isinstance(parent_ids, (list, tuple)) or not parent_ids:
         return {
             "epoch": store.epoch,
@@ -252,6 +261,20 @@ def stage_action(
     rev_enum = getattr(Reversibility, rev_str, Reversibility.IRREVERSIBLE)
 
     viewer = _viewer(auth, store)
+
+    if not isinstance(label, str) or not label.strip():
+        return {
+            "epoch": store.epoch,
+            "error": "Atomic derivation check failed: label must be a non-empty string.",
+            "success": False,
+        }
+
+    if not isinstance(action_type, str) or not action_type.strip():
+        return {
+            "epoch": store.epoch,
+            "error": "Atomic derivation check failed: action_type must be a non-empty string.",
+            "success": False,
+        }
 
     if not isinstance(parent_ids, (list, tuple)) or not parent_ids:
         return {
@@ -368,14 +391,21 @@ def claim_handoff(id: str, token: str = "") -> Dict[str, Any]:
             }
 
         now_ms = int(time.time() * 1000)
-        is_claimable = (
+        anchor_ok = True
+        if target.kind == HandoffKind.TASK and target.context_root_id:
+            anchor = store.nodes.get(target.context_root_id)
+            if anchor and anchor.status != Status.HEALTHY:
+                anchor_ok = False
+
+        is_claimable = anchor_ok and (
             target.status == HandoffStatus.PENDING
+            or target.status == HandoffStatus.TIMED_OUT
             or (target.status == HandoffStatus.IN_PROGRESS and target.lease_until and target.lease_until < now_ms)
         )
         if not is_claimable:
             return {
                 "epoch": store.epoch,
-                "error": f"Handoff '{id}' already claimed by '{target.claimed_by}' with active lease until {target.lease_until}.",
+                "error": f"Handoff '{id}' already claimed by '{target.claimed_by}' with active lease until {target.lease_until}." if anchor_ok else f"Anchor node for handoff '{id}' is not HEALTHY.",
                 "success": False,
             }
 
@@ -391,6 +421,7 @@ def claim_handoff(id: str, token: str = "") -> Dict[str, Any]:
             {
                 "handoff_id": target.id,
                 "winner": claimer,
+                "losers": [],
                 "lease_until": target.lease_until,
             },
         )
@@ -408,6 +439,10 @@ def review_handoff(id: str, decision: str, token: str = "", note: Optional[str] 
     if auth["role"] != "human":
         return {"error": roles.refusal(auth.get("agent_id") or "This token", auth["role"], "approve or reject reviews", "human"), "success": False}
 
+    dec = str(decision or "").strip().lower()
+    if dec not in ("approve", "passed", "reject", "rejected"):
+        return {"error": "Decision must be approve or reject.", "success": False}
+
     store = get_graph_store(auth["tenant"])
     with store.handoff_lock:
         target = next((h for h in store.handoffs if h.id == id), None)
@@ -418,7 +453,7 @@ def review_handoff(id: str, decision: str, token: str = "", note: Optional[str] 
             target.note = note
         target.status = HandoffStatus.COMPLETED
 
-        if decision.lower() in ("approve", "passed") and target.context_root_id:
+        if dec in ("approve", "passed") and target.context_root_id:
             with store._lock:
                 action_node = store.nodes.get(target.context_root_id)
                 if action_node and action_node.action:

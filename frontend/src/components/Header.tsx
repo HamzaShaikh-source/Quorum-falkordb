@@ -29,7 +29,18 @@ const VIEWS: { id: View; icon: string }[] = [
 ];
 
 /** Tab-bar labels on a phone, where nine tabs share the width. */
-const SHORT: Partial<Record<View, string>> = {};
+const SHORT: Record<View, string> = {
+  overview: 'Over',
+  console: 'Graph',
+  memory: 'Mem',
+  brain: 'Brain',
+  tenants: 'Tenants',
+  benchmark: 'Bench',
+  context: 'Context',
+  connect: 'MCP',
+  team: 'Team',
+  activity: 'Logs',
+};
 
 function SavedPill() {
   const naive = useLive((s) => s.totals.naive);
@@ -147,7 +158,7 @@ export function Header() {
           <span className="sr">{copy.header.tenant}</span>
           <span className="tenant-dot" aria-hidden="true" />
           <select value={tenant} onChange={(e) => void switchTenant(e.target.value)} aria-label={copy.header.tenant}>
-            {(tenants().length ? tenants() : [tenant]).map((t) => (
+            {Array.from(new Set([...tenants(), tenant])).map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>

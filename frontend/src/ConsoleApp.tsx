@@ -60,6 +60,10 @@ function useShortcuts() {
         return;
       }
       if (e.key === 'Escape') {
+        if (st.helpOpen) {
+          st.set({ helpOpen: false });
+          return;
+        }
         if (st.paletteOpen) return;
         if (st.ctxMenu) {
           st.set({ ctxMenu: null });

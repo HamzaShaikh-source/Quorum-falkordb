@@ -1,6 +1,8 @@
 import time
 from collections import defaultdict
-from fastapi import APIRouter, Depends
+from typing import Optional
+from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException
 from app.auth import get_auth_context, AuthContext
 from app.graph.queries import get_graph_store
 from app.models.common import NodeKind, Reversibility
@@ -12,6 +14,11 @@ from app.services.access import node_for
 router = APIRouter()
 
 
+class BlastPreviewRequest(BaseModel):
+    node_id: Optional[str] = None
+    root_id: Optional[str] = None
+
+
 @router.get("/blast/{node_id}/preview", response_model=BlastPreviewResponse)
 def blast_preview(node_id: str, auth: AuthContext = Depends(get_auth_context)):
     store = get_graph_store(auth.tenant)
@@ -19,7 +26,7 @@ def blast_preview(node_id: str, auth: AuthContext = Depends(get_auth_context)):
     node_for(store, auth, node_id)
     with store._lock:
         if node_id in store.nodes:
-            descendants = store.get_descendants(node_id, edge_types=["LEADS_TO", "SUPPORTS"])
+            descendants = store.get_descendants(node_id, edge_types=["LEADS_TO", "SUPPORTS", "FROM_SOURCE"])
             all_affected = [store.nodes[node_id]] + [n for n in descendants if viewer.can_see(n)]
             facts = sum(1 for n in all_affected if n.kind == NodeKind.FACT)
             conclusions = sum(1 for n in all_affected if n.kind == NodeKind.CONCLUSION)
@@ -56,6 +63,17 @@ def blast_preview(node_id: str, auth: AuthContext = Depends(get_auth_context)):
     )
 
 
+@router.post("/blast/preview", response_model=BlastPreviewResponse)
+def blast_preview_post(req: BlastPreviewRequest, auth: AuthContext = Depends(get_auth_context)):
+    target_id = req.node_id or req.root_id
+    if not target_id:
+        raise HTTPException(
+            status_code=422,
+            detail={"error": {"code": "VALIDATION", "message": "node_id or root_id is required."}},
+        )
+    return blast_preview(node_id=target_id, auth=auth)
+
+
 @router.get("/blast/{node_id}/report", response_model=BlastReportResponse)
 def blast_report(node_id: str, auth: AuthContext = Depends(get_auth_context)):
     now_ms = int(time.time() * 1000)
@@ -65,7 +83,7 @@ def blast_report(node_id: str, auth: AuthContext = Depends(get_auth_context)):
     with store._lock:
         if node_id in store.nodes:
             root_node = store.nodes[node_id]
-            descendants = store.get_descendants(node_id, edge_types=["LEADS_TO", "SUPPORTS"])
+            descendants = store.get_descendants(node_id, edge_types=["LEADS_TO", "SUPPORTS", "FROM_SOURCE"])
             all_affected = [root_node] + [n for n in descendants if viewer.can_see(n)]
             facts = sum(1 for n in all_affected if n.kind == NodeKind.FACT)
             conclusions = sum(1 for n in all_affected if n.kind == NodeKind.CONCLUSION)
@@ -81,7 +99,7 @@ def blast_report(node_id: str, auth: AuthContext = Depends(get_auth_context)):
                 curr = queue.pop(0)
                 curr_d = depth_map[curr]
                 for e in store.edges:
-                    if e.source == curr and e.type.value in ["LEADS_TO", "SUPPORTS"] and e.target in store.nodes and viewer.can_see(store.nodes[e.target]):
+                    if e.source == curr and e.type.value in ["LEADS_TO", "SUPPORTS", "FROM_SOURCE"] and e.target in store.nodes and viewer.can_see(store.nodes[e.target]):
                         if e.target not in depth_map:
                             depth_map[e.target] = curr_d + 1
                             queue.append(e.target)

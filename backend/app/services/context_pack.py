@@ -94,12 +94,16 @@ def short_ids(nodes: Iterable[GraphNode]) -> Dict[str, str]:
     return out
 
 
-def resolve_ref(nodes: Dict[str, GraphNode], ref: str) -> Optional[GraphNode]:
-    if ref in nodes:
-        return nodes[ref]
+def resolve_ref(nodes: Dict[str, GraphNode], ref: Any) -> Optional[GraphNode]:
+    if not isinstance(ref, str) or not ref.strip():
+        return None
+    ref_stripped = ref.strip()
+    if ref_stripped in nodes:
+        return nodes[ref_stripped]
     ids = short_ids(nodes.values())
+    ref_lower = ref_stripped.lower()
     for nid, sid in ids.items():
-        if sid.lower() == ref.strip().lower():
+        if sid.lower() == ref_lower:
             return nodes[nid]
     return None
 

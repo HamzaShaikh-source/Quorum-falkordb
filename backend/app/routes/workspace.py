@@ -1,14 +1,22 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
-
 from app.auth import AuthContext, get_auth_context, require_role
 from app.graph.queries import get_graph_store
+from app.models.workspace import (
+    WorkspacePatch,
+    TeamIn,
+    SeatsIn,
+    MemberIn,
+    MemberPatch,
+    LinkIn,
+    PausedIn,
+)
 from app.services import roles
 from app.services import workspace as ws
 from app.services.mcp_guard import record_event
 from app.services.event_bus import event_bus
+
 
 router = APIRouter()
 
@@ -23,46 +31,6 @@ def _done(auth: AuthContext, store, extra: Optional[dict] = None) -> dict:
     if extra:
         out.update(extra)
     return out
-
-
-class WorkspacePatch(BaseModel):
-    org: Optional[str] = None
-    plan: Optional[str] = None
-    hub: Optional[str] = None
-
-
-class TeamIn(BaseModel):
-    name: str
-    seats: int = 5
-
-
-class SeatsIn(BaseModel):
-    seats: int
-
-
-class MemberIn(BaseModel):
-    name: str
-    role: str = "agent"
-    team_id: str
-    client: str = "custom"
-    device: str = ""
-    expires_in_days: Optional[int] = Field(None, ge=0, le=3650)  # None: the hub default; 0: never
-
-
-class MemberPatch(BaseModel):
-    role: Optional[str] = None
-    team_id: Optional[str] = None
-    client: Optional[str] = None
-
-
-class LinkIn(BaseModel):
-    a: str
-    b: str
-    scope: str = "team"
-
-
-class PausedIn(BaseModel):
-    paused: bool
 
 
 @router.get("/workspace")

@@ -1,3 +1,4 @@
+import re
 import uuid
 from typing import Tuple, Optional
 from app.graph.queries import GraphStore
@@ -89,8 +90,13 @@ class QuorumGateService:
 
         # All leaf facts passed! Add SUPPORTS edges and pass gate
         action.action.gate = GateStatus.PASSED
+        seen_corroborators = set()
         for edge in corroborating_edges_to_add:
-            store.add_edge(edge, request_id)
+            if edge.source in seen_corroborators:
+                continue
+            seen_corroborators.add(edge.source)
+            if not any(e.source == edge.source and e.target == edge.target and e.type == edge.type for e in store.edges):
+                store.add_edge(edge, request_id)
 
         return GateStatus.PASSED, None, None
 
@@ -105,6 +111,8 @@ class QuorumGateService:
             return None
 
         target_tier = target_fact.asserted_by.tier if target_fact.asserted_by else Tier.NEW
+        target_val_norm = re.sub(r"\s+", " ", str(target_fact.value).strip().lower())
+        target_origin = target_fact.origin or (store.nodes.get(target_fact.source_ref).origin if target_fact.source_ref and store.nodes.get(target_fact.source_ref) else target_fact.source_ref)
 
         for node in store.nodes.values():
             if node.id == target_fact.id or node.kind != NodeKind.FACT or node.status != Status.HEALTHY or getattr(node, "stale", False):
@@ -112,17 +120,29 @@ class QuorumGateService:
 
             if not set(inherited_scopes([node])) <= set(inherited_scopes([target_fact])):
                 continue
-            if node.key == target_fact.key and node.value == target_fact.value:
+
+            node_val_norm = re.sub(r"\s+", " ", str(node.value).strip().lower()) if node.value else ""
+            if node.key == target_fact.key and node_val_norm == target_val_norm:
+                node_origin = node.origin or (store.nodes.get(node.source_ref).origin if node.source_ref and store.nodes.get(node.source_ref) else node.source_ref)
                 # Check different origin
-                if node.origin and target_fact.origin and node.origin != target_fact.origin:
+                if node_origin and target_origin and node_origin != target_origin:
                     candidate_tier = node.asserted_by.tier if node.asserted_by else Tier.NEW
                     # Check at least one is established or root
-                    if target_tier in [Tier.ROOT, Tier.ESTABLISHED] or candidate_tier in [Tier.ROOT, Tier.ESTABLISHED]:
+                    if target_tier in [Tier.ROOT, Tier.ESTABLISHED, "root", "established"] or candidate_tier in [Tier.ROOT, Tier.ESTABLISHED, "root", "established"]:
                         return node
 
         return None
 
     def _create_review_handoff(self, store: GraphStore, action: GraphNode, reason: str, tenant: str) -> Handoff:
+        # Check if an existing pending review handoff already exists for this action to guarantee idempotency
+        with store.handoff_lock:
+            existing = next(
+                (h for h in store.handoffs if h.context_root_id == action.id and h.kind == HandoffKind.REVIEW and h.status == HandoffStatus.PENDING),
+                None,
+            )
+            if existing:
+                return existing
+
         handoff = Handoff(
             id=f"hand_gate_{uuid.uuid4().hex[:6]}",
             kind=HandoffKind.REVIEW,

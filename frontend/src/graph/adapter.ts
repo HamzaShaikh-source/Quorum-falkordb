@@ -229,11 +229,14 @@ export class GraphAdapter {
   private search = '';
   private autoFit = true;
   private fitTimer: ReturnType<typeof setTimeout> | null = null;
+  private containerEl?: HTMLElement;
+  private manualHandler?: () => void;
 
   constructor(
     container: HTMLElement,
     private h: AdapterHandlers,
   ) {
+    this.containerEl = container;
     this.cy = cytoscape({
       container,
       style,
@@ -263,12 +266,17 @@ export class GraphAdapter {
     const manual = () => {
       this.autoFit = false;
     };
+    this.manualHandler = manual;
     container.addEventListener('wheel', manual, { passive: true });
     container.addEventListener('pointerdown', manual);
     h.onViewport(this.cy.pan(), this.cy.zoom());
   }
 
   destroy() {
+    if (this.containerEl && this.manualHandler) {
+      this.containerEl.removeEventListener('wheel', this.manualHandler);
+      this.containerEl.removeEventListener('pointerdown', this.manualHandler);
+    }
     if (this.fitTimer) clearTimeout(this.fitTimer);
     if (this.resizeRaf) cancelAnimationFrame(this.resizeRaf);
     this.timers.forEach(clearTimeout);
@@ -290,6 +298,8 @@ export class GraphAdapter {
     this.fresh.clear();
     const pos = layoutAll(nodes, edges);
     const sel = this.cy.$(':selected').map((n) => n.id());
+    const statusMap = new Map<string, string>();
+    for (const n of nodes) statusMap.set(n.id, n.status);
     this.cy.batch(() => {
       this.cy.elements().remove();
       this.cy.add(nodes.map((n) => ({ group: 'nodes' as const, data: toData(n), position: pos[n.id] ?? { x: 0, y: 0 } })));
@@ -297,7 +307,7 @@ export class GraphAdapter {
       this.cy.add(
         edges
           .filter((e) => ids.has(e.source) && ids.has(e.target))
-          .map((e) => ({ group: 'edges' as const, data: this.edgeData(e, nodes) })),
+          .map((e) => ({ group: 'edges' as const, data: this.edgeData(e, undefined, statusMap) })),
       );
     });
     sel.forEach((id) => this.cy.getElementById(id).select());
@@ -306,9 +316,8 @@ export class GraphAdapter {
     if (fit) this.fit(false);
   }
 
-  private edgeData(e: GraphEdge, nodes?: GraphNode[]) {
-    const tgt = nodes ? nodes.find((n) => n.id === e.target) : undefined;
-    const status = tgt ? tgt.status : (this.cy.getElementById(e.target).data('status') as string | undefined);
+  private edgeData(e: GraphEdge, nodes?: GraphNode[], statusMap?: Map<string, string>) {
+    const status = statusMap ? statusMap.get(e.target) : (nodes ? nodes.find((n) => n.id === e.target)?.status : (this.cy.getElementById(e.target).data('status') as string | undefined));
     return { id: e.id, source: e.source, target: e.target, type: e.type, tq: status === 'QUARANTINED' ? 1 : 0 };
   }
 

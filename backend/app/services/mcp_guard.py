@@ -142,6 +142,14 @@ def guarded(fn):
             return {"error": str(e), "success": False}
         except FalkorUnavailable as e:
             raise RuntimeError(f"FALKORDB_UNAVAILABLE: {e.reason}. Start FalkorDB (docker compose up -d falkordb) and retry.")
+        except Exception as e:
+            out = {"error": str(e), "success": False}
+            try:
+                if "bound_args" in locals() and "t0" in locals():
+                    _record(fn.__name__, bound_args, out, (time.time() - t0) * 1000)
+            except Exception:
+                pass
+            return out
         finally:
             _header_token.reset(reset)
 

@@ -55,6 +55,7 @@ async function whoami(token: string): Promise<{ tenant: string; role: Role } | n
     const res = await fetch('/api/whoami', { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
     if (!res.ok) return null;
     const j = (await res.json()) as { tenant: string; role: Role };
+    if (!j || typeof j.tenant !== 'string' || !j.role) return null;
     return { tenant: j.tenant, role: j.role };
   } catch {
     return null;
@@ -87,6 +88,7 @@ export async function resolveAuth(): Promise<AuthResult> {
       sandbox = false;
       adopt({ tokens: { [who.tenant]: { [who.role]: stored } }, tenants: [who.tenant] });
       session.tenant = who.tenant;
+      session.role = who.role;
       return 'ok';
     }
     writeStored(null);

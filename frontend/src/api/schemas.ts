@@ -15,7 +15,7 @@ export function lenientEnum<const T extends readonly [string, ...string[]]>(name
 const Ms = z.number();
 
 export const Status = lenientEnum('status', ['HEALTHY', 'SUPERSEDED', 'QUARANTINED'] as const);
-export const NodeKind = lenientEnum('node kind', ['source', 'fact', 'conclusion', 'action'] as const);
+export const NodeKind = lenientEnum('node kind', ['source', 'fact', 'conclusion', 'action', 'alert'] as const);
 export const EdgeType = lenientEnum('edge type', [
   'LEADS_TO',
   'SUPPORTS',
@@ -108,7 +108,7 @@ export const GraphResponse = z
     tenant: z.string(),
     epoch: z.number(),
     seq: z.number(),
-    as_of: Ms.nullable(),
+    as_of: Ms.nullish(),
     generated_at: Ms,
     truncated: z.boolean(),
     nodes: z.array(GraphNode),
@@ -201,7 +201,14 @@ export const Resume = z
     session_id: z.string(),
     summary: z.string(),
     memories: z.array(
-      z.object({ fact_id: z.string(), text: z.string(), source_ref: z.string(), quote: z.string() }).passthrough(),
+      z
+        .object({
+          fact_id: z.string(),
+          text: z.string(),
+          source_ref: z.string().nullish().transform((v) => v ?? undefined),
+          quote: z.string().nullish().transform((v) => v ?? undefined),
+        })
+        .passthrough(),
     ),
   })
   .passthrough();

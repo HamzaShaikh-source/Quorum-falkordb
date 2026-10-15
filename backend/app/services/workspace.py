@@ -46,7 +46,14 @@ def hash_token(token: str) -> str:
 
 
 def _ws(store) -> Dict[str, Any]:
-    return store.workspace
+    ws = store.workspace
+    ws.setdefault("teams", [])
+    ws.setdefault("members", [])
+    ws.setdefault("links", [])
+    ws.setdefault("plan", "business")
+    ws.setdefault("org", store.tenant.replace("_", " ").title())
+    ws.setdefault("hub", "")
+    return ws
 
 
 def _team(store, team_id: str) -> Dict[str, Any]:
@@ -212,6 +219,8 @@ def remove_team(store, team_id: str) -> None:
         ws["teams"] = [t for t in ws["teams"] if t["id"] != team_id]
         ws["members"] = [m for m in ws["members"] if m["team_id"] != team_id]
         ws["links"] = [l for l in ws["links"] if l["a"] not in gone and l["b"] not in gone]
+        for mid in gone:
+            store.agent_state.pop(mid, None)
         # Facts private to a removed team become unreadable by scoped members but stay in the graph for audit.
 
 

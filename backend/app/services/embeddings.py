@@ -322,9 +322,9 @@ def cosine_scores(query: str, nodes: Sequence) -> Dict[str, float]:
         return {}
     if len(valid_nodes) > 16:
         mat = np.stack([vecs[n.id] for n in valid_nodes])
-        dots = np.clip(np.dot(mat, qv), 0.0, 1.0)
+        dots = np.nan_to_num(np.clip(np.dot(mat, qv), 0.0, 1.0), nan=0.0)
         return {n.id: float(d) for n, d in zip(valid_nodes, dots, strict=True)}
-    return {n.id: min(1.0, max(0.0, float(np.dot(qv, vecs[n.id])))) for n in valid_nodes}
+    return {n.id: float(np.nan_to_num(min(1.0, max(0.0, float(np.dot(qv, vecs[n.id])))), nan=0.0)) for n in valid_nodes}
 
 
 def as_list(vec: np.ndarray) -> List[float]:

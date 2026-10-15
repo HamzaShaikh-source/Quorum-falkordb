@@ -238,7 +238,7 @@ function Row({ a }: { a: Activity }) {
   const saved = a.naive > 0 ? a.naive - a.used : 0;
   return (
     <li className="cn-row">
-      <span className="avatar">{a.member.slice(0, 1)}</span>
+      <span className="avatar">{[...a.member][0] ?? ''}</span>
       <div className="cn-row-main">
         <p>
           <b>{a.member}</b> <code className="cn-tool mono">{a.tool}</code>

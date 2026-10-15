@@ -34,6 +34,11 @@ async def run_scenario_step(
     try:
         scenario_orchestrator.execute_step(step, tenant=auth.tenant, request_id=run_id)
     except ValueError as e:
+        event_bus.publish(
+            auth.tenant,
+            "scenario_progress",
+            {"run_id": run_id, "step": step, "state": "failed", "detail": str(e)},
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"error": {"code": ErrorCode.VALIDATION.value, "message": str(e)}},

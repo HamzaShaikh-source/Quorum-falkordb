@@ -172,6 +172,9 @@ class ScenarioOrchestrator:
         store = get_graph_store(tenant)
         now_ms = int(time.time() * 1000)
 
+        if "fact_90d" not in store.nodes:
+            self.inject_poison(tenant, request_id)
+
         # 1. Analyst Agent: derives conclusion from poisoned fact
         conc = GraphNode(
             id="conc_eligible_1042",
@@ -294,7 +297,8 @@ class ScenarioOrchestrator:
         # 1. Auditor detects contradiction between fact_30d and fact_90d
         fact_90d = store.nodes.get("fact_90d")
         if not fact_90d:
-            return {"status": "error", "message": "fact_90d not found in graph"}
+            self.inject_poison(tenant, request_id)
+            fact_90d = store.nodes.get("fact_90d")
 
         # Trust rule overrules uncorroborated new fact -> Cascade quarantine
         affected = auditor_service.quarantine(
@@ -392,6 +396,7 @@ class ScenarioOrchestrator:
         old_fact = store.nodes.get("fact_30d")
         if old_fact:
             old_fact.status = Status.SUPERSEDED
+            old_fact.valid_to = now_ms
             event_bus.publish(tenant, "status_changed", {"id": "fact_30d", "status": Status.SUPERSEDED.value}, request_id=request_id)
 
         for n in store.nodes.values():

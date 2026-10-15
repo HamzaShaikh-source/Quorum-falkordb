@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, List
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.auth import get_auth_context, AuthContext
+from app.auth import get_auth_context, AuthContext, require_role
 from app.models.graph import GraphResponse, NodeDetailResponse, StatusHistoryEntry
 from app.models.common import ErrorCode, Status
 
@@ -11,6 +12,18 @@ from app.services.event_bus import event_bus
 import time
 
 router = APIRouter()
+
+
+class RestoreRequest(BaseModel):
+    root_id: Optional[str] = None
+    node_id: Optional[str] = None
+
+
+class RestoreResponse(BaseModel):
+    restored_count: int
+    restored_nodes: List[str]
+    epoch: int
+    success: bool
 
 
 @router.get("/graph", response_model=GraphResponse)
@@ -112,4 +125,32 @@ def get_node(node_id: str, auth: AuthContext = Depends(get_auth_context)):
         path=path,
         descendant_count=descendant_count,
         status_history=status_history,
+    )
+
+
+@router.post("/graph/restore", response_model=RestoreResponse)
+def restore_graph_nodes(
+    req: RestoreRequest,
+    auth: AuthContext = Depends(require_role(["auditor", "human"])),
+):
+    target_id = req.root_id or req.node_id
+    if not target_id:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"error": {"code": ErrorCode.VALIDATION.value, "message": "root_id or node_id is required."}},
+        )
+    store = get_graph_store(tenant=auth.tenant)
+    target = store.nodes.get(target_id)
+    if not target:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": {"code": ErrorCode.NOT_FOUND.value, "message": f"Node '{target_id}' not found."}},
+        )
+    from app.services.auditor import auditor_service
+    restored = auditor_service.restore(store, target_id, tenant=auth.tenant)
+    return RestoreResponse(
+        restored_count=len(restored),
+        restored_nodes=restored,
+        epoch=store.epoch,
+        success=len(restored) > 0,
     )

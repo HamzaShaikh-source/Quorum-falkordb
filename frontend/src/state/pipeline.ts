@@ -95,7 +95,7 @@ function flush() {
     runEffects(effects);
   }
   if (plan.gap) {
-    buffer = batch.filter((e) => e.seq > core.seq);
+    buffer = [...batch.filter((e) => e.seq > core.seq), ...buffer];
     void resync();
   }
 }
@@ -109,8 +109,9 @@ function onEvent(ev: SseEvent) {
   schedule();
 }
 
-export async function loadGraph(): Promise<void> {
+export async function loadGraph(expectedGen?: number): Promise<void> {
   const g = await getGraph();
+  if (expectedGen !== undefined && expectedGen !== generation) return;
   const st = useStore.getState();
   useStore.setState({
     ...snapshotToCore(st, g),
@@ -128,10 +129,13 @@ export async function loadGraph(): Promise<void> {
 async function resync() {
   const st = useStore.getState();
   if (st.resyncing) return;
+  const gen = generation;
   useStore.setState({ resyncing: true });
   try {
-    await loadGraph();
+    await loadGraph(gen);
+    if (gen !== generation) return;
     const h = await getHandoffs().catch(() => []);
+    if (gen !== generation) return;
     useStore.setState({ handoffs: Object.fromEntries(h.map((x) => [x.id, x])) });
     const currentNodes = useStore.getState().nodes;
     void queryClient.invalidateQueries({
@@ -139,6 +143,7 @@ async function resync() {
     });
     st.set({ asOf: null, past: null });
   } catch (e) {
+    if (gen !== generation) return;
     useStore.setState({ resyncing: false, loadError: errorMessage(e) });
     return;
   }
@@ -160,8 +165,10 @@ export async function startSession(): Promise<void> {
     const vs = major(meta.contract_version) !== major(CONTRACT_VERSION) ? 'major' : minor(meta.contract_version) !== minor(CONTRACT_VERSION) ? 'minor' : 'ok';
     useStore.getState().set({ meta, versionState: vs, tenant: meta.tenant });
     if (vs === 'major') return;
-    await loadGraph();
+    await loadGraph(gen);
+    if (gen !== generation) return;
     const h = await getHandoffs().catch(() => []);
+    if (gen !== generation) return;
     useStore.setState({ handoffs: Object.fromEntries(h.map((x) => [x.id, x])) });
     if (gen !== generation) return;
     close = openEventStream({
@@ -185,6 +192,10 @@ export function stopSession() {
   close?.();
   close = null;
   buffer = [];
+  if (raf) {
+    cancelAnimationFrame(raf);
+    raf = 0;
+  }
   if (reconnectTimer) clearTimeout(reconnectTimer);
   reconnectTimer = null;
 }

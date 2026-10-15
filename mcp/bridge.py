@@ -27,21 +27,24 @@ def _err(text: str) -> types.CallToolResult:
 
 async def serve(url: str, token: str) -> None:
     headers = {"Authorization": f"Bearer {token}"} if token else {}
-    http = create_mcp_http_client(headers=headers)
-    async with Client(streamable_http_client(url, http_client=http), mode="legacy") as upstream:
+    async with create_mcp_http_client(headers=headers) as http:
+        async with Client(streamable_http_client(url, http_client=http), mode="legacy") as upstream:
 
-        async def on_list_tools(ctx, params):
-            return types.ListToolsResult(tools=(await upstream.list_tools()).tools)
+            async def on_list_tools(ctx, params):
+                try:
+                    return types.ListToolsResult(tools=(await upstream.list_tools()).tools)
+                except Exception:
+                    return types.ListToolsResult(tools=[])
 
-        async def on_call_tool(ctx, params):
-            try:
-                return await upstream.call_tool(params.name, params.arguments or {})
-            except Exception as e:  # the hub is down, the token was rejected, the rate limit hit...
-                return _err(f"Quorum hub error: {type(e).__name__}: {e}")
+            async def on_call_tool(ctx, params):
+                try:
+                    return await upstream.call_tool(params.name, params.arguments or {})
+                except Exception as e:  # the hub is down, the token was rejected, the rate limit hit...
+                    return _err(f"Quorum hub error: {type(e).__name__}: {e}")
 
-        server = Server("quorum-bridge", on_list_tools=on_list_tools, on_call_tool=on_call_tool)
-        async with stdio_server() as (read, write):
-            await server.run(read, write, server.create_initialization_options())
+            server = Server("quorum-bridge", on_list_tools=on_list_tools, on_call_tool=on_call_tool)
+            async with stdio_server() as (read, write):
+                await server.run(read, write, server.create_initialization_options())
 
 
 def main() -> None:

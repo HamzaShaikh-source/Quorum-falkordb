@@ -22,7 +22,13 @@ function accept(raw: unknown, onEvent: (e: SseEvent) => void) {
   const t = typeof env?.type === 'string' ? env.type : 'unknown';
   devLog('warn', `Unrecognized SSE event "${t}" kept in sequence, no state change: ${r.error.issues[0]?.path.join('.') ?? ''} ${r.error.issues[0]?.message ?? ''}`, true);
   if (typeof env?.seq === 'number') {
-    const wrapped = SseEvent.safeParse({ ...(raw as object), type: 'unknown', data: { original_type: t } });
+    const wrapped = SseEvent.safeParse({
+      ts: Date.now(),
+      epoch: 1,
+      ...(raw as object),
+      type: 'unknown',
+      data: { original_type: t },
+    });
     if (wrapped.success) onEvent(wrapped.data);
   }
 }
@@ -36,6 +42,7 @@ export function openEventStream(h: Handlers): () => void {
 
   const ctl = new AbortController();
   const token = tokenFor();
+  let retryCount = 0;
   h.onStatus('connecting');
   void fetchEventSource('/api/events', {
     signal: ctl.signal,
@@ -46,6 +53,7 @@ export function openEventStream(h: Handlers): () => void {
     },
     async onopen(res) {
       if (!res.ok) throw new Error(`events ${res.status}`);
+      retryCount = 0;
       h.onStatus('live');
     },
     onmessage(msg) {
@@ -70,7 +78,9 @@ export function openEventStream(h: Handlers): () => void {
     },
     onerror() {
       h.onStatus('reconnecting');
-      return 2000;
+      retryCount++;
+      const backoff = Math.min(30000, 1000 * Math.pow(1.5, Math.min(retryCount, 8)));
+      return Math.round(backoff);
     },
   });
   return () => {

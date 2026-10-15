@@ -28,7 +28,9 @@ export function AgentStrip({ rows = 5 }: { rows?: number }) {
   }, []);
   const recent = feed.filter((r) => now - r.ts < 120_000).length;
   const counts = { read: 0, write: 0, alert: 0, failed: 0 };
-  for (const r of feed) counts[r.severity] += 1;
+  for (const r of feed) {
+    if (r.severity in counts) counts[r.severity as keyof typeof counts] += 1;
+  }
   const busy = recent > 0;
   return (
     <section className="card wide agent-strip" aria-label="AI at work">
@@ -53,10 +55,10 @@ export function AgentStrip({ rows = 5 }: { rows?: number }) {
       {failed && <p className="bad-text">Could not load agent activity from the backend.</p>}
       {feed.length ? (
         <ol className="as-feed">
-          {feed.slice(0, rows).map((r) => (
+          {feed.slice(0, Math.max(0, rows)).map((r) => (
             <li key={r.id} className={`as-row ${r.severity}`}>
               <span className={`au-ico ${r.severity}`} aria-hidden="true">
-                <Icon name={ICON[r.severity]} size={14} />
+                <Icon name={ICON[r.severity] ?? 'sparkle'} size={14} />
               </span>
               <p>
                 <b>{r.who}</b> {r.text}

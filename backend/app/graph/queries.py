@@ -120,6 +120,17 @@ class GraphStore:
             if edge.type in (EdgeType.LEADS_TO, EdgeType.SUPPORTS, EdgeType.FROM_SOURCE):
                 if edge.source == edge.target:
                     raise HTTPException(409, "Causal links must form a DAG")
+                causal_types = {EdgeType.LEADS_TO.value, EdgeType.SUPPORTS.value, EdgeType.FROM_SOURCE.value}
+                q = [edge.target]
+                visited = {edge.target}
+                while q:
+                    curr = q.pop(0)
+                    if curr == edge.source:
+                        raise HTTPException(409, "Causal links must form a DAG")
+                    for e in self.edges:
+                        if e.source == curr and e.type.value in causal_types and e.target not in visited:
+                            visited.add(e.target)
+                            q.append(e.target)
             self.edges.append(edge)
             self.log_query("add_edge", f"MATCH (a), (b) CREATE (a)-[:{edge.type.value}]->(b)", (time.time() - start) * 1000, 1, request_id)
 
@@ -213,7 +224,7 @@ class GraphStore:
         """Finds all leaf ancestor Facts (ancestor Facts that have no incoming LEADS_TO edges)."""
         with self._lock:
             start = time.time()
-            ancestors = self.get_ancestors(node_id, edge_types=["LEADS_TO", "SUPPORTS"])
+            ancestors = self.get_ancestors(node_id, edge_types=["LEADS_TO"])
             facts = [n for n in ancestors if n.kind == NodeKind.FACT]
 
             leaf_facts = []
@@ -257,7 +268,7 @@ class GraphStore:
                 self.log_query("execute_guard", cypher, (time.time() - start) * 1000, 0, request_id)
                 return False
 
-            ancestors = self.get_ancestors(action_id, edge_types=["LEADS_TO", "SUPPORTS"])
+            ancestors = self.get_ancestors(action_id, edge_types=["LEADS_TO", "SUPPORTS", "FROM_SOURCE"])
             bad_ancestors = [x for x in ancestors if x.status != Status.HEALTHY or getattr(x, "stale", False)]
 
             if bad_ancestors:
@@ -267,6 +278,7 @@ class GraphStore:
             # Atomic check-and-set succeeds
             action.action.executed = True
             action.action.confirmed = False
+            action.action.executed_at = int(time.time() * 1000)
             self.log_query("execute_guard", cypher, (time.time() - start) * 1000, 1, request_id)
             return True
 
@@ -293,6 +305,7 @@ class GraphStore:
 
             root.status = Status.QUARANTINED
             root.quarantined_at = now_ms
+            root.released_at = None
             root.quarantine_root = root_id
             root.depth = 0
 
@@ -317,6 +330,7 @@ class GraphStore:
                         if child:
                             child.status = Status.QUARANTINED
                             child.quarantined_at = now_ms
+                            child.released_at = None
                             child.quarantine_root = root_id
                             child.depth = curr_depth + 1
                             affected.append({
@@ -334,7 +348,7 @@ class GraphStore:
     def restore_node(self, root_id: str, request_id: Optional[str] = None) -> List[str]:
         """
         Restores root fact, then recursively restores descendants ONLY if ALL their parents
-        (LEADS_TO and SUPPORTS) are HEALTHY. NEVER restores executed actions.
+        (LEADS_TO, SUPPORTS, and FROM_SOURCE) are HEALTHY. NEVER restores executed actions.
         Increments Meta.epoch.
         """
         with self._lock:
@@ -345,6 +359,16 @@ class GraphStore:
                 return []
             if root.action and root.action.executed:
                 return []
+
+            causal_edge_types = ["LEADS_TO", "SUPPORTS", "FROM_SOURCE"]
+
+            # Root invariant check: root cannot be restored if any of its incoming parents are not HEALTHY
+            incoming_to_root = [e for e in self.edges if e.target == root_id and e.type.value in causal_edge_types]
+            if incoming_to_root:
+                for e in incoming_to_root:
+                    p = self.nodes.get(e.source)
+                    if not p or p.status != Status.HEALTHY:
+                        return []
 
             restored = []
 
@@ -365,9 +389,9 @@ class GraphStore:
                     if node.kind == NodeKind.ACTION and node.action and node.action.executed:
                         continue
 
-                    # Check parents
-                    parents = self.get_parents(node.id, edge_types=["LEADS_TO", "SUPPORTS"])
-                    if parents and all(p.status == Status.HEALTHY for p in parents):
+                    # Check parents across all causal derivation edges
+                    in_edges = [e for e in self.edges if e.target == node.id and e.type.value in causal_edge_types]
+                    if in_edges and all(e.source in self.nodes and self.nodes[e.source].status == Status.HEALTHY for e in in_edges):
                         node.status = Status.HEALTHY
                         node.released_at = now_ms
                         restored.append(node.id)
@@ -425,7 +449,7 @@ class GraphStore:
             visited: Dict[str, int] = {}  # 0: unvisited, 1: visiting, 2: visited
             has_cycle = False
 
-            for nid in list(self.nodes.keys()):
+            for nid in list(set(self.nodes.keys()) | set(adj.keys()) | {e.target for e in self.edges}):
                 if visited.get(nid, 0) == 0:
                     stack = [(nid, 0)]
                     while stack:
@@ -451,7 +475,7 @@ class GraphStore:
             bad_ancestors_count = 0
             for node in self.nodes.values():
                 if node.kind == NodeKind.ACTION and node.action and node.action.executed and node.status == Status.HEALTHY:
-                    ancestors = self.get_ancestors(node.id)
+                    ancestors = self.get_ancestors(node.id, edge_types=["LEADS_TO", "SUPPORTS", "FROM_SOURCE"])
                     if any(a.status != Status.HEALTHY for a in ancestors):
                         bad_ancestors_count += 1
 
