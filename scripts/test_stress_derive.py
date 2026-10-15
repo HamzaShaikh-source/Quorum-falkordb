@@ -11,8 +11,6 @@ Comprehensive Test Suite covering:
 
 import time
 import threading
-import concurrent.futures
-from typing import List, Dict, Any
 from graph import queries
 
 TENANT = "stress_derive_tenant"
@@ -337,6 +335,6 @@ if __name__ == "__main__":
     test_5_ten_parent_facts()
     test_6_logic_and_parameters()
     total_time = time.time() - t_start
-    print(f"\n==========================================")
+    print("\n==========================================")
     print(f"ALL 6 TEST SUITES PASSED in {total_time:.2f} seconds!")
-    print(f"==========================================")
+    print("==========================================")

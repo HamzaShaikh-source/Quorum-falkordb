@@ -7,7 +7,7 @@ import time
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any
 import numpy as np
 
 from graph import queries
@@ -109,7 +109,7 @@ def run_single_dag_test(num_trials: int = 10) -> Dict[str, Any]:
            count(CASE WHEN m.status = 'HEALTHY' THEN 1 END) AS healthy_nodes
     """).result_set[0]
 
-    print(f"Pre-quarantine Graph Structure:")
+    print("Pre-quarantine Graph Structure:")
     print(f"  Total nodes: {pre_counts[0]} (Facts: {pre_counts[1]}, Conclusions: {pre_counts[2]}, Decisions: {pre_counts[3]}, Actions: {pre_counts[4]})")
     print(f"  Pre-executed actions: {pre_counts[5]}, Healthy nodes: {pre_counts[6]}")
 
@@ -118,7 +118,7 @@ def run_single_dag_test(num_trials: int = 10) -> Dict[str, Any]:
     casc_res = queries.cascade(tenant, root_id)
     t_roundtrip = (time.time() - t0) * 1000
 
-    print(f"\nCascade Result:")
+    print("\nCascade Result:")
     print(f"  Success: {casc_res.get('success')}")
     print(f"  Containment Latency (DB internal): {casc_res.get('ms_to_containment')} ms")
     print(f"  Total Round-Trip Latency: {t_roundtrip:.2f} ms")
@@ -136,7 +136,7 @@ def run_single_dag_test(num_trials: int = 10) -> Dict[str, Any]:
     """, {"root_id": root_id}).result_set[0]
 
     inv = queries.invariant_check(tenant)
-    print(f"\nPost-quarantine DB State:")
+    print("\nPost-quarantine DB State:")
     print(f"  Total nodes: {post_counts[0]}")
     print(f"  Quarantined nodes: {post_counts[1]} (Expected: 131)")
     print(f"  Matching quarantine_root: {post_counts[2]} (Expected: 131)")
@@ -270,7 +270,7 @@ def run_containment_precision_test() -> Dict[str, Any]:
     recall = float(tp / (tp + fn)) if (tp + fn) > 0 else 0.0
     specificity = float(tn / (tn + fp)) if (tn + fp) > 0 else 0.0
 
-    print(f"Results for Parallel Tree Isolation:")
+    print("Results for Parallel Tree Isolation:")
     print(f"  Tree A (Target): Total={treeA_status[0]}, Quarantined={treeA_status[1]}, Healthy={treeA_status[2]}")
     print(f"  Tree B (Control): Total={treeB_status[0]}, Quarantined={treeB_status[1]}, Healthy={treeB_status[2]}")
     print(f"  Confusion Matrix: TP={tp}, FP={fp}, TN={tn}, FN={fn}")
@@ -395,7 +395,7 @@ def run_50_concurrent_cascades_test() -> Dict[str, Any]:
     t_wall_total = (time.time() - t_wall_start) * 1000 # ms
     wall_sec = t_wall_total / 1000.0
 
-    print(f"Concurrency Execution Completed:")
+    print("Concurrency Execution Completed:")
     print(f"  Wall-clock Duration: {t_wall_total:.2f} ms ({wall_sec:.3f} s)")
     print(f"  Success: {len(thread_results)} / {num_trees}")
     print(f"  Errors: {len(errors)}")
@@ -460,7 +460,7 @@ def run_50_concurrent_cascades_test() -> Dict[str, Any]:
         }
     }
 
-    print(f"Latency Distribution (Round-trip ms):")
+    print("Latency Distribution (Round-trip ms):")
     print(f"  Mean: {stats['roundtrip_latency_ms']['mean']} | p50: {stats['roundtrip_latency_ms']['p50']} | p95: {stats['roundtrip_latency_ms']['p95']} | p99: {stats['roundtrip_latency_ms']['p99']} | Max: {stats['roundtrip_latency_ms']['max']}")
     print(f"Throughput: {stats['throughput_cascades_per_sec']} cascades/sec ({stats['throughput_quarantined_nodes_per_sec']} nodes/sec)")
     print(f"Database Integrity: Quarantined={db_audit[1]}/{total_expected_nodes}, Healthy={db_audit[2]}, Invariants Passed={inv['all_passed']}")
@@ -515,7 +515,7 @@ def run_architecture_verdict_tests() -> Dict[str, Any]:
     """)
     res_dia = queries.cascade(tenant, "f_dia")
     dia_db_count = g.query("MATCH (m:MemoryNode) WHERE m.id IN ['f_dia', 'cA_dia', 'cB_dia', 'd_dia'] AND m.status = 'QUARANTINED' RETURN count(m)").result_set[0][0]
-    print(f"  Diamond DAG distinct physical nodes: 4")
+    print("  Diamond DAG distinct physical nodes: 4")
     print(f"  Diamond cascade returned affected_count: {res_dia.get('affected_count')}")
     print(f"  Diamond actual quarantined in DB: {dia_db_count}")
 
