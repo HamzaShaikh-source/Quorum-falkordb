@@ -38,3 +38,18 @@ jobs:
       - run: ruff check .
       - run: mypy
       - run: pytest -q
+
+  docker:
+    runs-on: ubuntu-latest
+    env:
+      # required by compose on purpose (no insecure defaults); throwaway values are enough to validate and build
+      FALKORDB_PASSWORD: ci-only
+      QUORUM_TOKENS_JSON: '{}'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compose files are valid
+        run: |
+          docker compose -f docker-compose.yml config -q
+          docker compose --env-file .env.production.example -f docker-compose.yml -f docker-compose.production.yml config -q
+      - name: Images build
+        run: docker compose build
