@@ -1,6 +1,6 @@
 import json
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict
 from graph import queries
 
 TENANT = "subagent_09_test"

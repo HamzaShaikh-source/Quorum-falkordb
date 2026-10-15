@@ -13,8 +13,6 @@ Covers:
 
 import concurrent.futures
 import json
-import math
-import os
 import random
 import sys
 import time
@@ -237,7 +235,7 @@ def run_all_tests():
         client_expected_counts[pid][outcome] += 1
         client_expected_counts[pid]["uses"] += 1
 
-    print(f"[*] Prepared 500 score updates:")
+    print("[*] Prepared 500 score updates:")
     print(f"    - Target procedures: {len(client_expected_counts)} distinct procedures")
     print(f"    - Hot-spot proc_bench_000 expected uses: {client_expected_counts['proc_bench_000']['uses']} "
           f"(succ={client_expected_counts['proc_bench_000']['success']}, fail={client_expected_counts['proc_bench_000']['failure']})")
@@ -317,7 +315,7 @@ def run_all_tests():
             print(f"    - {m['procedure_id']}: Expected uses={m['expected']['uses']} (succ={m['expected']['success']}, fail={m['expected']['failure']}) | "
                   f"Actual uses={m['actual']['uses']} (succ={m['actual']['successes']}, fail={m['actual']['failures']})")
     else:
-        print(f"[+] PERFECT CONCURRENCY SAFETY: 0 lost updates! All 500 operations reflected exactly in DB.")
+        print("[+] PERFECT CONCURRENCY SAFETY: 0 lost updates! All 500 operations reflected exactly in DB.")
 
     t2_pass = (len(errors_score) == 0 and len(counter_mismatches) == 0 and total_db_uses == 500)
     print(f"[*] TEST 2 VERDICT: {'PASSED' if t2_pass else 'FAILED'}")

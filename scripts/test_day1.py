@@ -3,8 +3,6 @@ Day-1 FalkorDB Cypher Verification Suite (Brief Section 10)
 Runs against live FalkorDB container and records exact working syntax and results.
 """
 
-import time
-import sys
 from falkordb import FalkorDB
 
 def run_tests():

@@ -17,7 +17,7 @@ import time
 import json
 import random
 import threading
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import numpy as np
 import redis
@@ -62,9 +62,9 @@ def setup_clean_graph(tenant_id: str):
 # =========================================================================
 
 def run_mixed_workload_benchmark(total_ops: int = 1000, num_agents: int = 30) -> Dict[str, Any]:
-    print(f"\n======================================================================")
+    print("\n======================================================================")
     print(f"TEST 1 & 2: 30 CONCURRENT AGENTS MIXED WORKLOAD ({total_ops} Total Ops, 70/30)")
-    print(f"======================================================================")
+    print("======================================================================")
     setup_clean_graph(TENANT_BENCH)
 
     read_latencies: List[float] = []
@@ -196,7 +196,7 @@ def run_mixed_workload_benchmark(total_ops: int = 1000, num_agents: int = 30) ->
         "invariants": inv,
     }
 
-    print(f"Results:")
+    print("Results:")
     print(f"  Duration:         {metrics['duration_seconds']}s")
     print(f"  Throughput:       {metrics['throughput_ops_sec']} ops/sec")
     print(f"  Overall Latency:  p50={metrics['latencies_overall']['p50_ms']}ms | "
@@ -216,9 +216,9 @@ def run_mixed_workload_benchmark(total_ops: int = 1000, num_agents: int = 30) ->
 # =========================================================================
 
 def run_connection_pool_burst_test() -> Dict[str, Any]:
-    print(f"\n======================================================================")
-    print(f"TEST 3: CONNECTION POOL EXHAUSTION RESILIENCE & BURST STRESS")
-    print(f"======================================================================")
+    print("\n======================================================================")
+    print("TEST 3: CONNECTION POOL EXHAUSTION RESILIENCE & BURST STRESS")
+    print("======================================================================")
     setup_clean_graph(TENANT_BENCH)
 
     burst_levels = [30, 60, 90, 100, 120, 150]
@@ -403,9 +403,9 @@ def run_concurrent_mutation_invariant_stress(
     num_writers: int = 15,
     num_auditors: int = 5,
 ) -> Dict[str, Any]:
-    print(f"\n======================================================================")
+    print("\n======================================================================")
     print(f"TEST 4: CONCURRENT HIGH-SPEED MUTATIONS VS INVARIANT AUDITING ({duration_seconds}s)")
-    print(f"======================================================================")
+    print("======================================================================")
     setup_clean_graph(TENANT_BENCH)
 
     stop_event = threading.Event()
@@ -548,7 +548,7 @@ def run_concurrent_mutation_invariant_stress(
         "graph_consistency_passed": (violations_healthy_under_quarantine == 0 and violations_action_executed_after_quarantine == 0),
     }
 
-    print(f"Results:")
+    print("Results:")
     print(f"  Duration:              {res['duration_seconds']}s")
     print(f"  Mutations Executed:    {res['total_mutations_executed']} ({res['mutation_rate_ops_sec']} writes/sec)")
     print(f"  Mutation Breakdown:    {res['mutation_breakdown']}")

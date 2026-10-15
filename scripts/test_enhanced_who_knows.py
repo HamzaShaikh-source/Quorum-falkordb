@@ -1,6 +1,5 @@
 import os
 import sys
-import json
 
 _current_dir = os.path.dirname(os.path.abspath(__file__))
 _root_dir = os.path.abspath(os.path.join(_current_dir, ".."))

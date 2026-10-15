@@ -232,14 +232,14 @@ def run_poison_benchmark() -> Dict[str, Any]:
         )
 
         if d == 1:
-            queries.derive(TENANT, f"c_d1", [root_id], "Depth 1 conclusion")
+            queries.derive(TENANT, "c_d1", [root_id], "Depth 1 conclusion")
         elif d == 2:
-            queries.derive(TENANT, f"c_d2", [root_id], "Depth 2 conclusion")
-            queries.stage_action(TENANT, f"a_d2", [f"c_d2"], "EMAIL", {}, "REVERSIBLE", gate="PASSED")
+            queries.derive(TENANT, "c_d2", [root_id], "Depth 2 conclusion")
+            queries.stage_action(TENANT, "a_d2", ["c_d2"], "EMAIL", {}, "REVERSIBLE", gate="PASSED")
         elif d == 3:
-            queries.derive(TENANT, f"c_d3_1", [root_id], "Depth 3 intermediate")
-            queries.derive(TENANT, f"c_d3_2", [f"c_d3_1"], "Depth 3 conclusion")
-            queries.stage_action(TENANT, f"a_d3", [f"c_d3_2"], "REFUND", {}, "COMPENSABLE", gate="PASSED")
+            queries.derive(TENANT, "c_d3_1", [root_id], "Depth 3 intermediate")
+            queries.derive(TENANT, "c_d3_2", ["c_d3_1"], "Depth 3 conclusion")
+            queries.stage_action(TENANT, "a_d3", ["c_d3_2"], "REFUND", {}, "COMPENSABLE", gate="PASSED")
 
         # Now test retrieval leakage under three approaches:
         # A: Flat Vector Store (TTL deletion - bad fact expires, but downstream conclusions persist and leak)
@@ -247,7 +247,7 @@ def run_poison_benchmark() -> Dict[str, Any]:
         # C: Quorum (Quarantine cascade - bad fact AND all descendants quarantined)
 
         # Baseline A/B leaked IDs: downstream conclusions still return in retrieval
-        descendant_ids = [f"c_d{d}"] if d == 1 else ([f"c_d2", f"a_d2"] if d == 2 else [f"c_d3_1", f"c_d3_2", f"a_d3"])
+        descendant_ids = [f"c_d{d}"] if d == 1 else (["c_d2", "a_d2"] if d == 2 else ["c_d3_1", "c_d3_2", "a_d3"])
         baseline_leakage_rate = 1.0 # Downstream artifacts completely persist
 
         # Quorum Cascade
