@@ -9,4 +9,4 @@ falkordb>=1.0.0
 numpy>=1.26.0
 pytest>=8.3.3
 pytest-asyncio>=0.24.0
-mcp>=2.0.0,<3
+mcp>=2.3.0,<3
