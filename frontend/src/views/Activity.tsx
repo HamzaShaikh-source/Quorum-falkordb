@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { SEEN_ACTIVITY } from '../components/GettingStarted';
 import { useQuery } from '@tanstack/react-query';
 import { API_MODE } from '../api/client';
-import { AgentStrip } from '../components/AgentStrip';
 import { Icon } from '../components/Icon';
 import { fmt } from '../context/tokens';
 import { useStore } from '../state/store';
@@ -82,8 +81,6 @@ export function Activity() {
         <h1>What your agents did</h1>
         <p>A plain record for people who do not read graphs: who did what, when, and what it cost. Nothing here needs a diagram to understand, and it exports as a spreadsheet for audit.</p>
       </header>
-
-      <AgentStrip rows={4} />
 
       <section className="card wide" aria-label="Summary">
         <dl className="au-tiles">

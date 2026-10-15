@@ -37,7 +37,7 @@ export const copy = {
     live: 'Agents call the model for real.',
   } as Record<string, string>,
   epoch: (n: number) => `Memory version ${n}`,
-  invariants: { ok: 'Safety checks pass', bad: (n: number) => `${n} safety check${n === 1 ? '' : 's'} failing`, unknown: 'Safety checks running' },
+  invariants: { ok: 'Safety checks pass', bad: (n: number) => `${n} safety check${n === 1 ? '' : 's'} failing`, unknown: 'Safety checks' },
   connection: {
     connecting: 'Connecting',
     live: 'Connected',
