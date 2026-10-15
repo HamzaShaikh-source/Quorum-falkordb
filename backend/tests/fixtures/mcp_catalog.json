@@ -1,0 +1,414 @@
+{
+  "tools": [
+    {
+      "name": "remember_fact",
+      "summary": "Store a fact with its source. scope=\"team\" keeps it private to your team (and linked teams)",
+      "args": [
+        {
+          "name": "key",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "value",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "text",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "id",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "quote",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "origin",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "scope",
+          "required": false,
+          "default": "commons"
+        }
+      ],
+      "who": "agent",
+      "writes": true,
+      "saves": "Store once, reference by id everywhere"
+    },
+    {
+      "name": "derive",
+      "summary": "Record a conclusion or decision from parent facts",
+      "args": [
+        {
+          "name": "text",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "parent_ids",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "id",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "is_decision",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "owner_team",
+          "required": false,
+          "default": null
+        }
+      ],
+      "who": "agent",
+      "writes": true,
+      "saves": "Conclusions are linked, not re-explained"
+    },
+    {
+      "name": "retrieve_context",
+      "summary": "Healthy, in-scope facts for a query, best match first. format=\"compact\" costs a fraction of the tokens",
+      "args": [
+        {
+          "name": "query",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "k",
+          "required": false,
+          "default": 5
+        },
+        {
+          "name": "format",
+          "required": false,
+          "default": "full"
+        },
+        {
+          "name": "budget_tokens",
+          "required": false,
+          "default": null
+        }
+      ],
+      "who": "any",
+      "writes": false,
+      "saves": "Compact lines with short ids and provenance, trimmed to your budget"
+    },
+    {
+      "name": "stage_action",
+      "summary": "Stage an action; the quorum gate decides",
+      "args": [
+        {
+          "name": "label",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "action_type",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "reversibility",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "parent_ids",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "id",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "procedure_id",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "idempotency_key",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "payload",
+          "required": false,
+          "default": null
+        }
+      ],
+      "who": "agent",
+      "writes": true,
+      "saves": "One call replaces a long approval thread"
+    },
+    {
+      "name": "execute_action",
+      "summary": "Run a staged action under the atomic guard",
+      "args": [
+        {
+          "name": "id",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "agent",
+      "writes": true,
+      "saves": "No retries from stale context"
+    },
+    {
+      "name": "claim_handoff",
+      "summary": "Claim a task with an atomic lease",
+      "args": [
+        {
+          "name": "id",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "agent",
+      "writes": true,
+      "saves": "Two agents never do the same work"
+    },
+    {
+      "name": "quarantine",
+      "summary": "Quarantine a fact and everything built on it",
+      "args": [
+        {
+          "name": "root_id",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "reason",
+          "required": false,
+          "default": "Manual auditor quarantine"
+        }
+      ],
+      "who": "auditor",
+      "writes": true,
+      "saves": "Bad context is removed, not re-read"
+    },
+    {
+      "name": "restore",
+      "summary": "Restore a quarantined fact and valid descendants",
+      "args": [
+        {
+          "name": "root_id",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "auditor",
+      "writes": true,
+      "saves": "Undo without re-ingesting"
+    },
+    {
+      "name": "explain_blast_radius",
+      "summary": "Dry run: what a quarantine would touch",
+      "args": [
+        {
+          "name": "root_id",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "auditor",
+      "writes": false,
+      "saves": "Ids only, no node bodies"
+    },
+    {
+      "name": "review_handoff",
+      "summary": "Approve or reject a gate-blocked review",
+      "args": [
+        {
+          "name": "id",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "decision",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "note",
+          "required": false,
+          "default": null
+        }
+      ],
+      "who": "human",
+      "writes": true,
+      "saves": "Humans decide once, agents read the verdict"
+    },
+    {
+      "name": "get_map",
+      "summary": "A small index of the shared memory: areas, hubs, how to ask",
+      "args": [
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "any",
+      "writes": false,
+      "saves": "Orientation in a few hundred tokens, for long sessions or an unfamiliar memory"
+    },
+    {
+      "name": "get_node",
+      "summary": "One node with its parents and children, by short id (F3) or full id",
+      "args": [
+        {
+          "name": "id",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "any",
+      "writes": false,
+      "saves": "A few lines instead of a document"
+    },
+    {
+      "name": "find_path",
+      "summary": "Shortest causal chain between two nodes",
+      "args": [
+        {
+          "name": "from_id",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "to_id",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "any",
+      "writes": false,
+      "saves": "Provenance without the whole subgraph"
+    },
+    {
+      "name": "delta",
+      "summary": "What stopped being true since your last read, plus new matches",
+      "args": [
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "any",
+      "writes": false,
+      "saves": "Refresh without re-reading"
+    },
+    {
+      "name": "observe",
+      "summary": "Save the facts in text you already produced (numbers with units, policies, limits, dates), each with its source sentence",
+      "args": [
+        {
+          "name": "text",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "source",
+          "required": false,
+          "default": "chat"
+        },
+        {
+          "name": "dry_run",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "scope",
+          "required": false,
+          "default": "commons"
+        }
+      ],
+      "who": "agent",
+      "writes": true,
+      "saves": "Facts are captured from what you already wrote, with no extra tool call per fact"
+    }
+  ]
+}

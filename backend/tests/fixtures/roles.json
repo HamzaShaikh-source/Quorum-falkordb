@@ -1,0 +1,78 @@
+{
+  "levels": [
+    {
+      "role": "agent",
+      "name": "Contributor",
+      "summary": "Reads the memory, saves facts, proposes and runs actions. Cannot quarantine or restore, and cannot approve reviews."
+    },
+    {
+      "role": "auditor",
+      "name": "Reviewer",
+      "summary": "Everything a Contributor can do, plus quarantine and restore facts. Cannot approve reviews or manage people."
+    },
+    {
+      "role": "human",
+      "name": "Admin",
+      "summary": "Everything: also approves reviews and manages people, teams, links, plan and tokens."
+    }
+  ],
+  "capabilities": [
+    {
+      "key": "read",
+      "label": "Look things up",
+      "detail": "retrieve_context, get_map, get_node, find_path, delta, blast-radius preview",
+      "agent": true,
+      "auditor": true,
+      "human": true
+    },
+    {
+      "key": "write",
+      "label": "Save facts and conclusions",
+      "detail": "remember_fact, observe, derive",
+      "agent": true,
+      "auditor": true,
+      "human": true
+    },
+    {
+      "key": "act",
+      "label": "Stage and run actions",
+      "detail": "stage_action, execute_action (the quorum gate still decides)",
+      "agent": true,
+      "auditor": true,
+      "human": true
+    },
+    {
+      "key": "claim",
+      "label": "Claim handoffs",
+      "detail": "claim_handoff",
+      "agent": "limited",
+      "auditor": true,
+      "human": true,
+      "note": "Contributors can claim tasks only, not reviews or escalations."
+    },
+    {
+      "key": "quarantine",
+      "label": "Quarantine and restore facts",
+      "detail": "quarantine, restore",
+      "agent": false,
+      "auditor": true,
+      "human": true
+    },
+    {
+      "key": "review",
+      "label": "Approve or reject reviews",
+      "detail": "review_handoff",
+      "agent": false,
+      "auditor": false,
+      "human": true
+    },
+    {
+      "key": "manage",
+      "label": "Manage people, teams, links, plan and tokens",
+      "detail": "the Team page and /api/workspace",
+      "agent": false,
+      "auditor": false,
+      "human": true
+    }
+  ]
+}

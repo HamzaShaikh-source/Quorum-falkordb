@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quorum.local/contracts/events.schema.json",
+  "title": "Quorum SSE event envelope",
+  "$comment": "contract_version 0.1.0 (draft). Keep in sync with docs/CONTRACT.md.",
+  "type": "object",
+  "required": ["seq", "ts", "epoch", "type", "data"],
+  "properties": {
+    "seq": { "type": "integer", "minimum": 0 },
+    "ts": { "type": "integer" },
+    "epoch": { "type": "integer", "minimum": 0 },
+    "type": {
+      "enum": [
+        "node_added", "edge_added", "status_changed", "epoch_changed", "gate_blocked",
+        "action_executed", "compensation_updated", "handoff_claimed", "handoff_updated",
+        "invariant_status", "scenario_progress", "resync_required", "heartbeat"
+      ]
+    },
+    "request_id": { "type": "string" },
+    "data": { "type": "object" }
+  },
+  "oneOf": [
+    { "properties": { "type": { "const": "node_added" }, "data": { "$ref": "#/$defs/node_added" } } },
+    { "properties": { "type": { "const": "edge_added" }, "data": { "$ref": "#/$defs/edge_added" } } },
+    { "properties": { "type": { "const": "status_changed" }, "data": { "$ref": "#/$defs/status_changed" } } },
+    { "properties": { "type": { "const": "epoch_changed" }, "data": { "$ref": "#/$defs/epoch_changed" } } },
+    { "properties": { "type": { "const": "gate_blocked" }, "data": { "$ref": "#/$defs/gate_blocked" } } },
+    { "properties": { "type": { "const": "action_executed" }, "data": { "$ref": "#/$defs/action_executed" } } },
+    { "properties": { "type": { "const": "compensation_updated" }, "data": { "$ref": "#/$defs/compensation_updated" } } },
+    { "properties": { "type": { "const": "handoff_claimed" }, "data": { "$ref": "#/$defs/handoff_claimed" } } },
+    { "properties": { "type": { "const": "handoff_updated" }, "data": { "$ref": "#/$defs/handoff_updated" } } },
+    { "properties": { "type": { "const": "invariant_status" }, "data": { "$ref": "#/$defs/invariant_status" } } },
+    { "properties": { "type": { "const": "scenario_progress" }, "data": { "$ref": "#/$defs/scenario_progress" } } },
+    { "properties": { "type": { "const": "resync_required" }, "data": { "type": "object" } } },
+    { "properties": { "type": { "const": "heartbeat" }, "data": { "type": "object" } } }
+  ],
+  "$defs": {
+    "Status": { "enum": ["HEALTHY", "SUPERSEDED", "QUARANTINED"] },
+    "CompensationStatus": { "enum": ["PENDING_COMPENSATION", "DISPATCHING", "COMPENSATED", "FAILED"] },
+    "GraphNode": {
+      "type": "object",
+      "required": ["id", "kind", "label", "status", "stale"],
+      "properties": {
+        "id": { "type": "string" },
+        "kind": { "enum": ["source", "fact", "conclusion", "action"] },
+        "is_decision": { "type": "boolean" },
+        "label": { "type": "string", "maxLength": 60 },
+        "text": { "type": "string" },
+        "key": { "type": "string" },
+        "value": { "type": "string" },
+        "status": { "$ref": "#/$defs/Status" },
+        "stale": { "type": "boolean" },
+        "valid_from": { "type": "integer" },
+        "valid_to": { "type": ["integer", "null"] },
+        "quarantined_at": { "type": ["integer", "null"] },
+        "released_at": { "type": ["integer", "null"] },
+        "quarantine_root": { "type": ["string", "null"] },
+        "depth": { "type": ["integer", "null"], "minimum": 0 },
+        "source_ref": { "type": "string" },
+        "quote": { "type": "string" },
+        "origin": { "type": "string" },
+        "asserted_by": {
+          "type": "object",
+          "required": ["id", "name", "tier"],
+          "properties": {
+            "id": { "type": "string" },
+            "name": { "type": "string" },
+            "tier": { "enum": ["root", "established", "new"] }
+          }
+        },
+        "source": {
+          "type": "object",
+          "required": ["kind", "title", "url", "version"],
+          "properties": {
+            "kind": { "enum": ["DOC", "TICKET", "CHAT", "WEBHOOK"] },
+            "title": { "type": "string" },
+            "url": { "type": "string" },
+            "version": { "type": "string" }
+          }
+        },
+        "owner_team": { "type": "string" },
+        "action": {
+          "type": "object",
+          "required": ["type", "reversibility", "executed", "confirmed", "gate"],
+          "properties": {
+            "type": { "type": "string" },
+            "reversibility": { "enum": ["REVERSIBLE", "COMPENSABLE", "IRREVERSIBLE"] },
+            "executed": { "type": "boolean" },
+            "confirmed": { "type": "boolean" },
+            "gate": { "enum": ["PASSED", "BLOCKED"] },
+            "procedure_id": { "type": ["string", "null"] },
+            "compensation": {
+              "type": ["object", "null"],
+              "properties": {
+                "status": { "$ref": "#/$defs/CompensationStatus" },
+                "attempts": { "type": "integer", "minimum": 0 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "GraphEdge": {
+      "type": "object",
+      "required": ["id", "source", "target", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "source": { "type": "string" },
+        "target": { "type": "string" },
+        "type": { "enum": ["LEADS_TO", "SUPPORTS", "CONTRADICTS", "SUPERSEDES", "FROM_SOURCE"] }
+      }
+    },
+    "Handoff": {
+      "type": "object",
+      "required": ["id", "kind", "task", "status"],
+      "properties": {
+        "id": { "type": "string" },
+        "kind": { "enum": ["TASK", "REVIEW", "ESCALATION"] },
+        "task": { "type": "string" },
+        "status": { "enum": ["PENDING", "IN_PROGRESS", "COMPLETED", "TIMED_OUT"] },
+        "assigned_to": { "type": "string" },
+        "claimed_by": { "type": "string" },
+        "claimed_at": { "type": "integer" },
+        "lease_until": { "type": "integer" },
+        "context_root_id": { "type": "string" }
+      }
+    },
+    "node_added": {
+      "type": "object", "required": ["node"],
+      "properties": { "node": { "$ref": "#/$defs/GraphNode" } }
+    },
+    "edge_added": {
+      "type": "object", "required": ["edge"],
+      "properties": { "edge": { "$ref": "#/$defs/GraphEdge" } }
+    },
+    "status_changed": {
+      "type": "object", "required": ["id", "status"],
+      "properties": {
+        "id": { "type": "string" },
+        "status": { "$ref": "#/$defs/Status" },
+        "stale": { "type": "boolean" },
+        "depth": { "type": "integer", "minimum": 0 },
+        "root_id": { "type": "string" }
+      }
+    },
+    "epoch_changed": {
+      "type": "object", "required": ["epoch", "reason"],
+      "properties": {
+        "epoch": { "type": "integer", "minimum": 0 },
+        "reason": { "enum": ["quarantine", "restore", "supersede"] }
+      }
+    },
+    "gate_blocked": {
+      "type": "object", "required": ["action_id", "handoff_id", "reason"],
+      "properties": {
+        "action_id": { "type": "string" },
+        "handoff_id": { "type": "string" },
+        "reason": { "type": "string" }
+      }
+    },
+    "action_executed": {
+      "type": "object", "required": ["action_id", "confirmed"],
+      "properties": {
+        "action_id": { "type": "string" },
+        "confirmed": { "type": "boolean" }
+      }
+    },
+    "compensation_updated": {
+      "type": "object", "required": ["action_id", "status", "attempts"],
+      "properties": {
+        "action_id": { "type": "string" },
+        "status": { "$ref": "#/$defs/CompensationStatus" },
+        "attempts": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "handoff_claimed": {
+      "type": "object", "required": ["handoff_id", "winner", "losers", "lease_until"],
+      "properties": {
+        "handoff_id": { "type": "string" },
+        "winner": { "type": "string" },
+        "losers": { "type": "array", "items": { "type": "string" } },
+        "lease_until": { "type": "integer" }
+      }
+    },
+    "handoff_updated": {
+      "type": "object", "required": ["handoff"],
+      "properties": { "handoff": { "$ref": "#/$defs/Handoff" } }
+    },
+    "invariant_status": {
+      "type": "object", "required": ["ok", "violations"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "violations": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "scenario_progress": {
+      "type": "object", "required": ["run_id", "step", "state"],
+      "properties": {
+        "run_id": { "type": "string" },
+        "step": { "type": "string" },
+        "state": { "enum": ["started", "finished", "failed"] },
+        "detail": { "type": "string" }
+      }
+    }
+  }
+}
