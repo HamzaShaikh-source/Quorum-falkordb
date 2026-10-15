@@ -2,43 +2,14 @@
    Loaded last so it only refines what earlier sheets set. */
 
 /* Navigation names its destination. With the ten-tab guided build there is only room for the active label until the screen is very wide. */
-.header .nav .navbtn .nav-tip,
-.header .nav .navbtn .nl-short {
-  display: none;
-}
-.header .nav .navbtn {
-  white-space: nowrap;
-}
-.header .nav[data-count='10'] .navbtn {
-  padding: 6px 8px;
-  gap: 5px;
-  font-size: 12px;
-}
-.header .nav[data-count='10'] .navbtn:not(.on) .nav-label {
-  display: none;
-}
-@media (min-width: 1400px) {
-  .header .nav[data-count='10'] .navbtn:not(.on) .nav-label,
-  .header .nav[data-count='10'] .navbtn .nav-label {
-    display: inline;
-  }
-  .header .nav[data-count='10'] .navbtn svg {
+@media (min-width: 821px) {
+  .header .nav .navbtn .nav-tip,
+  .header .nav .navbtn .nl-short {
     display: none;
   }
-  .header .pill.sample,
-  .header .pill.saved .saved-w {
-    display: none;
+  .header .nav .navbtn {
+    white-space: nowrap;
   }
-}
-.header .nav:not([data-count='10']) .navbtn .nav-label {
-  display: inline;
-}
-.header .nav {
-  flex-shrink: 0;
-}
-.header .status {
-  min-width: 0;
-  gap: 6px;
 }
 .guide-btn {
   border-width: 1.5px;
@@ -47,11 +18,42 @@
   padding: 5px 11px;
   white-space: nowrap;
 }
-.header .pb-label,
-.header .palette-btn kbd {
-  display: none;
+@media (min-width: 821px) {
+  .header .nav[data-count='10'] .navbtn {
+    padding: 6px 8px;
+    gap: 5px;
+    font-size: 12px;
+  }
+  .header .nav[data-count='10'] .navbtn:not(.on) .nav-label {
+    display: none;
+  }
+  .header .nav:not([data-count='10']) .navbtn .nav-label {
+    display: inline;
+  }
+  .header .nav {
+    flex-shrink: 0;
+  }
+  .header .status {
+    min-width: 0;
+    gap: 6px;
+  }
+  .header .pb-label,
+  .header .palette-btn kbd {
+    display: none;
+  }
 }
-@media (max-width: 1580px) {
+@media (min-width: 1400px) {
+  .header .nav[data-count='10'] .navbtn:not(.on) .nav-label,
+  .header .nav[data-count='10'] .navbtn .nav-label {
+    display: inline;
+  }
+  .header .nav[data-count='10'] .navbtn svg,
+  .header .pill.sample,
+  .header .pill.saved .saved-w {
+    display: none;
+  }
+}
+@media (min-width: 821px) and (max-width: 1580px) {
   .header .pill.epoch,
   .header .pill.mode,
   .header .pill.conn .conn-label {
@@ -68,7 +70,7 @@
     display: inline;
   }
 }
-@media (max-width: 1200px) {
+@media (min-width: 821px) and (max-width: 1200px) {
   .header .nav:not([data-count='10']) .navbtn:not(.on) .nav-label {
     display: none;
   }
@@ -76,6 +78,13 @@
 @media (max-width: 900px) {
   .guide-btn span {
     display: none;
+  }
+}
+/* segmented filters wrap instead of running off a narrow card */
+@media (max-width: 640px) {
+  .cn-filters .seg {
+    flex-wrap: wrap;
+    border-radius: 18px;
   }
 }
 
@@ -317,5 +326,31 @@
   .as-dot.on,
   .guide {
     animation: none;
+  }
+}
+
+/* Phone: the tab bar names each tab, the guide stays reachable, headings wrap cleanly. */
+.agent-strip .card-h {
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+@media (max-width: 820px) {
+  .guide-btn {
+    display: inline-flex;
+  }
+  .guide-btn span {
+    display: none;
+  }
+  .header .iconbtn[aria-label='Keyboard shortcuts'] {
+    display: none;
+  }
+  .agent-strip .card-sub {
+    flex-basis: 100%;
+  }
+  .as-row {
+    grid-template-columns: 24px minmax(0, 1fr);
+  }
+  .as-row time {
+    grid-column: 2;
   }
 }

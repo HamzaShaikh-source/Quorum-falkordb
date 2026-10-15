@@ -39,7 +39,7 @@ This checklist is used by Janani, Aaditya, and Hamza for the final pre-submissio
 ---
 
 ### 4. Benchmark Harness & PROOF PACK
-- [x] **Harness Execution:** `python bench/run.py` generates [`bench/results.json`](bench/results.json) and [`docs/PROOF.md`](docs/PROOF.md).
+- [x] **Harness Execution:** `python bench/run.py` generates [`bench/results.json`](bench/results.json) and [`docs/PROOF.md`](../PROOF.md).
 - [x] **30-Agent Load Test:** > 33,000 ops/sec, p50 < 0.05ms, 0 orphan violations.
 - [x] **Handoff Claim Race:** 100 handoffs x 30 claimers = 100.0% single winner rate.
 - [x] **Atomic Guard Race:** 0 quarantined actions executed during concurrent audit.
@@ -66,7 +66,7 @@ This checklist is used by Janani, Aaditya, and Hamza for the final pre-submissio
 
 ### 6. Submission Deliverables & Documentation
 - [x] **Root README ([`README.md`](README.md)):** Pitch, architecture diagram, port mapping table, live benchmark numbers, dual UI guide, Track 02/03 matrix, quickstart, and AI disclosure.
-- [x] **90-Second Demo Storyboard ([`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md)):** Scene-by-scene script with exact timings (Beats 1-6), UI visual cues, voiceover narrative, and API triggers.
+- [x] **90-Second Demo Storyboard ([`docs/DEMO_SCRIPT.md`](../DEMO_SCRIPT.md)):** Scene-by-scene script with exact timings (Beats 1-6), UI visual cues, voiceover narrative, and API triggers.
 - [x] **Technical Blog Post ([`docs/SUBMISSION_POST.md`](docs/SUBMISSION_POST.md)):** Comprehensive hackathon article for the side prize explaining the problem, causal DAG architecture, the 3 layers of defense, and FalkorDB benchmarks.
 - [x] **WeMakeDevs Submission Metadata ([`docs/SUBMISSION_DETAILS.md`](docs/SUBMISSION_DETAILS.md)):** All official submission form fields, team roles, track selections, graph data model, key queries, and honest limits.
 - [x] **Acceptance Focus Checklist ([`docs/FOCUS_CHECKLIST.md`](docs/FOCUS_CHECKLIST.md)):** All 10 focus items and 3 defense invariants marked verified with automated proof commands and UI screenshots.
