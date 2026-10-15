@@ -1,0 +1,358 @@
+{
+  "tests_1_and_2": {
+    "depth_tests": {
+      "depth_1": {
+        "depth": 1,
+        "hops_to_decision": 1,
+        "path_node_ids": [
+          "fact_d1",
+          "dec_d1"
+        ],
+        "prov_decision": {
+          "decision_id": "dec_d1",
+          "found_count": 1,
+          "latency_ms": 1.511,
+          "records": [
+            {
+              "claim": "Root policy fact for depth 1",
+              "quote": "Quote for depth 1",
+              "source": "Core Policy Manual",
+              "url": "https://kb/policy",
+              "version": "2.1",
+              "owner": "Operations"
+            }
+          ],
+          "success": true
+        },
+        "prov_action": {
+          "action_id": "act_d1",
+          "found_count": 0,
+          "latency_ms": 1.818,
+          "records": [],
+          "success": false
+        },
+        "prov_first_conclusion": null
+      },
+      "depth_5": {
+        "depth": 5,
+        "hops_to_decision": 5,
+        "path_node_ids": [
+          "fact_d5",
+          "conc_d5_h1",
+          "conc_d5_h2",
+          "conc_d5_h3",
+          "conc_d5_h4",
+          "dec_d5"
+        ],
+        "prov_decision": {
+          "decision_id": "dec_d5",
+          "found_count": 1,
+          "latency_ms": 1.607,
+          "records": [
+            {
+              "claim": "Root policy fact for depth 5",
+              "quote": "Quote for depth 5",
+              "source": "Core Policy Manual",
+              "url": "https://kb/policy",
+              "version": "2.1",
+              "owner": "Operations"
+            }
+          ],
+          "success": true
+        },
+        "prov_action": {
+          "action_id": "act_d5",
+          "found_count": 0,
+          "latency_ms": 2.072,
+          "records": [],
+          "success": false
+        },
+        "prov_first_conclusion": {
+          "conc_id": "conc_d5_h1",
+          "found": false,
+          "count": 0,
+          "data": []
+        }
+      },
+      "depth_10": {
+        "depth": 10,
+        "hops_to_decision": 10,
+        "path_node_ids": [
+          "fact_d10",
+          "conc_d10_h1",
+          "conc_d10_h2",
+          "conc_d10_h3",
+          "conc_d10_h4",
+          "conc_d10_h5",
+          "conc_d10_h6",
+          "conc_d10_h7",
+          "conc_d10_h8",
+          "conc_d10_h9",
+          "dec_d10"
+        ],
+        "prov_decision": {
+          "decision_id": "dec_d10",
+          "found_count": 0,
+          "latency_ms": 1.307,
+          "records": [],
+          "success": false
+        },
+        "prov_action": {
+          "action_id": "act_d10",
+          "found_count": 0,
+          "latency_ms": 1.236,
+          "records": [],
+          "success": false
+        },
+        "prov_first_conclusion": {
+          "conc_id": "conc_d10_h1",
+          "found": false,
+          "count": 0,
+          "data": []
+        }
+      },
+      "depth_20": {
+        "depth": 20,
+        "hops_to_decision": 20,
+        "path_node_ids": [
+          "fact_d20",
+          "conc_d20_h1",
+          "conc_d20_h2",
+          "conc_d20_h3",
+          "conc_d20_h4",
+          "conc_d20_h5",
+          "conc_d20_h6",
+          "conc_d20_h7",
+          "conc_d20_h8",
+          "conc_d20_h9",
+          "conc_d20_h10",
+          "conc_d20_h11",
+          "conc_d20_h12",
+          "conc_d20_h13",
+          "conc_d20_h14",
+          "conc_d20_h15",
+          "conc_d20_h16",
+          "conc_d20_h17",
+          "conc_d20_h18",
+          "conc_d20_h19",
+          "dec_d20"
+        ],
+        "prov_decision": {
+          "decision_id": "dec_d20",
+          "found_count": 0,
+          "latency_ms": 1.308,
+          "records": [],
+          "success": false
+        },
+        "prov_action": {
+          "action_id": "act_d20",
+          "found_count": 0,
+          "latency_ms": 1.026,
+          "records": [],
+          "success": false
+        },
+        "prov_first_conclusion": {
+          "conc_id": "conc_d20_h1",
+          "found": false,
+          "count": 0,
+          "data": []
+        }
+      }
+    },
+    "diamond_test": {
+      "record_count": 2,
+      "has_duplicates": true,
+      "records": [
+        {
+          "claim": "Diamond Root Fact",
+          "quote": "diamond quote",
+          "source": "Core Policy Manual",
+          "url": "https://kb/policy",
+          "version": "2.1",
+          "owner": "Operations"
+        },
+        {
+          "claim": "Diamond Root Fact",
+          "quote": "diamond quote",
+          "source": "Core Policy Manual",
+          "url": "https://kb/policy",
+          "version": "2.1",
+          "owner": "Operations"
+        }
+      ]
+    },
+    "cycle_test": {
+      "record_count": 1,
+      "latency_ms": 1.379,
+      "error": null,
+      "records": [
+        {
+          "claim": "Cycle Root Fact",
+          "quote": "cycle quote",
+          "source": "Core Policy Manual",
+          "url": "https://kb/policy",
+          "version": "2.1",
+          "owner": "Operations"
+        }
+      ]
+    }
+  },
+  "test_3": {
+    "fan_in_5_to_1": {
+      "expected_facts": 5,
+      "retrieved_count": 5,
+      "claims": [
+        "Compliance rule component #1",
+        "Compliance rule component #2",
+        "Compliance rule component #3",
+        "Compliance rule component #4",
+        "Compliance rule component #5"
+      ],
+      "sources": [
+        "Security Audit v1",
+        "Security Audit v1",
+        "Security Audit v1",
+        "Financial Audit v2",
+        "Financial Audit v2"
+      ],
+      "dirty_retrieved_count": 5,
+      "filters_quarantined_or_stale": false
+    },
+    "fan_out_1_to_10": {
+      "expected_decisions": 10,
+      "all_resolved": true,
+      "mean_latency_ms": 1.355,
+      "details": [
+        {
+          "decision_id": "dec_spoke_1",
+          "count": 1,
+          "claim": "Universal Cryptographic Key Standard",
+          "latency_ms": 1.338
+        },
+        {
+          "decision_id": "dec_spoke_2",
+          "count": 1,
+          "claim": "Universal Cryptographic Key Standard",
+          "latency_ms": 1.261
+        },
+        {
+          "decision_id": "dec_spoke_3",
+          "count": 1,
+          "claim": "Universal Cryptographic Key Standard",
+          "latency_ms": 1.402
+        },
+        {
+          "decision_id": "dec_spoke_4",
+          "count": 1,
+          "claim": "Universal Cryptographic Key Standard",
+          "latency_ms": 1.19
+        },
+        {
+          "decision_id": "dec_spoke_5",
+          "count": 1,
+          "claim": "Universal Cryptographic Key Standard",
+          "latency_ms": 1.77
+        },
+        {
+          "decision_id": "dec_spoke_6",
+          "count": 1,
+          "claim": "Universal Cryptographic Key Standard",
+          "latency_ms": 1.504
+        },
+        {
+          "decision_id": "dec_spoke_7",
+          "count": 1,
+          "claim": "Universal Cryptographic Key Standard",
+          "latency_ms": 1.391
+        },
+        {
+          "decision_id": "dec_spoke_8",
+          "count": 1,
+          "claim": "Universal Cryptographic Key Standard",
+          "latency_ms": 1.329
+        },
+        {
+          "decision_id": "dec_spoke_9",
+          "count": 1,
+          "claim": "Universal Cryptographic Key Standard",
+          "latency_ms": 1.221
+        },
+        {
+          "decision_id": "dec_spoke_10",
+          "count": 1,
+          "claim": "Universal Cryptographic Key Standard",
+          "latency_ms": 1.144
+        }
+      ],
+      "fact_self_query": []
+    }
+  },
+  "test_4": {
+    "total_reads": 400,
+    "successful_reads": 400,
+    "read_error_count": 0,
+    "read_errors_sample": [],
+    "total_writes": 34,
+    "write_error_count": 0,
+    "latency_stats_ms": {
+      "min": 1.74,
+      "mean": 5.55,
+      "p50": 5.0,
+      "p95": 9.41,
+      "p99": 23.69,
+      "max": 25.61
+    }
+  },
+  "test_5": {
+    "root_fact_depth_0": {
+      "input_id": "fact_root_zero",
+      "returned": [],
+      "count": 0,
+      "notes": "Returns empty because pattern expects (dec:Decision)<-[:LEADS_TO*1..5]-(f:Fact)"
+    },
+    "orphan_decision": {
+      "input_id": "dec_orphan",
+      "returned": [],
+      "count": 0,
+      "notes": "Returns empty as expected (no ancestors)"
+    },
+    "decision_from_sourceless_fact": {
+      "input_id": "dec_from_no_source",
+      "returned": [],
+      "count": 0,
+      "notes": "Returns empty because pattern requires [:FROM_SOURCE]->(s:Source)"
+    },
+    "non_existent_node": {
+      "input_id": "node_does_not_exist_xyz",
+      "returned": [],
+      "count": 0,
+      "notes": "Gracefully returns empty list without error"
+    },
+    "action_node": {
+      "input_id": "act_terminal",
+      "returned": [],
+      "count": 0,
+      "notes": "Returns empty because pattern hardcodes (dec:Decision) label"
+    },
+    "unowned_source": {
+      "input_id": "dec_no_team",
+      "returned": [
+        {
+          "claim": "Unowned Fact",
+          "quote": "unowned quote",
+          "source": "Unowned Source",
+          "url": "https://orphan/src",
+          "version": "0.1",
+          "owner": null
+        }
+      ],
+      "count": 1,
+      "notes": "Returns owner=None due to OPTIONAL MATCH (team:Team)-[:OWNS]->(s)"
+    },
+    "empty_string_id": {
+      "input_id": "",
+      "returned": [],
+      "count": 0
+    }
+  }
+}

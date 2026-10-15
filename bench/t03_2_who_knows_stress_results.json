@@ -1,0 +1,176 @@
+{
+  "test_1_multiple_topics": {
+    "success": true,
+    "errors": [],
+    "billing_results": [
+      {
+        "person_id": "p_alice",
+        "name": "Alice Walker",
+        "evidence_count": 5
+      },
+      {
+        "person_id": "p_bob",
+        "name": "Bob Chen",
+        "evidence_count": 4
+      },
+      {
+        "person_id": "p_charlie",
+        "name": "Charlie Miller",
+        "evidence_count": 1
+      }
+    ],
+    "k8s_results": [
+      {
+        "person_id": "p_evan",
+        "name": "Evan Wright",
+        "evidence_count": 8
+      },
+      {
+        "person_id": "p_frank",
+        "name": "Frank Gomez",
+        "evidence_count": 2
+      },
+      {
+        "person_id": "p_alice",
+        "name": "Alice Walker",
+        "evidence_count": 1
+      }
+    ],
+    "auth_results": [
+      {
+        "person_id": "p_frank",
+        "name": "Frank Gomez",
+        "evidence_count": 4
+      },
+      {
+        "person_id": "p_grace",
+        "name": "Grace Hopper",
+        "evidence_count": 4
+      },
+      {
+        "person_id": "p_henry",
+        "name": "Henry Ford",
+        "evidence_count": 2
+      }
+    ],
+    "dual_edge_duplicate_count": false,
+    "dual_edge_bob_score": 4,
+    "has_owner_field_in_payload": false
+  },
+  "test_2_complex_topologies": {
+    "success": true,
+    "errors": [],
+    "shared_results": [
+      {
+        "person_id": "p_coauth_1",
+        "name": "CoAuthor One",
+        "evidence_count": 1
+      },
+      {
+        "person_id": "p_coauth_2",
+        "name": "CoAuthor Two",
+        "evidence_count": 1
+      }
+    ],
+    "orphan_empty": [],
+    "orphan_unowned_src": [
+      {
+        "person_id": "p_solo",
+        "name": "Solo Rogue Author",
+        "evidence_count": 1
+      }
+    ],
+    "orphan_bot_feed": [],
+    "cycle_results": [
+      {
+        "person_id": "p_cycle_a",
+        "name": "Cycle Person A",
+        "evidence_count": 2
+      },
+      {
+        "person_id": "p_cycle_b",
+        "name": "Cycle Person B",
+        "evidence_count": 2
+      }
+    ],
+    "cycle_elapsed_ms": 1.1849403381347656
+  },
+  "test_3_concurrency": {
+    "success": true,
+    "total_queries": 100,
+    "expected_queries": 100,
+    "reader_errors": [],
+    "writer_errors": [],
+    "throughput_ops_per_s": 1291.7,
+    "latencies_ms": {
+      "min": 0.89,
+      "mean": 1.76,
+      "p50": 1.37,
+      "p95": 4.26,
+      "p99": 7.94,
+      "max": 7.94
+    },
+    "knows_edges_added": 7,
+    "authored_edges_added": 5,
+    "knows_edges_captured_by_who_knows": false,
+    "authored_edges_captured_by_who_knows": true
+  },
+  "test_4_boundary_conditions": {
+    "success": true,
+    "errors": [],
+    "non_existent_topic_result": [],
+    "empty_graph_result": [],
+    "injection_tests": {
+      "": {
+        "status": "ok",
+        "rows": 0
+      },
+      "billing' OR 1=1 --": {
+        "status": "ok",
+        "rows": 0
+      },
+      "billing\" OR 1=1 --": {
+        "status": "ok",
+        "rows": 0
+      },
+      "billing/*comment*/": {
+        "status": "ok",
+        "rows": 0
+      },
+      "topic:with:colons": {
+        "status": "ok",
+        "rows": 0
+      },
+      "topic/with/slashes": {
+        "status": "ok",
+        "rows": 0
+      },
+      "topic with spaces": {
+        "status": "ok",
+        "rows": 0
+      },
+      "\ud83d\udd25_unicode_topic_\ud83d\ude80": {
+        "status": "ok",
+        "rows": 0
+      },
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+        "status": "ok",
+        "rows": 0
+      }
+    },
+    "large_topic_contributors_count": 60,
+    "large_topic_query_ms": 3.41,
+    "top_contributor": {
+      "person_id": "p_contrib_001",
+      "name": "Contributor 001",
+      "evidence_count": 60
+    },
+    "last_contributor": {
+      "person_id": "p_contrib_060",
+      "name": "Contributor 060",
+      "evidence_count": 1
+    }
+  },
+  "total_time_seconds": 0.28,
+  "all_tests_passed": true
+}

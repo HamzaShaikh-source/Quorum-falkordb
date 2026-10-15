@@ -1,0 +1,59 @@
+{
+  "timestamp": 1792039467239,
+  "concurrency": {
+    "agents": 30,
+    "total_operations": 1200,
+    "duration_seconds": 0.63,
+    "throughput_ops_sec": 1903.5,
+    "p50_ms": 12.86,
+    "p95_ms": 24.25,
+    "p99_ms": 31.58,
+    "healthy_children_under_quarantined": 0,
+    "zero_orphans_invariant": true
+  },
+  "handoff_race": {
+    "total_handoffs": 100,
+    "concurrent_claimers": 30,
+    "single_winner_handoffs": 100,
+    "multiple_winner_handoffs": 0,
+    "zero_winner_handoffs": 0,
+    "exact_single_winner_rate": 1.0,
+    "passed": true
+  },
+  "execute_race": {
+    "total_actions": 50,
+    "executed_before_quarantine": 2,
+    "refused_after_quarantine": 48,
+    "actions_executed_after_ancestor_quarantined": 0,
+    "race_invariant_passed": true
+  },
+  "poison_bench": {
+    "depth_1": {
+      "causal_depth": 1,
+      "total_descendants": 1,
+      "containment_ms": 1.4,
+      "quorum_retrieval_leakage_rate": 0.0,
+      "baseline_delete_only_leakage_rate": 1.0,
+      "baseline_flat_ttl_leakage_rate": 1.0,
+      "quarantined_count": 2
+    },
+    "depth_2": {
+      "causal_depth": 2,
+      "total_descendants": 2,
+      "containment_ms": 1.53,
+      "quorum_retrieval_leakage_rate": 0.0,
+      "baseline_delete_only_leakage_rate": 1.0,
+      "baseline_flat_ttl_leakage_rate": 1.0,
+      "quarantined_count": 3
+    },
+    "depth_3": {
+      "causal_depth": 3,
+      "total_descendants": 3,
+      "containment_ms": 1.59,
+      "quorum_retrieval_leakage_rate": 0.0,
+      "baseline_delete_only_leakage_rate": 1.0,
+      "baseline_flat_ttl_leakage_rate": 1.0,
+      "quarantined_count": 4
+    }
+  }
+}
