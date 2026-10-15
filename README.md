@@ -7,8 +7,9 @@
 **Git revert for AI agent beliefs.**  
 *Quorum quarantines a poisoned fact and its causal descendants. Healthy context excludes them until authorized restoration.*
 
+[![CI](https://github.com/HamzaShaikh-source/Quorum-falkordb/actions/workflows/ci.yml/badge.svg)](https://github.com/HamzaShaikh-source/Quorum-falkordb/actions/workflows/ci.yml)
 [![Backend Tests](https://img.shields.io/badge/pytest-CI%20gate%20%E2%89%A590%25%20coverage-brightgreen?style=flat-square)](backend/tests)
-[![Frontend Tests](https://img.shields.io/badge/vitest-105%20passed-brightgreen?style=flat-square)](frontend)
+[![Frontend Tests](https://img.shields.io/badge/vitest-114%20passed-brightgreen?style=flat-square)](frontend)
 [![Accessibility](https://img.shields.io/badge/axe--core-0%20violations%20(22%20screens)-brightgreen?style=flat-square)](frontend/scripts/a11y.mjs)
 [![Types](https://img.shields.io/badge/mypy%20%2B%20ruff-clean-brightgreen?style=flat-square)](mypy.ini)
 [![Benchmark](https://img.shields.io/badge/historical%20helper%20throughput-757.6%20ops%2Fsec-blue?style=flat-square)](bench/results.json)
