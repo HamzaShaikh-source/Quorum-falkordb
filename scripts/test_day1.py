@@ -150,7 +150,7 @@ def run_tests():
                 res = g.query(q, {"v1": v1, "v2": v2}).result_set[0][0]
                 working = (fn, res)
                 break
-            except Exception as ex:
+            except Exception:
                 continue
         if working:
             return f"Working distance function: {working[0]} -> {working[1]}"
