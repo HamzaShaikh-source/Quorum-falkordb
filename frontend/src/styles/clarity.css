@@ -1,0 +1,321 @@
+/* Clarity layer. Direction: a printed field manual. Ink on paper, one mint accent, every control says what it is in words.
+   Loaded last so it only refines what earlier sheets set. */
+
+/* Navigation names its destination. With the ten-tab guided build there is only room for the active label until the screen is very wide. */
+.header .nav .navbtn .nav-tip,
+.header .nav .navbtn .nl-short {
+  display: none;
+}
+.header .nav .navbtn {
+  white-space: nowrap;
+}
+.header .nav[data-count='10'] .navbtn {
+  padding: 6px 8px;
+  gap: 5px;
+  font-size: 12px;
+}
+.header .nav[data-count='10'] .navbtn:not(.on) .nav-label {
+  display: none;
+}
+@media (min-width: 1400px) {
+  .header .nav[data-count='10'] .navbtn:not(.on) .nav-label,
+  .header .nav[data-count='10'] .navbtn .nav-label {
+    display: inline;
+  }
+  .header .nav[data-count='10'] .navbtn svg {
+    display: none;
+  }
+  .header .pill.sample,
+  .header .pill.saved .saved-w {
+    display: none;
+  }
+}
+.header .nav:not([data-count='10']) .navbtn .nav-label {
+  display: inline;
+}
+.header .nav {
+  flex-shrink: 0;
+}
+.header .status {
+  min-width: 0;
+  gap: 6px;
+}
+.guide-btn {
+  border-width: 1.5px;
+  border-color: var(--text);
+  font-weight: 600;
+  padding: 5px 11px;
+  white-space: nowrap;
+}
+.header .pb-label,
+.header .palette-btn kbd {
+  display: none;
+}
+@media (max-width: 1580px) {
+  .header .pill.epoch,
+  .header .pill.mode,
+  .header .pill.conn .conn-label {
+    display: none;
+  }
+}
+@media (min-width: 1760px) {
+  .header .nav[data-count='10'] .navbtn svg,
+  .header .pill.sample,
+  .header .pill.saved .saved-w {
+    display: inline-flex;
+  }
+  .header .pb-label {
+    display: inline;
+  }
+}
+@media (max-width: 1200px) {
+  .header .nav:not([data-count='10']) .navbtn:not(.on) .nav-label {
+    display: none;
+  }
+}
+@media (max-width: 900px) {
+  .guide-btn span {
+    display: none;
+  }
+}
+
+/* AI at work */
+.agent-strip {
+  border-width: 1.5px;
+}
+.agent-strip .card-h h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.as-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ghost);
+  box-shadow: 0 0 0 3px rgb(11 18 24 / 8%);
+}
+.as-dot.on {
+  background: var(--mint);
+  box-shadow: 0 0 0 3px rgb(61 219 176 / 30%);
+  animation: as-pulse 1.8s ease-in-out infinite;
+}
+@keyframes as-pulse {
+  50% {
+    box-shadow: 0 0 0 7px rgb(61 219 176 / 0%);
+  }
+}
+.as-counts {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 0;
+}
+.as-c {
+  padding: 4px 11px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  font-size: var(--t12);
+  color: var(--text-2);
+  background: var(--bg-2);
+}
+.as-c.has.write {
+  border-color: var(--ok-line);
+  color: var(--ok);
+}
+.as-c.has.alert {
+  border-color: var(--warn-line);
+  color: var(--warn);
+}
+.as-c.has.failed {
+  border-color: var(--bad-line);
+  color: var(--bad);
+}
+.as-feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.as-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 9px 4px;
+  border-top: 1px solid var(--line);
+}
+.as-row:first-child {
+  border-top: 0;
+}
+.as-row p {
+  margin: 0;
+  line-height: 1.4;
+}
+.as-row small {
+  display: block;
+  font-size: var(--t12);
+  margin-top: 2px;
+}
+.as-row time {
+  font-size: var(--t12);
+  white-space: nowrap;
+  padding-top: 2px;
+}
+.as-empty {
+  padding: 14px 0 6px;
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+.as-empty p {
+  margin: 0;
+}
+.as-all {
+  margin-top: 8px;
+}
+
+/* Guide drawer */
+.guide-back {
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+  padding: 0;
+}
+.guide {
+  width: min(560px, 100vw);
+  height: 100%;
+  background: var(--bg);
+  border-left: 1.5px solid var(--text);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -18px 0 40px rgb(11 18 24 / 18%);
+  animation: gd-in 0.22s var(--ease, ease-out);
+}
+@keyframes gd-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+.gd-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 8px;
+}
+.gd-head h2 {
+  margin: 0;
+  font-family: var(--f-display);
+  font-size: 26px;
+  letter-spacing: -0.03em;
+}
+.gd-tabs {
+  margin: 0 20px 6px;
+  align-self: flex-start;
+  flex-wrap: wrap;
+}
+.gd-body {
+  overflow-y: auto;
+  padding: 10px 20px 28px;
+  flex: 1;
+}
+.gd-lead {
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 4px 0 18px;
+}
+.gd-group h3 {
+  margin: 18px 0 2px;
+  font-size: 15px;
+}
+.gd-group > p {
+  margin: 0 0 8px;
+}
+.gd-tools {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.gd-tools li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+  align-items: flex-start;
+}
+.gd-tools b {
+  display: block;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.gd-tools code {
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+.gd-search input {
+  width: 100%;
+}
+.gd-az {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 10px 0 6px;
+  position: sticky;
+  top: -10px;
+  background: var(--bg);
+  padding: 6px 0;
+  z-index: 1;
+}
+.gd-az a {
+  min-width: 26px;
+  text-align: center;
+  padding: 3px 0;
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  font: 600 12px var(--f-mono, monospace);
+  color: var(--text);
+  text-decoration: none;
+}
+.gd-az a:hover,
+.gd-az a:focus-visible {
+  background: var(--text);
+  color: #fff;
+}
+.gd-terms {
+  margin: 0;
+}
+.gd-term {
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 46px;
+}
+.gd-letter {
+  font: 700 30px var(--f-display);
+  color: var(--ok);
+  margin: 6px 0 2px;
+}
+.gd-term dt {
+  font-weight: 700;
+}
+.gd-term dd {
+  margin: 2px 0 0;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.gd-see {
+  display: block;
+  margin-top: 4px;
+  padding-left: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .as-dot.on,
+  .guide {
+    animation: none;
+  }
+}
