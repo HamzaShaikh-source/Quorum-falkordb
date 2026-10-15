@@ -6,9 +6,11 @@ Delivers tested Cypher statements returning plain Python dicts.
 Logs every query execution to an in-memory query log for the UI 'Show Cypher' drawer.
 """
 
+import os
 import time
 import json
 import logging
+import threading
 from typing import Any, Dict, List, Optional, Tuple
 from falkordb import FalkorDB
 
@@ -19,12 +21,37 @@ QUERY_LOG: List[Dict[str, Any]] = []
 MAX_QUERY_LOG_SIZE = 500
 
 _db_client: Optional[FalkorDB] = None
+_record_lock = threading.Lock()
 
 
-def get_db(host: str = "localhost", port: int = 6379) -> FalkorDB:
+def get_db(host: Optional[str] = None, port: Optional[int] = None) -> FalkorDB:
     global _db_client
     if _db_client is None:
-        _db_client = FalkorDB(host=host, port=port)
+        h = host or os.getenv("QUORUM_FALKORDB_HOST", os.getenv("FALKORDB_HOST"))
+        p = port
+        if not h and os.getenv("QUORUM_FALKORDB_URL"):
+            url = os.getenv("QUORUM_FALKORDB_URL", "")
+            if "//" in url:
+                netloc = url.split("//", 1)[1].split("/", 1)[0]
+                if "@" in netloc:
+                    netloc = netloc.split("@", 1)[1]
+                if ":" in netloc:
+                    h, port_str = netloc.split(":", 1)
+                    if p is None:
+                        try:
+                            p = int(port_str)
+                        except ValueError:
+                            pass
+                else:
+                    h = netloc
+        if not h:
+            h = "localhost"
+        if not p:
+            try:
+                p = int(os.getenv("QUORUM_FALKORDB_PORT", os.getenv("FALKORDB_PORT", "6379")))
+            except ValueError:
+                p = 6379
+        _db_client = FalkorDB(host=h, port=p)
     return _db_client
 
 
@@ -121,7 +148,7 @@ def stage_action(
         })
         RETURN a.id, a.status, a.gate
         """
-        params = {
+        params: Dict[str, Any] = {
             "id": action_id, "type": action_type, "payload": payload_str,
             "gate": gate, "reversibility": reversibility,
             "procedure_id": procedure_id, "idempotency_key": idempotency_key
@@ -373,9 +400,59 @@ def create_compensations(
         res = g.query(cypher, {"action_id": aid, "comp_id": cid})
         ms = (time.time() - t0) * 1000
         log_query("create_compensation", cypher, ms, len(res.result_set), request_id)
+        if act.get("reversibility") == "IRREVERSIBLE":
+            cypher_escl = """
+            MATCH (a:Action {id: $action_id})
+            MERGE (alert:Alert:MemoryNode {id: 'alert_retraction_' + a.id})
+            ON CREATE SET alert.label = '⚠️ Damage Control: Retraction for ' + a.id,
+                          alert.target_action_id = a.id,
+                          alert.status = 'HEALTHY',
+                          alert.recipient = 'customer@acme.com',
+                          alert.original_subject = 'Update: Your Refund Request is Approved',
+                          alert.original_statement = coalesce(a.text, a.label, 'Your refund of $150 has been approved under our new 90-day policy.'),
+                          alert.correction_subject = 'CORRECTION: Important update regarding your refund request',
+                          alert.drafted_body = 'Dear Customer,\\n\\nWe recently sent an email stating that your refund request was approved under a 90-day refund policy. That communication was sent in error due to an unverified policy update.\\n\\nOur official refund policy remains 30 days (per Finance Ops Policy v3.0). We sincerely apologize for any confusion. Please find our verified policy details attached.\\n\\nSincerely,\\nAcme Support Operations',
+                          alert.verified_policy_citation = 'Finance Ops Policy Doc v3.0 (30-day window)',
+                          alert.notice_status = 'READY_FOR_HUMAN_APPROVAL',
+                          alert.created_at = timestamp()
+            MERGE (alert)-[:LEADS_TO]->(a)
+            MERGE (h:Handoff:MemoryNode {id: 'hand_escl_' + a.id})
+            ON CREATE SET h.kind = 'ESCALATION',
+                          h.task = 'Irreversible action quarantined! Automated damage control retraction notice drafted.',
+                          h.status = 'PENDING',
+                          h.context_root_id = a.id,
+                          h.created_at = timestamp()
+            MERGE (a)-[:REQUIRES_HANDOFF]->(h)
+            RETURN alert.id, h.id
+            """
+            try:
+                g.query(cypher_escl, {"action_id": aid})
+            except Exception:
+                pass
         if res.result_set:
             results.append({"compensation_id": cid, "action_id": aid, "status": "PENDING_COMPENSATION"})
     return results
+
+
+def approve_correction(tenant_id: str, action_id: str, request_id: Optional[str] = None) -> Dict[str, Any]:
+    """Marks the correction notice on Alert memory node as DISPATCHED in FalkorDB."""
+    g = get_graph(tenant_id, "commons")
+    cypher = """
+    MATCH (alert:Alert {id: 'alert_retraction_' + $action_id})
+    SET alert.notice_status = 'DISPATCHED',
+        alert.dispatched_at = timestamp()
+    RETURN alert.id, alert.notice_status
+    """
+    t0 = time.time()
+    try:
+        res = g.query(cypher, {"action_id": action_id})
+        ms = (time.time() - t0) * 1000
+        log_query("approve_correction", cypher, ms, len(res.result_set), request_id)
+        if res.result_set:
+            return {"success": True, "alert_id": res.result_set[0][0], "status": res.result_set[0][1]}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+    return {"success": False, "error": f"Alert for action {action_id} not found"}
 
 
 # =========================================================================
@@ -982,52 +1059,53 @@ def record_episode(
     Links:   (prev_message)-[:NEXT]->(message)  (ordered chain)
     Graph:   tenant_<id>:agent_<n>:raw
     """
-    g = get_graph(tenant_id, f"agent_{agent_id}:raw")
-    ts = ts_ms or int(time.time() * 1000)
-    # Step 1: Merge session + create message node
-    cypher_create = """
-    MERGE (s:Session {id: $session_id})
-    ON CREATE SET s.started_at = $ts
-    CREATE (m:Message {
-        id: $message_id,
-        session_id: $session_id,
-        role: $role,
-        content: $content,
-        ts: $ts
-    })
-    MERGE (s)-[:HAS_MESSAGE]->(m)
-    RETURN m.id AS message_id, s.id AS session_id
-    """
-    t0 = time.time()
-    res = g.query(cypher_create, {
-        "session_id": session_id,
-        "message_id": message_id,
-        "role": role,
-        "content": content,
-        "ts": ts,
-    })
-    ms = (time.time() - t0) * 1000
-    log_query("record_episode_create", cypher_create, ms, len(res.result_set), request_id)
-
-    # Step 2: Link previous message with NEXT (FalkorDB has no FOREACH)
-    cypher_next = """
-    MATCH (prev:Message {session_id: $session_id})
-    WHERE prev.id <> $message_id AND prev.ts < $ts
-    WITH prev ORDER BY prev.ts DESC LIMIT 1
-    MATCH (m:Message {id: $message_id})
-    CREATE (prev)-[:NEXT]->(m)
-    RETURN prev.id
-    """
-    try:
-        g.query(cypher_next, {
+    with _record_lock:
+        g = get_graph(tenant_id, f"agent_{agent_id}:raw")
+        ts = ts_ms or int(time.time() * 1000)
+        # Step 1: Merge session + create message node
+        cypher_create = """
+        MERGE (s:Session {id: $session_id})
+        ON CREATE SET s.started_at = $ts
+        CREATE (m:Message {
+            id: $message_id,
+            session_id: $session_id,
+            role: $role,
+            content: $content,
+            ts: $ts
+        })
+        MERGE (s)-[:HAS_MESSAGE]->(m)
+        RETURN m.id AS message_id, s.id AS session_id
+        """
+        t0 = time.time()
+        res = g.query(cypher_create, {
             "session_id": session_id,
             "message_id": message_id,
+            "role": role,
+            "content": content,
             "ts": ts,
         })
-    except Exception:
-        pass  # No prior message — first in session, no NEXT link needed
+        ms = (time.time() - t0) * 1000
+        log_query("record_episode_create", cypher_create, ms, len(res.result_set), request_id)
 
-    return {"success": True, "message_id": message_id, "session_id": session_id}
+        # Step 2: Link previous message with NEXT (FalkorDB has no FOREACH)
+        cypher_next = """
+        MATCH (prev:Message {session_id: $session_id})
+        WHERE prev.id <> $message_id AND prev.ts < $ts
+        WITH prev ORDER BY prev.ts DESC LIMIT 1
+        MATCH (m:Message {id: $message_id})
+        CREATE (prev)-[:NEXT]->(m)
+        RETURN prev.id
+        """
+        try:
+            g.query(cypher_next, {
+                "session_id": session_id,
+                "message_id": message_id,
+                "ts": ts,
+            })
+        except Exception:
+            pass  # No prior message — first in session, no NEXT link needed
+
+        return {"success": True, "message_id": message_id, "session_id": session_id}
 
 
 def upsert_procedure(
@@ -1097,7 +1175,7 @@ def score_procedure(
     SET p.uses = p.uses + 1,
         p.successes = p.successes + $inc_success,
         p.failures = p.failures + $inc_failure,
-        p.rank = toFloat(p.successes + 1) / toFloat(p.uses + 2),
+        p.rank = toFloat(p.successes + $inc_success + 1) / toFloat(p.uses + 3),
         p.last_used_at = timestamp()
     RETURN p.id AS id, p.uses AS uses, p.successes AS successes,
            p.failures AS failures, p.rank AS rank
@@ -1115,7 +1193,7 @@ def score_procedure(
     if not res.result_set:
         return {"success": False, "error": "Procedure not found"}
     r = res.result_set[0]
-    rank = round(r[4], 4)
+    rank = round((r[2] + 1.0) / (r[1] + 2.0), 4)
     return {
         "success": True,
         "procedure_id": r[0],

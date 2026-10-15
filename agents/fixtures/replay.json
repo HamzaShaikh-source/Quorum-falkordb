@@ -1,0 +1,139 @@
+{
+  "scout": {
+    "inject_poison": {
+      "default": {
+        "thought": "Ingesting partner support feed claiming 90 day window...",
+        "session_summary": "Scout ingested partner webhook feed claiming 90 day refund coverage.",
+        "calls": [
+          {
+            "tool": "remember_fact",
+            "arguments": {
+              "id": "fact_90d",
+              "key": "refund_window_days",
+              "value": "90",
+              "text": "Partner policy states 90 day coverage.",
+              "quote": "Partner claims refunds are permitted up to 90 days.",
+              "origin": "webhook:partner-feed"
+            },
+            "thought": "Storing fact into commons memory."
+          }
+        ]
+      }
+    }
+  },
+  "analyst": {
+    "run_agents": {
+      "default": {
+        "thought": "Analyzing customer ticket #1042 against memory facts...",
+        "session_summary": "Analyst derived eligibility for order 1042 based on 90-day window fact.",
+        "calls": [
+          {
+            "tool": "retrieve_context",
+            "arguments": {
+              "query": "refund window days",
+              "k": 5
+            },
+            "thought": "Retrieving healthy policy facts."
+          },
+          {
+            "tool": "derive",
+            "arguments": {
+              "id": "conc_eligible_1042",
+              "text": "Order 1042 placed 45 days ago is eligible under 90-day policy rule.",
+              "parent_ids": ["fact_90d"],
+              "is_decision": true,
+              "owner_team": "Billing Tier 1"
+            },
+            "thought": "Deriving eligibility conclusion."
+          }
+        ]
+      }
+    }
+  },
+  "refunder": {
+    "run_agents": {
+      "default": {
+        "thought": "Processing approved refund actions for order 1042...",
+        "session_summary": "Refunder staged 3 actions and executed 2 refunds before pause.",
+        "calls": [
+          {
+            "tool": "stage_action",
+            "arguments": {
+              "id": "act_refund_1",
+              "label": "Process store credit for order 1042 ($50)",
+              "action_type": "refund_credit",
+              "reversibility": "COMPENSABLE",
+              "parent_ids": ["conc_eligible_1042"],
+              "procedure_id": "proc_refund_standard",
+              "idempotency_key": "idemp_ref_1042_a"
+            },
+            "thought": "Staging store credit."
+          },
+          {
+            "tool": "stage_action",
+            "arguments": {
+              "id": "act_refund_2",
+              "label": "Refund card payment for order 1042 ($180)",
+              "action_type": "refund",
+              "reversibility": "COMPENSABLE",
+              "parent_ids": ["conc_eligible_1042"],
+              "procedure_id": "proc_refund_standard",
+              "idempotency_key": "idemp_ref_1042_b"
+            },
+            "thought": "Staging card payment refund."
+          },
+          {
+            "tool": "stage_action",
+            "arguments": {
+              "id": "act_refund_3",
+              "label": "Waive restocking fee for order 1042 ($25)",
+              "action_type": "waive_fee",
+              "reversibility": "COMPENSABLE",
+              "parent_ids": ["conc_eligible_1042"],
+              "procedure_id": "proc_refund_standard",
+              "idempotency_key": "idemp_ref_1042_c"
+            },
+            "thought": "Staging restocking fee waiver."
+          },
+          {
+            "tool": "execute_action",
+            "arguments": {
+              "id": "act_refund_1"
+            },
+            "thought": "Executing store credit."
+          },
+          {
+            "tool": "execute_action",
+            "arguments": {
+              "id": "act_refund_2"
+            },
+            "thought": "Executing card payment refund."
+          }
+        ]
+      }
+    }
+  },
+  "comms": {
+    "run_agents": {
+      "default": {
+        "thought": "Attempting to dispatch customer notification email...",
+        "session_summary": "Comms attempted customer notification; held by Quorum Gate.",
+        "calls": [
+          {
+            "tool": "stage_action",
+            "arguments": {
+              "id": "act_email_cust",
+              "label": "Send approval email to customer",
+              "action_type": "email_customer",
+              "reversibility": "IRREVERSIBLE",
+              "parent_ids": ["conc_eligible_1042"],
+              "procedure_id": "proc_notify_customer",
+              "idempotency_key": "idemp_email_1042"
+            },
+            "thought": "Staging irreversible customer email notification."
+          }
+        ]
+      }
+    }
+  }
+}
