@@ -1,0 +1,95 @@
+{
+  "facts": 336,
+  "questions": 44,
+  "models": [
+    "sonnet",
+    "haiku"
+  ],
+  "summary": {
+    "hybrid/sonnet": {
+      "by_kind": {
+        "para_known": {
+          "questions": 24,
+          "correct": 24
+        },
+        "para_unknown": {
+          "questions": 12,
+          "correct": 7
+        },
+        "none": {
+          "questions": 8,
+          "correct": 8
+        }
+      },
+      "correct": 39,
+      "questions": 44,
+      "median_turns": 3.0,
+      "median_input_tokens": 155482,
+      "cost_usd_total": 6.958
+    },
+    "hybrid/haiku": {
+      "by_kind": {
+        "para_known": {
+          "questions": 24,
+          "correct": 24
+        },
+        "para_unknown": {
+          "questions": 12,
+          "correct": 8
+        },
+        "none": {
+          "questions": 8,
+          "correct": 8
+        }
+      },
+      "correct": 40,
+      "questions": 44,
+      "median_turns": 3.0,
+      "median_input_tokens": 105225,
+      "cost_usd_total": 1.558
+    },
+    "keyword/sonnet": {
+      "by_kind": {
+        "para_known": {
+          "questions": 24,
+          "correct": 19
+        },
+        "para_unknown": {
+          "questions": 12,
+          "correct": 6
+        },
+        "none": {
+          "questions": 8,
+          "correct": 8
+        }
+      },
+      "correct": 33,
+      "questions": 44,
+      "median_turns": 3.0,
+      "median_input_tokens": 155536,
+      "cost_usd_total": 6.788
+    },
+    "keyword/haiku": {
+      "by_kind": {
+        "para_known": {
+          "questions": 24,
+          "correct": 17
+        },
+        "para_unknown": {
+          "questions": 12,
+          "correct": 6
+        },
+        "none": {
+          "questions": 8,
+          "correct": 8
+        }
+      },
+      "correct": 31,
+      "questions": 44,
+      "median_turns": 3.0,
+      "median_input_tokens": 105266,
+      "cost_usd_total": 1.443
+    }
+  },
+  "note": "Each model answered each question once per hub. Small sample: read it as direction, not precision."
+}

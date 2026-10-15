@@ -1,5 +1,7 @@
 {
   "timestamp": 1792039467239,
+  "engine": "falkordb",
+  "falkordb_version": "8.10.2",
   "concurrency": {
     "agents": 30,
     "total_operations": 1200,
@@ -31,7 +33,7 @@
     "depth_1": {
       "causal_depth": 1,
       "total_descendants": 1,
-      "containment_ms": 1.4,
+      "containment_ms": 0.4,
       "quorum_retrieval_leakage_rate": 0.0,
       "baseline_delete_only_leakage_rate": 1.0,
       "baseline_flat_ttl_leakage_rate": 1.0,
