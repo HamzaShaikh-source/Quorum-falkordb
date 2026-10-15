@@ -69,6 +69,7 @@ export const copy = {
   history: {
     title: 'History',
     empty: 'No beliefs yet. Run the scenario to watch agents form facts.',
+    emptyLive: 'Nothing has changed since you opened the console. New facts, quarantines and handoffs appear here the moment they happen. For earlier activity, open Activity.',
     filters: { all: 'All', graph: 'Beliefs', actions: 'Actions', handoffs: 'Handoffs', system: 'System' },
     filterLabel: 'Filter history',
     added: (kind: string, label: string) => `Added ${kind.toLowerCase()}: ${label}`,

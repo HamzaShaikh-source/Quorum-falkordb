@@ -47,17 +47,28 @@
   .header .nav[data-count='10'] .navbtn .nav-label {
     display: inline;
   }
-  .header .nav[data-count='10'] .navbtn svg,
-  .header .pill.sample,
-  .header .pill.saved .saved-w {
+  .header .nav[data-count='10'] .navbtn svg {
+    display: none;
+  }
+  .header:has(.nav[data-count='10']) .pill.sample,
+  .header:has(.nav[data-count='10']) .pill.saved .saved-w {
     display: none;
   }
 }
 @media (min-width: 821px) and (max-width: 1580px) {
   .header .pill.epoch,
-  .header .pill.mode,
-  .header .pill.conn .conn-label {
+  .header .pill.mode {
     display: none;
+  }
+  .header:has(.nav[data-count='10']) .pill.conn .conn-label {
+    display: none;
+  }
+}
+/* the lean build has room: say what each pill is */
+@media (min-width: 821px) {
+  .header:not(:has(.nav[data-count='10'])) .pill.saved .saved-w,
+  .header:not(:has(.nav[data-count='10'])) .pill.conn .conn-label {
+    display: inline;
   }
 }
 @media (min-width: 1760px) {

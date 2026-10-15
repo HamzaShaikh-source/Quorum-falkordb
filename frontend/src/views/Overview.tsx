@@ -1,3 +1,4 @@
+import { PageTag } from '../components/PageTag';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { API_MODE } from '../api/client';
@@ -86,9 +87,7 @@ export function Overview() {
   return (
     <div className="page ov" tabIndex={0}>
       <header className="page-head">
-        <p className="page-tag">
-          <span>[00]</span> Overview
-        </p>
+        <PageTag view="overview">Overview</PageTag>
         <h1>{empty ? 'Welcome. Your memory is empty.' : 'Your shared memory at a glance'}</h1>
         <p>{empty ? 'Nothing here is sample data. Add a person, connect their AI, and what it learns appears on this page.' : 'What your agents know, who is connected, and what needs a person.'}</p>
       </header>
