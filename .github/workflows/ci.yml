@@ -41,6 +41,10 @@ jobs:
 
   docker:
     runs-on: ubuntu-latest
+    env:
+      # required by compose on purpose (no insecure defaults); throwaway values are enough to validate and build
+      FALKORDB_PASSWORD: ci-only
+      QUORUM_TOKENS_JSON: '{}'
     steps:
       - uses: actions/checkout@v4
       - name: Compose files are valid
