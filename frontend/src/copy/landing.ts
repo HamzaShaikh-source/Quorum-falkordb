@@ -1,0 +1,171 @@
+import bench from '../../../bench/results.json';
+
+export const landing = {
+  loader: { label: 'Replaying memory', done: 'Ready' },
+  skip: 'Skip to content',
+  nav: {
+    links: [
+      ['problem', 'Problem'],
+      ['playground', 'Playground'],
+      ['defense', 'Defense'],
+      ['console', 'Console'],
+      ['proof', 'Proof'],
+      ['savings', 'Savings'],
+      ['connect', 'Connect'],
+      ['teams', 'Teams'],
+    ] as [string, string][],
+    cta: 'Open console',
+    menu: 'Menu',
+  },
+  hero: {
+    eyebrow: 'Graph Hacks 2026 · Agent memory and company brain',
+    before: 'Git',
+    ghost: 'revert',
+    after: 'for agent beliefs.',
+    sub: 'Agents that share memory share its mistakes. Quorum links every fact to the conclusions and actions built on it, so one bad belief can be rolled back completely, and no later retrieval can return it.',
+    primary: 'Open the console',
+    secondary: 'Watch the 90-second story',
+    windowLabel: 'Live preview of the belief graph quarantining a poisoned fact',
+    caption: {
+      healthy: 'All beliefs healthy',
+      poisoned: 'A poisoned fact is acted on',
+      contained: 'Contained, rolled back, not retrievable',
+    },
+  },
+  marquee: ['FalkorDB', 'FastAPI', 'Model Context Protocol', 'Cytoscape', 'React', 'TypeScript', 'Redis ACLs', 'Server-sent events', 'Zod'],
+  problem: {
+    tag: '01',
+    kicker: 'The problem',
+    title: 'Delete the fact. The damage stays.',
+    rows: [
+      {
+        h: 'One wrong fact',
+        p: 'A partner feed says refunds last 90 days. The Scout files it as a belief. Nobody questions it, because it looks like every other fact in memory.',
+      },
+      {
+        h: 'Becomes conclusions',
+        p: 'The Analyst derives eligibility from it, and a decision cites that conclusion. Every layer inherits the error and hides where it came from.',
+      },
+      {
+        h: 'Becomes actions',
+        p: 'Refunds go out and an email is drafted. Deleting the original fact removes none of it. Only the graph still knows what depended on what.',
+      },
+    ],
+    visualLabel: 'The wrong fact spreads to conclusions and then to actions',
+  },
+  play: {
+    tag: '02',
+    kicker: 'Playground',
+    title: 'Break something. We will fix it.',
+    sub: 'Click any belief. Quorum marks it and everything built on it, cancels what has not run, and rolls back what has.',
+    poison: 'Poison the 90-day fact',
+    reset: 'Restore everything',
+    pixel: 'Click a node',
+    stats: { held: 'Held', rolling: 'Rolling back', rolled: 'Rolled back', cancelled: 'Cancelled' },
+    idle: 'Nothing is quarantined. Every belief is healthy.',
+    done: (held: number) => `${held} belief${held === 1 ? '' : 's'} held. No later retrieval returns them.`,
+    graphLabel: 'Interactive belief graph. Select a node to quarantine it.',
+  },
+  defense: {
+    tag: '03',
+    kicker: 'Three layers of defense',
+    title: 'Stop it, refuse it, repair it.',
+    slides: [
+      {
+        k: 'Prevent',
+        h: 'The quorum gate',
+        p: 'An irreversible action needs a root-backed fact or two independent sources. Anything less is held for a person to decide.',
+      },
+      {
+        k: 'Guard',
+        h: 'The atomic execute guard',
+        p: 'An action runs only if every ancestor is still healthy. One API process checks and marks execution under a lock, then persists intent before contacting the external service.',
+      },
+      {
+        k: 'Repair',
+        h: 'The cascade',
+        p: 'One pass quarantines everything downstream, queues compensations for real-world effects, and bumps the context epoch so agents rebuild their view.',
+      },
+    ],
+    prev: 'Previous layer',
+    next: 'Next layer',
+  },
+  gallery: {
+    tag: '04',
+    kicker: 'Inside the console',
+    title: 'Every number comes from the API.',
+    prev: 'Previous screen',
+    next: 'Next screen',
+    items: [
+      ['05-contained', 'Containment report', 'Blast radius, measured the moment it happens.'],
+      ['06-prompt-diff', 'Prompt diff', 'See what the agent is no longer told.'],
+      ['07-ledger', 'Actions and handoffs', 'Claim races, leases and a human review queue.'],
+      ['08-past', 'Time travel', 'Replay what the team believed at any moment.'],
+      ['10-memory', 'Agent memory', 'Procedures that rank themselves by what worked.'],
+      ['11-brain', 'Company brain', 'Answers with receipts, or a refusal.'],
+      ['insights', 'Graph insights', 'Belief flow, most connected nodes, shortest paths.'],
+      ['palette', 'Command palette', 'Jump to any belief or run any step from the keyboard.'],
+    ] as [string, string, string][],
+    cta: 'Open the console',
+  },
+  proof: {
+    tag: '05',
+    kicker: 'Proof',
+    title: 'Numbers from the harness, not from us.',
+    items: [
+      { v: Math.round(bench.concurrency.throughput_ops_sec), u: ' ops/s', l: `Mixed reads and writes, ${bench.concurrency.agents} agents` },
+      { v: bench.concurrency.p99_ms, u: ' ms', l: 'p99 latency under that load', d: 2 },
+      { v: Math.round(bench.handoff_race.exact_single_winner_rate * 100), u: '%', l: `Single winner across ${bench.handoff_race.total_handoffs} handoffs, ${bench.handoff_race.concurrent_claimers} claimers each` },
+      {
+        v: bench.concurrency.healthy_children_under_quarantined + bench.execute_race.actions_executed_after_ancestor_quarantined,
+        u: '',
+        l: 'Orphan violations: healthy node under a quarantined parent, or an action run after its source was quarantined',
+      },
+    ],
+    note: `Measured on ${bench.engine === 'falkordb' ? `FalkorDB ${bench.falkordb_version ?? ''}`.trim() : 'the in-memory model (not FalkorDB)'} by python bench/run.py and read straight from bench/results.json at build time. Numbers depend on the machine. Re-run it yourself with make proof.`,
+  },
+  tracks: {
+    tag: '09',
+    kicker: 'What it covers',
+    title: 'Two tracks, one graph.',
+    t2: {
+      h: 'Track 02: Agent memory and coordination',
+      items: [
+        ['Episodic, semantic and procedural memory', 'Memory view'],
+        ['Persistent history and resume', 'Memory view, resume panel'],
+        ['Shared state and handoffs', 'Actions and handoffs tab'],
+        ['High-concurrency reads and writes', 'Benchmark view'],
+        ['Per-tenant isolation', 'Tenants view'],
+      ] as [string, string][],
+    },
+    t3: {
+      h: 'Track 03: Company brain',
+      items: [
+        ['Docs, tickets and chats in one graph', 'Console graph'],
+        ['Who owns what, who knows what', 'Brain view'],
+        ['Decisions traced to their sources', 'Brain view, trace'],
+        ['Knowledge that stays current', 'Replace policy step'],
+        ['Cited answers, or a refusal', 'Brain view, Ask box'],
+      ] as [string, string][],
+    },
+    verify: 'Verify in',
+  },
+  cta: {
+    title: 'Correct the memory, not the model.',
+    sub: 'Run the whole story from the console. No terminal, no setup.',
+    primary: 'Open the console',
+    secondary: 'Watch the 90-second story',
+  },
+  footer: {
+    team: [
+      ['Janani', 'Graph and FalkorDB'],
+      ['Aaditya', 'Backend and agents'],
+      ['Hamza', 'Frontend and narrative'],
+    ] as [string, string][],
+    limits: 'Honest limits',
+    limitsText:
+      'Compensation is not undo; irreversible actions are flagged for a person. An agent keeps a fact in its context window until it rebuilds. As-of queries see only the latest quarantine window per node. All data is synthetic.',
+    ai: 'Built with the help of AI coding assistants, disclosed in the README. Every commit is made by a human on the team.',
+    rights: 'Quorum, a Graph Hacks 2026 project.',
+  },
+};

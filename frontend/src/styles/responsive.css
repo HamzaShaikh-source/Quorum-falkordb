@@ -1,0 +1,100 @@
+/*
+  The console on a phone or a narrow window. Direction: the same print proof room, folded: the graph first, the
+  panels stacked under it, and the navigation as a labelled tab bar at the thumb instead of nine icons at the top.
+  Everything above 820px is untouched.
+*/
+@media (max-width: 820px) {
+  .app { min-width: 0; }
+  .stage { overflow-y: auto; overflow-x: hidden; padding-bottom: 64px; -webkit-overflow-scrolling: touch; }
+
+  /* header: brand, tenant, saved counter, search. The rest lives in the palette and the pages. */
+  .header { gap: 8px; padding: 0 10px; height: 52px; }
+  .header .pill.sample, .header .pill.mode, .header .pill.epoch, .header .pill.conn .conn-label,
+  .header .palette-btn kbd, .header .palette-btn .pb-label, .header .iconbtn, .header .pop-wrap { display: none; }
+  .status { gap: 6px; min-width: 0; }
+  .tenant select { max-width: 96px; }
+
+  /* navigation: a tab bar fixed to the bottom, every view labelled */
+  .header .nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    display: grid; grid-template-columns: repeat(var(--tabs, 9), minmax(0, 1fr)); gap: 0;
+    margin: 0; padding: 4px 4px max(4px, env(safe-area-inset-bottom));
+    background: #fff; border: 0; border-top: 1.5px solid var(--text); border-radius: 0;
+  }
+  .header .nav .navbtn { flex-direction: column; gap: 2px; padding: 6px 0 4px; border-radius: 10px; font-size: 9px; letter-spacing: -0.01em; line-height: 1.1; justify-content: center; min-width: 0; }
+  .header .nav .navbtn .nav-label, .header .nav .navbtn:not(.on) .nav-label { display: block; font-size: 9px; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .header .nav .navbtn.on { box-shadow: none; }
+
+  /* the console: graph first, panels below it */
+  .console { display: flex; flex-direction: column; height: auto; padding: 8px; gap: 10px; }
+  .console > .timeline { order: 5; }
+  .col.center { order: 1; min-height: 62vh; }
+  .col.right { order: 2; }
+  .col.left { order: 3; overflow: visible; }
+  .col.left > .history { min-height: 220px; }
+
+  /* pages */
+  .page { padding: 14px 12px 24px; }
+  .page-head h1 { font-size: clamp(28px, 9vw, 40px); }
+  .kpis, .grid-3, .ctx-hero, .au-tiles { grid-template-columns: 1fr 1fr; }
+  .ctx-hero { grid-template-columns: 1fr; }
+  .cn-table-wrap { overflow-x: auto; }
+  .tm-form, .ctx-controls, .cn-filters, .cn-opts { flex-direction: column; align-items: stretch; }
+  .tm-form .field, .ctx-controls .field, .cn-filters .field { width: 100%; }
+  .cn-status { grid-template-columns: 1fr; }
+  .cn-facts { grid-template-columns: 1fr 1fr; }
+  .cn-url { width: 100%; }
+  .cn-chats { grid-template-columns: 1fr; }
+  .card.wide, .card { padding: 12px; }
+  .block-card { padding: 20px; box-shadow: 4px 4px 0 var(--redfill); }
+  .dev-toggle { display: none; }
+  .nav-label .nl-full { display: none; }
+  .nav-label .nl-short { display: inline; }
+}
+
+@media (min-width: 821px) {
+  .nav-label .nl-short { display: none; }
+}
+
+@media (max-width: 480px) {
+  .au-row { grid-template-columns: 22px minmax(0, 1fr); }
+  .pill.saved .saved-w { display: none; }
+  .brand-name { display: none; }
+}
+
+/* A middle width: ten tabs and the status pills share the header, so the pills lose their words first. */
+@media (min-width: 821px) and (max-width: 1480px) {
+  .header .pill.saved .saved-w, .header .pill.conn .conn-label, .header .palette-btn .pb-label, .header .palette-btn kbd { display: none; }
+  .header .navbtn { padding: 6px 8px; }
+}
+@media (min-width: 821px) and (max-width: 1180px) {
+  .header .navbtn.on .nav-label { display: none; }
+  .header .brand-name, .header .pill.mode, .header .pill.epoch, .header .iconbtn { display: none; }
+}
+
+/* A single tooltip label serves mouse and keyboard without clipping inside the scrollable rail. */
+.nav-tip { display: none; }
+.header .nav { min-width: 0; flex-shrink: 1; }
+@media (max-width: 1480px) {
+  .header .nav { overflow-x: auto; overscroll-behavior-inline: contain; }
+  .header .nav .navbtn { flex-shrink: 0; }
+}
+.navbtn { position: relative; }
+.navbtn:is(:hover, :focus-visible) .nav-tip {
+  display: block; position: fixed; top: 58px; left: 50%; transform: translateX(-50%); z-index: 100;
+  padding: 5px 9px; border-radius: 6px; background: var(--text); color: #fff;
+  font-size: 12px; white-space: nowrap; pointer-events: none;
+}
+.sandbox-label { font-size: 10px; max-width: 90px; line-height: 1.1; }
+.timing-badge { border: 1px solid var(--line); border-radius: 99px; padding: 2px 7px; font-size: 10px; }
+@media (max-width: 1024px) {
+  .app { min-width: 0; }
+  .header .nav { overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: thin; min-width: 0; }
+  .header .nav .navbtn { flex-shrink: 0; }
+}
+@media (max-width: 820px) {
+  .header .nav { display: flex; }
+  .header .nav .navbtn { min-width: 62px; padding-inline: 6px; }
+  .navbtn:is(:hover, :focus-visible) .nav-tip { top: auto; bottom: 66px; }
+  .sandbox-label { display: none; }
+}

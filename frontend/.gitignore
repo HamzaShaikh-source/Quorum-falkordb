@@ -1,0 +1,6 @@
+node_modules
+dist
+*.local
+public/config.json
+dist-live/
+dist-mock/
