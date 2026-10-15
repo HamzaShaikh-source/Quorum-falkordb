@@ -1,0 +1,7 @@
+node_modules
+dist
+dist-mock
+.env.local
+.env.*.local
+public/config.json
+*.log

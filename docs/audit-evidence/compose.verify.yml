@@ -1,0 +1,16 @@
+# Disposable local smoke-test override. Use with --project-name quorum-audit.
+services:
+  falkordb:
+    container_name: quorum-audit-db
+    ports: !override ["16380:6379"]
+  backend:
+    ports: !override ["18000:8000"]
+  mock-helpdesk:
+    ports: !override ["18002:8002"]
+  frontend:
+    container_name: quorum-audit-ui
+    ports: !override ["15174:5173"]
+networks:
+  default:
+    ipam:
+      config: !override [{subnet: "172.29.78.0/24"}]
