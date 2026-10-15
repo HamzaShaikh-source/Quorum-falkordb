@@ -75,9 +75,12 @@ function InvariantLight() {
   const inv = useStore((s) => s.invariant);
   const open = useStore((s) => s.invariantsOpen);
   const set = useStore((s) => s.set);
-  const q = useQuery({ queryKey: ['invariants'], queryFn: getInvariants, enabled: open });
-  const state = inv ? (inv.ok ? 'ok' : 'bad') : 'unknown';
-  const text = inv ? (inv.ok ? copy.invariants.ok : copy.invariants.bad(inv.violations)) : copy.invariants.unknown;
+  // Ask for the result as soon as the console loads, so the pill says pass or fail instead of waiting to be opened.
+  const q = useQuery({ queryKey: ['invariants'], queryFn: getInvariants, refetchInterval: 30_000 });
+  const failing = q.data ? q.data.checks.filter((c) => !c.ok).length : 0;
+  const result = inv ?? (q.data ? { ok: failing === 0, violations: failing } : null);
+  const state = result ? (result.ok ? 'ok' : 'bad') : 'unknown';
+  const text = result ? (result.ok ? copy.invariants.ok : copy.invariants.bad(result.violations)) : copy.invariants.unknown;
   return (
     <div className="pop-wrap">
       <button className={`pill light ${state}`} aria-expanded={open} data-popover-trigger="invariants" onClick={() => set({ invariantsOpen: !open })}>

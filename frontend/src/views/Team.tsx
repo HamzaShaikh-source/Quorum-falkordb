@@ -1,3 +1,4 @@
+import { PageTag } from '../components/PageTag';
 import { useMemo, useState } from 'react';
 import { Icon } from '../components/Icon';
 import { fmt } from '../context/tokens';
@@ -579,9 +580,7 @@ export function Team() {
   return (
     <div className="page tm" tabIndex={0}>
       <header className="page-head">
-        <p className="page-tag">
-          <span>[08]</span> Team
-        </p>
+        <PageTag view="team">Team</PageTag>
         <h1>One company, many teams, many AIs</h1>
         <p>Choose a plan, split people into teams, give each person their own token and AI, then link them so context flows between laptops without anyone pasting anything.</p>
       </header>

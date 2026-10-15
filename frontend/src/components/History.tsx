@@ -12,6 +12,7 @@ export function HistoryFeed() {
   const feed = useStore((s) => s.feed);
   const filter = useStore((s) => s.feedFilter);
   const loaded = useStore((s) => s.loaded);
+  const story = useStore((s) => s.story);
   const set = useStore((s) => s.set);
   const shown = feed.filter((f) => filter === 'all' || f.group === (filter as FeedGroup));
 
@@ -31,7 +32,7 @@ export function HistoryFeed() {
       {loaded && shown.length === 0 && (
         <div className="feed-empty">
           <Icon name="clock" size={22} />
-          <p>{copy.history.empty}</p>
+          <p>{story ? copy.history.empty : copy.history.emptyLive}</p>
         </div>
       )}
       <ol className="feed" aria-live="polite" aria-relevant="additions">
