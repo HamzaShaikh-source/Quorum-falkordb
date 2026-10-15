@@ -23,11 +23,9 @@ import os
 import json
 import time
 import subprocess
-import threading
 import jsonschema
 import redis
-import numpy as np
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 REPO_ROOT = "/mnt/c/Users/mdana/OneDrive/Documents/GitHub/iFone"
 RESULTS_PATH = os.path.join(REPO_ROOT, "bench", "results.json")
@@ -173,7 +171,7 @@ def main():
     # 1. Baseline resource check
     init_stats = get_redis_stats()
     init_sockets = get_socket_stats()
-    print(f"\n[Initial Redis/Socket State]")
+    print("\n[Initial Redis/Socket State]")
     print(f"  FalkorDB Memory: {init_stats['used_memory'] / 1024 / 1024:.2f} MB (RSS: {init_stats['used_memory_rss'] / 1024 / 1024:.2f} MB)")
     print(f"  Clients: {init_stats['connected_clients']} | Blocked: {init_stats['blocked_clients']} | Watched: {init_stats['total_watched_keys']}")
     print(f"  Socket States: {init_sockets}")
@@ -253,7 +251,7 @@ def main():
     final_stats = get_redis_stats()
     final_sockets = get_socket_stats()
 
-    print(f"\n[Final Redis/Socket State]")
+    print("\n[Final Redis/Socket State]")
     print(f"  FalkorDB Memory: {final_stats['used_memory'] / 1024 / 1024:.2f} MB (RSS: {final_stats['used_memory_rss'] / 1024 / 1024:.2f} MB)")
     print(f"  Memory Delta: {(final_stats['used_memory'] - init_stats['used_memory']) / 1024 / 1024:+.2f} MB")
     print(f"  Connected Clients: {final_stats['connected_clients']} | Blocked: {final_stats['blocked_clients']} | Watched: {final_stats['total_watched_keys']}")

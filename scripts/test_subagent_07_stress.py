@@ -15,7 +15,7 @@ import time
 import json
 import threading
 import statistics
-from typing import Dict, List, Any
+from typing import Dict, Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 _current_dir = os.path.dirname(os.path.abspath(__file__))

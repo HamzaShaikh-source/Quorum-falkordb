@@ -6,8 +6,6 @@ import json
 import time
 import threading
 import statistics
-from typing import Any, Dict, List, Optional
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from graph import queries
 
@@ -504,7 +502,7 @@ def test_4_concurrent_stress():
     p99 = all_read_latencies[int(len(all_read_latencies) * 0.99)] if all_read_latencies else 0
     mean_lat = statistics.mean(all_read_latencies) if all_read_latencies else 0
 
-    print(f"\n--- Concurrent Stress Results ---")
+    print("\n--- Concurrent Stress Results ---")
     print(f"Total concurrent reads: {total_reads}")
     print(f"Successful reads (found >= 1 fact): {total_read_success} ({total_read_success/total_reads*100:.1f}%)")
     print(f"Read Errors: {len(all_read_errors)}")

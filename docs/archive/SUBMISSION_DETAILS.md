@@ -16,7 +16,7 @@ This document contains all official submission form fields, technical disclosure
   - **Team Member 2 (Person 2):** Aaditya (`AsteroidHH`) — Backend Architecture, FastAPI App, Standalone MCP Server, 4 Autonomous Agents Swarm, Outbox Saga Worker.
   - **Team Member 3 (Person 3):** Hamza — Frontend Architecture, React/Vite/Cytoscape Incident Command Console, Marketing Landing Page, Narrative & Storyboard.
 - **Repository URL:** `https://github.com/AsteroidHH/iFone.git` (Active branch: `p2-backend-agents`)
-- **Demo Video Link:** `[Link to 90-Second YouTube / Loom Demonstration]` (Story script in [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md))
+- **Demo Video Link:** `[Link to 90-Second YouTube / Loom Demonstration]` (Story script in [`docs/DEMO_SCRIPT.md`](../DEMO_SCRIPT.md))
 - **Technical Blog Post:** [`docs/SUBMISSION_POST.md`](docs/SUBMISSION_POST.md) (Eligible for Hackathon Side Prize)
 
 ---

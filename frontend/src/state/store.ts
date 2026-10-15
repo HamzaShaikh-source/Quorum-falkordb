@@ -50,6 +50,7 @@ export interface UiState {
   demo: boolean;
   devOpen: boolean;
   shortcutsOpen: boolean;
+  helpOpen: boolean;
   legendOpen: boolean;
   selectedId: string | null;
   previewIds: string[];
@@ -115,6 +116,7 @@ export const useStore = create<Store>((set, get) => ({
   demo: params.get('demo') === '1',
   devOpen: false,
   shortcutsOpen: false,
+  helpOpen: false,
   legendOpen: false,
   selectedId: null,
   previewIds: [],
