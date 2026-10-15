@@ -1,0 +1,70 @@
+{
+  "facts": 336,
+  "topics": 14,
+  "questions": 190,
+  "embedding_provider": "local",
+  "caveat": "The paraphrases were written together with the built-in vocabulary, so the known-words row is optimistic; the unknown-words row is the limit of the local vectors.",
+  "keyword_only": {
+    "direct": {
+      "questions": 60,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "mrr": 1.0
+    },
+    "para_known": {
+      "questions": 60,
+      "recall@1": 0.383,
+      "recall@3": 0.517,
+      "recall@5": 0.6,
+      "mrr": 0.493
+    },
+    "para_unknown": {
+      "questions": 60,
+      "recall@1": 0.25,
+      "recall@3": 0.383,
+      "recall@5": 0.517,
+      "mrr": 0.385
+    },
+    "none": {
+      "questions": 10,
+      "answered_anyway": 1,
+      "clean_rate": 0.9
+    },
+    "_ms_per_question": 0.4
+  },
+  "hybrid": {
+    "direct": {
+      "questions": 60,
+      "recall@1": 1.0,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "mrr": 1.0
+    },
+    "para_known": {
+      "questions": 60,
+      "recall@1": 0.867,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "mrr": 0.933
+    },
+    "para_unknown": {
+      "questions": 60,
+      "recall@1": 0.35,
+      "recall@3": 0.4,
+      "recall@5": 0.55,
+      "mrr": 0.445
+    },
+    "none": {
+      "questions": 10,
+      "answered_anyway": 1,
+      "clean_rate": 0.9
+    },
+    "_ms_per_question": 2.49
+  },
+  "tokens_per_answer": {
+    "full_json_top5": 320,
+    "compact": 205,
+    "saved_pct": 36.0
+  }
+}
