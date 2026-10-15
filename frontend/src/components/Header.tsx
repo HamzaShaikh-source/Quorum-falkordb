@@ -143,7 +143,6 @@ export function Header() {
         <label className="tenant">
           <span className="sr">{copy.header.tenant}</span>
           <span className="tenant-dot" aria-hidden="true" />
-          {demoCredentials() && <span className="sandbox-label">Demo Sandbox Credentials</span>}
           <select value={tenant} onChange={(e) => void switchTenant(e.target.value)} aria-label={copy.header.tenant}>
             {(tenants().length ? tenants() : [tenant]).map((t) => (
               <option key={t} value={t}>
@@ -152,11 +151,18 @@ export function Header() {
             ))}
           </select>
         </label>
-        {API_MODE === 'mock' && (
+        {API_MODE === 'mock' ? (
           <span className="pill sample" title={copy.sampleHint}>
             <Icon name="sparkle" size={13} />
-            {copy.sampleData}
+            <span className="sample-w">{copy.sampleData}</span>
           </span>
+        ) : (
+          demoCredentials() && (
+            <span className="pill sample" title="Demo sandbox credentials active">
+              <Icon name="sparkle" size={13} />
+              <span className="sample-w">Demo</span>
+            </span>
+          )
         )}
         {story && (
           <span className={`pill mode ${mode}`} title={copy.modeHint[mode] ?? ''}>
