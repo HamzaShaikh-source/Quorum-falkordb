@@ -64,7 +64,7 @@
 
 /* A middle width: ten tabs and the status pills share the header, so the pills lose their words first. */
 @media (min-width: 821px) and (max-width: 1480px) {
-  .header .pill.saved .saved-w, .header .pill.conn .conn-label, .header .palette-btn .pb-label, .header .palette-btn kbd { display: none; }
+  .header .pill.saved .saved-w, .header .pill.conn .conn-label, .header .palette-btn .pb-label, .header .palette-btn kbd, .sample-w { display: none; }
   .header .navbtn { padding: 6px 8px; }
 }
 @media (min-width: 821px) and (max-width: 1180px) {
@@ -74,11 +74,18 @@
 
 /* A single tooltip label serves mouse and keyboard without clipping inside the scrollable rail. */
 .nav-tip { display: none; }
-.header .nav { min-width: 0; flex-shrink: 1; }
-@media (max-width: 1480px) {
-  .header .nav { overflow-x: auto; overscroll-behavior-inline: contain; }
-  .header .nav .navbtn { flex-shrink: 0; }
+.header .nav {
+  min-width: 0;
+  flex-shrink: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
 }
+.header .nav::-webkit-scrollbar {
+  display: none;
+}
+.header .nav .navbtn { flex-shrink: 0; }
 .navbtn { position: relative; }
 .navbtn:is(:hover, :focus-visible) .nav-tip {
   display: block; position: fixed; top: 58px; left: 50%; transform: translateX(-50%); z-index: 100;
@@ -86,6 +93,7 @@
   font-size: 12px; white-space: nowrap; pointer-events: none;
 }
 .sandbox-label { font-size: 10px; max-width: 90px; line-height: 1.1; }
+.sample-w { display: inline; }
 .timing-badge { border: 1px solid var(--line); border-radius: 99px; padding: 2px 7px; font-size: 10px; }
 @media (max-width: 1024px) {
   .app { min-width: 0; }
@@ -96,5 +104,5 @@
   .header .nav { display: flex; }
   .header .nav .navbtn { min-width: 62px; padding-inline: 6px; }
   .navbtn:is(:hover, :focus-visible) .nav-tip { top: auto; bottom: 66px; }
-  .sandbox-label { display: none; }
+  .sandbox-label, .sample-w { display: none; }
 }

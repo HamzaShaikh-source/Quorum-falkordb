@@ -134,6 +134,7 @@ a:hover {
   border: 0;
   padding: 0;
   color: inherit;
+  flex-shrink: 0;
 }
 .brand-mark {
   width: 32px;
@@ -149,6 +150,7 @@ a:hover {
   font-weight: 700;
   font-size: 19px;
   letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 .nav {
   display: flex;
@@ -169,6 +171,8 @@ a:hover {
   border-radius: 8px;
   font-weight: 500;
   font-size: var(--t13);
+  white-space: nowrap;
+  flex-shrink: 0;
   transition:
     background 0.15s var(--ease),
     color 0.15s var(--ease);
@@ -187,6 +191,7 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 .pill {
   display: inline-flex;
@@ -2458,14 +2463,32 @@ kbd {
   padding-bottom: 4px;
 }
 
-@media (max-width: 1380px) {
-  .brand-name {
-    display: none;
-  }
+@media (max-width: 1720px) {
   .navbtn:not(.on) .nav-label {
     display: none;
   }
   .navbtn {
     padding: 6px 10px;
+  }
+}
+
+@media (max-width: 1440px) {
+  .brand-name {
+    display: none;
+  }
+  .header .pill.saved .saved-w,
+  .header .pill.conn .conn-label,
+  .header .palette-btn .pb-label,
+  .header .palette-btn kbd,
+  .sample-w {
+    display: none;
+  }
+}
+
+@media (max-width: 1200px) {
+  .header .pill.mode,
+  .header .pill.epoch,
+  .header .iconbtn {
+    display: none;
   }
 }
