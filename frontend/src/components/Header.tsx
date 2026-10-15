@@ -64,7 +64,7 @@ function EpochBadge() {
     prev.current = epoch;
   }, [epoch]);
   return (
-    <span className={`pill epoch${pulse ? ' pulse' : ''}`} title="Increments on every quarantine, restore and replacement">
+    <span className={`pill epoch${pulse ? ' pulse' : ''}`} title="The memory version goes up by one every time a fact is quarantined, restored or replaced. Agents rebuild their context when it changes.">
       <Icon name="refresh" size={13} />
       {copy.epoch(epoch)}
     </span>
@@ -127,7 +127,7 @@ export function Header() {
         </span>
         <span className="brand-name">{copy.appName}</span>
       </button>
-      <nav aria-label={copy.header.menu} className="nav" style={{ ["--tabs" as string]: shown.length }}>
+      <nav aria-label={copy.header.menu} className="nav" data-count={shown.length} style={{ ["--tabs" as string]: shown.length }}>
         {VIEWS.filter((v) => shown.includes(v.id)).map((v) => (
           <button key={v.id} className={`navbtn${view === v.id ? ' on' : ''}`} aria-current={view === v.id ? 'page' : undefined} aria-label={copy.nav[v.id]} title={copy.nav[v.id]} onFocus={(e) => e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest' })} onClick={() => set({ view: v.id })}>
             <Icon name={v.icon} size={16} />
@@ -140,10 +140,9 @@ export function Header() {
         ))}
       </nav>
       <div className="status">
-        <label className="tenant">
+        <label className="tenant" title={demoCredentials() ? 'You are signed in with demo sandbox credentials. Nothing here is a real company.' : 'The company whose memory you are looking at'}>
           <span className="sr">{copy.header.tenant}</span>
           <span className="tenant-dot" aria-hidden="true" />
-          {demoCredentials() && <span className="sandbox-label">Demo Sandbox Credentials</span>}
           <select value={tenant} onChange={(e) => void switchTenant(e.target.value)} aria-label={copy.header.tenant}>
             {(tenants().length ? tenants() : [tenant]).map((t) => (
               <option key={t} value={t}>
@@ -181,6 +180,14 @@ export function Header() {
         </button>
         <button className="iconbtn" aria-pressed={presentation} aria-label={copy.presentationMode} title={`${copy.presentationMode} (P)`} onClick={() => set({ presentation: !presentation })}>
           <Icon name="present" size={17} />
+        </button>
+        <button className="btn guide-btn" aria-label="Open the guide: what the AI does here, and an A to Z glossary" title="Guide and A to Z glossary (G)" onClick={() => {
+            rememberFocus();
+            set({ helpOpen: true });
+          }}
+        >
+          <Icon name="help" size={15} />
+          <span>Guide</span>
         </button>
         <button className="iconbtn" aria-label={copy.shortcuts.title} title={copy.shortcuts.title} onClick={() => {
             rememberFocus();
