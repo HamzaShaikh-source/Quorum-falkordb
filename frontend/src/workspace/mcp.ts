@@ -143,7 +143,7 @@ Then tell the assistant to pass token="${token}" on each call (see step 3).`,
       file: i.client === 'antigravity' ? '~/.gemini/antigravity/mcp_config.json' : info.where,
       lang: 'json',
       body: json({ mcpServers: { quorum: entry } }),
-      note: i.client === 'antigravity' && http ? 'If your Antigravity build ignores "headers", switch to the stdio bridge.' : undefined,
+      note: i.client === 'antigravity' && http ? 'The Antigravity command line (agy) keeps its own list and ignores "headers" in this file. Register the hub there instead: agy mcp add --header "Authorization: Bearer <token>" quorum <hub url>/mcp' : undefined,
     };
   }
   // cursor and any other client that reads mcpServers with url + headers
