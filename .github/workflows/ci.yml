@@ -34,7 +34,7 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-      - run: pip install -r requirements.txt ruff mypy
+      - run: pip install -r requirements.txt ruff mypy hypothesis pytest-timeout
       - run: ruff check .
       - run: mypy
       - run: pytest -q
