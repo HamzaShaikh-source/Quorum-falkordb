@@ -309,6 +309,23 @@ def seed_acme_commons(tenant_id: str = "acme"):
         {"dec_text": dec_text}
     )
 
+    # 6. Seed Action #1 (Irreversible Customer Email for Damage Control Demo)
+    g.query("""
+    MATCH (dec:Conclusion {id: 'dec_standard_window_30d'})
+    CREATE (act:Action:MemoryNode {
+        id: 'act_email_001',
+        label: 'Send customer refund approval notice',
+        type: 'SEND_CUSTOMER_EMAIL',
+        reversibility: 'IRREVERSIBLE',
+        executed: true,
+        confirmed: true,
+        gate: 'PASSED',
+        status: 'HEALTHY',
+        text: 'Your refund of $150 has been approved under our new 90-day policy.',
+        created_at: timestamp()
+    })
+    CREATE (dec)-[:LEADS_TO]->(act)
+    """)
     print(f"[Seed] Successfully seeded Acme Commons graph for tenant '{tenant_id}'!")
 
 
