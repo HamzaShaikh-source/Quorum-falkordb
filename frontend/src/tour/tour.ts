@@ -64,12 +64,25 @@ const TOUR_STEPS: DriveStep[] = [
         'FalkorDB traces all downstream dependencies in <0.4ms. When a premise is revoked, the entire tainted branch turns red.',
       side: 'left',
       align: 'start',
+      onNextClick: (_el, _step, opts) => {
+        useStore.getState().set({ view: 'console', tab: 'ledger' });
+        setTimeout(() => {
+          opts.driver.moveNext();
+        }, 50);
+      },
     },
   },
   {
     element: '.action-ledger',
-    onHighlightStarted: () => {
+    onHighlightStarted: (el, _step, opts) => {
       useStore.getState().set({ view: 'console', tab: 'ledger' });
+      if (!el || el.id === 'driver-dummy-element') {
+        setTimeout(() => {
+          if (opts.driver.getActiveIndex() === 3) {
+            opts.driver.drive(3);
+          }
+        }, 60);
+      }
     },
     popover: {
       title: 'Transactional Outbox Sagas',
@@ -77,6 +90,12 @@ const TOUR_STEPS: DriveStep[] = [
         'Actions are strictly guarded. Reversible actions (like customer refunds) are automatically compensated via the helpdesk API.',
       side: 'top',
       align: 'center',
+      onPrevClick: (_el, _step, opts) => {
+        useStore.getState().set({ view: 'console', tab: 'graph' });
+        setTimeout(() => {
+          opts.driver.movePrevious();
+        }, 50);
+      },
     },
   },
   {
@@ -90,12 +109,25 @@ const TOUR_STEPS: DriveStep[] = [
         'For irreversible actions already executed (sent emails), Quorum automatically drafts a verified apology notice for human approval.',
       side: 'bottom',
       align: 'center',
+      onNextClick: (_el, _step, opts) => {
+        useStore.getState().set({ view: 'console', tab: 'graph' });
+        setTimeout(() => {
+          opts.driver.moveNext();
+        }, 50);
+      },
     },
   },
   {
     element: '.as-of-slider',
-    onHighlightStarted: () => {
+    onHighlightStarted: (el, _step, opts) => {
       useStore.getState().set({ view: 'console', tab: 'graph' });
+      if (!el || el.id === 'driver-dummy-element') {
+        setTimeout(() => {
+          if (opts.driver.getActiveIndex() === 5) {
+            opts.driver.drive(5);
+          }
+        }, 60);
+      }
     },
     popover: {
       title: 'Bitemporal Time Travel',
@@ -103,6 +135,12 @@ const TOUR_STEPS: DriveStep[] = [
         'Slide back in time to audit what the multi-agent team believed at any past timestamp T using FalkorDB as-of queries.',
       side: 'top',
       align: 'center',
+      onPrevClick: (_el, _step, opts) => {
+        useStore.getState().set({ view: 'console', tab: 'ledger' });
+        setTimeout(() => {
+          opts.driver.movePrevious();
+        }, 50);
+      },
     },
   },
   {
@@ -179,6 +217,9 @@ export function createTourDriver(): Driver {
 }
 
 export function startTour() {
+  // Preload lazy tab components used in the tour
+  void import('../components/Ledger');
+
   const st = useStore.getState();
   if (st.view !== 'console') {
     st.set({ view: 'console' });
