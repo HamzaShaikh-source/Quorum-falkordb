@@ -54,5 +54,6 @@ class NodeRegistry(dict):
 
     def candidates(self, viewer):
         # Mutable scope lists and link changes never use a cached authorization decision.
-        return [n for n in sorted(self.facts.values(), key=lambda n: self.order[n.id])
+        facts_snapshot = list(self.facts.values())
+        return [n for n in sorted(facts_snapshot, key=lambda n: self.order.get(n.id, 0))
                 if n.status == Status.HEALTHY and not n.stale and viewer.can_see(n)]

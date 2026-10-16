@@ -31,6 +31,7 @@ def resume_agent(agent_id: str, auth: AuthContext = Depends(get_auth_context)):
                 text="Refund window is 90 days (quarantined).",
                 source_ref="tenant_acme:agent_scout:raw:msg_004",
                 quote="Partner policy states 90 day coverage.",
+                status=Status.QUARANTINED,
             ),
         ],
     )

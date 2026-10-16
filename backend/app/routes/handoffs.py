@@ -68,7 +68,7 @@ def claim_handoff(
                 detail={
                     "error": {
                         "code": ErrorCode.CONFLICT.value,
-                        "message": f"Handoff '{handoff_id}' already claimed by '{target.claimed_by}' with active lease until {target.lease_until}." if not anchor_ok else f"Anchor node for handoff '{handoff_id}' is not HEALTHY.",
+                        "message": f"Handoff '{handoff_id}' already claimed by '{target.claimed_by}' with active lease until {target.lease_until}." if anchor_ok else f"Anchor node for handoff '{handoff_id}' is not HEALTHY.",
                     }
                 },
             )

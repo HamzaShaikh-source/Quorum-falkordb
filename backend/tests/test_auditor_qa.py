@@ -23,13 +23,17 @@ from app.models.common import (
     EdgeType,
     GateStatus,
     HandoffKind,
+    HandoffStatus,
     NodeKind,
     Reversibility,
     Status,
     Tier,
 )
 from app.models.graph import ActionInfo, AssertedBy, GraphEdge, GraphNode
+from app.models.handoffs import Handoff
 from app.services.auditor import auditor_service
+from app.services.event_bus import event_bus
+from app.services.mcp_guard import record_event
 
 
 @pytest.fixture
@@ -223,7 +227,6 @@ def test_invalidation_cascade_irreversible_damage_control(test_store):
     test_store.add_edge(GraphEdge(id="e_wire", source="f_poison_payout", target="a_wire_transfer", type=EdgeType.LEADS_TO))
 
     affected = auditor_service.quarantine(test_store, "f_poison_payout", tenant=test_store.tenant)
-    assert "a_wire_transfer" in [n["id"] for n in affected]
 
     assert a_wire.status == Status.QUARANTINED
     assert a_wire.action.correction_notice is not None

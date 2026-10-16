@@ -1,8 +1,8 @@
 import time
-from collections import defaultdict
 from typing import Optional
+from collections import defaultdict
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends, HTTPException
 from app.auth import get_auth_context, AuthContext
 from app.graph.queries import get_graph_store
 from app.models.common import NodeKind, Reversibility
@@ -17,6 +17,19 @@ router = APIRouter()
 class BlastPreviewRequest(BaseModel):
     node_id: Optional[str] = None
     root_id: Optional[str] = None
+
+
+@router.post("/blast/preview", response_model=BlastPreviewResponse)
+def blast_preview_post(payload: BlastPreviewRequest, auth: AuthContext = Depends(get_auth_context)):
+    target_id = payload.node_id or payload.root_id
+    if not target_id:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Either node_id or root_id is required.")
+    return blast_preview(target_id, auth)
+
+
+@router.post("/blast/{node_id}/preview", response_model=BlastPreviewResponse)
+def blast_preview_post_path(node_id: str, auth: AuthContext = Depends(get_auth_context)):
+    return blast_preview(node_id, auth)
 
 
 @router.get("/blast/{node_id}/preview", response_model=BlastPreviewResponse)
@@ -61,17 +74,6 @@ def blast_preview(node_id: str, auth: AuthContext = Depends(get_auth_context)):
             executed_irreversible=0,
         ),
     )
-
-
-@router.post("/blast/preview", response_model=BlastPreviewResponse)
-def blast_preview_post(req: BlastPreviewRequest, auth: AuthContext = Depends(get_auth_context)):
-    target_id = req.node_id or req.root_id
-    if not target_id:
-        raise HTTPException(
-            status_code=422,
-            detail={"error": {"code": "VALIDATION", "message": "node_id or root_id is required."}},
-        )
-    return blast_preview(node_id=target_id, auth=auth)
 
 
 @router.get("/blast/{node_id}/report", response_model=BlastReportResponse)

@@ -13,7 +13,7 @@ class TenantEventBuffer:
         self.current_seq = 0
         self.current_epoch = 1
         self.history: List[SSEEventEnvelope] = []
-        self.subscribers: List[asyncio.Queue] = []
+        self.subscribers: List[Any] = []
 
     def publish(self, event_type: str, data: Dict[str, Any], request_id: Optional[str] = None, epoch: Optional[int] = None) -> SSEEventEnvelope:
         with self._lock:
@@ -39,9 +39,21 @@ class TenantEventBuffer:
             if len(self.history) > self.max_buffer_size:
                 self.history.pop(0)
 
-            for q in list(self.subscribers):
+            try:
+                current_loop = asyncio.get_running_loop()
+            except RuntimeError:
+                current_loop = None
+
+            for s in list(self.subscribers):
                 try:
-                    q.put_nowait(envelope)
+                    if isinstance(s, tuple):
+                        q, loop = s
+                        if loop and loop.is_running() and current_loop != loop:
+                            loop.call_soon_threadsafe(q.put_nowait, envelope)
+                        else:
+                            q.put_nowait(envelope)
+                    else:
+                        s.put_nowait(envelope)
                 except Exception:
                     pass
 
@@ -49,6 +61,12 @@ class TenantEventBuffer:
 
     def get_events_since(self, last_event_id: int) -> Optional[List[SSEEventEnvelope]]:
         with self._lock:
+            if last_event_id is None:
+                return None
+            try:
+                last_event_id = int(last_event_id)
+            except (ValueError, TypeError):
+                return None
             if last_event_id > self.current_seq:
                 return None  # The client is ahead of this server: the server restarted, so the client must reload.
             if not self.history:
@@ -61,14 +79,17 @@ class TenantEventBuffer:
 
     def subscribe(self) -> asyncio.Queue:
         with self._lock:
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = None
             q: asyncio.Queue = asyncio.Queue()
-            self.subscribers.append(q)
+            self.subscribers.append((q, loop))
             return q
 
     def unsubscribe(self, q: asyncio.Queue):
         with self._lock:
-            if q in self.subscribers:
-                self.subscribers.remove(q)
+            self.subscribers = [s for s in self.subscribers if (s[0] if isinstance(s, tuple) else s) != q]
 
 
 class EventBusService:

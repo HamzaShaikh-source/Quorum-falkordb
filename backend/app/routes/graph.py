@@ -1,7 +1,7 @@
-from typing import Optional, List
-from pydantic import BaseModel
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.auth import get_auth_context, AuthContext, require_role
+from pydantic import BaseModel
+from app.auth import get_auth_context, AuthContext
 from app.models.graph import GraphResponse, NodeDetailResponse, StatusHistoryEntry
 from app.models.common import ErrorCode, Status
 
@@ -12,18 +12,6 @@ from app.services.event_bus import event_bus
 import time
 
 router = APIRouter()
-
-
-class RestoreRequest(BaseModel):
-    root_id: Optional[str] = None
-    node_id: Optional[str] = None
-
-
-class RestoreResponse(BaseModel):
-    restored_count: int
-    restored_nodes: List[str]
-    epoch: int
-    success: bool
 
 
 @router.get("/graph", response_model=GraphResponse)
@@ -128,29 +116,41 @@ def get_node(node_id: str, auth: AuthContext = Depends(get_auth_context)):
     )
 
 
-@router.post("/graph/restore", response_model=RestoreResponse)
-def restore_graph_nodes(
-    req: RestoreRequest,
-    auth: AuthContext = Depends(require_role(["auditor", "human"])),
+class GraphRestoreRequest(BaseModel):
+    root_id: Optional[str] = None
+    node_id: Optional[str] = None
+
+
+class GraphRestoreResponse(BaseModel):
+    success: bool
+    root_id: str
+    restored_nodes: list[str]
+    restored_count: int
+    epoch: int
+
+
+@router.post("/graph/restore", response_model=GraphRestoreResponse)
+def restore_graph(
+    payload: GraphRestoreRequest,
+    auth: AuthContext = Depends(get_auth_context),
 ):
-    target_id = req.root_id or req.node_id
-    if not target_id:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"error": {"code": ErrorCode.VALIDATION.value, "message": "root_id or node_id is required."}},
-        )
-    store = get_graph_store(tenant=auth.tenant)
-    target = store.nodes.get(target_id)
-    if not target:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"error": {"code": ErrorCode.NOT_FOUND.value, "message": f"Node '{target_id}' not found."}},
-        )
     from app.services.auditor import auditor_service
-    restored = auditor_service.restore(store, target_id, tenant=auth.tenant)
-    return RestoreResponse(
-        restored_count=len(restored),
-        restored_nodes=restored,
-        epoch=store.epoch,
-        success=len(restored) > 0,
-    )
+    target_id = payload.root_id or payload.node_id
+    if not target_id:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Either root_id or node_id must be provided.")
+    store = get_graph_store(tenant=auth.tenant)
+    with store._lock:
+        if target_id not in store.nodes:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={"error": {"code": ErrorCode.NOT_FOUND.value, "message": f"Node '{target_id}' not found."}},
+            )
+        restored = auditor_service.restore(store, target_id, tenant=auth.tenant)
+        store.commit()
+        return GraphRestoreResponse(
+            success=True,
+            root_id=target_id,
+            restored_nodes=restored,
+            restored_count=len(restored),
+            epoch=store.epoch,
+        )

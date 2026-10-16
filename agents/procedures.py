@@ -64,7 +64,7 @@ class ProcedureRegistry:
             matching = [p for p in self._procedures.values() if p.task_type == task_type]
             if not matching:
                 return None
-            return max(matching, key=lambda p: p.rank_score)
+            return max(matching, key=lambda p: (p.rank_score, p.uses, p.id))
 
     def record_outcome(self, procedure_id: str, success: bool):
         with self._lock:
@@ -93,7 +93,7 @@ class ProcedureRegistry:
 
     def list_procedures(self) -> List[Procedure]:
         with self._lock:
-            return sorted(list(self._procedures.values()), key=lambda p: p.rank_score, reverse=True)
+            return sorted(list(self._procedures.values()), key=lambda p: (p.rank_score, p.uses, p.id), reverse=True)
 
 
 procedure_registry = ProcedureRegistry()

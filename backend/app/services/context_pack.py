@@ -14,6 +14,7 @@ Every function reports `tokens` (what it returned) and `tokens_baseline` (what a
 same question: full JSON of the best-matching nodes, healthy or not). Token counts are estimates, see estimate_tokens.
 """
 import json
+import math
 import re
 from collections import deque
 from dataclasses import dataclass, field
@@ -120,7 +121,8 @@ def _adjacency(nodes: Dict[str, GraphNode], edges) -> Tuple[Dict[str, List[str]]
     inn: Dict[str, List[str]] = {i: [] for i in nodes}
     out: Dict[str, List[str]] = {i: [] for i in nodes}
     for e in edges:
-        if e.source in nodes and e.target in nodes and e.type.value in ("LEADS_TO", "SUPPORTS", "FROM_SOURCE"):
+        t_val = getattr(e.type, "value", e.type)
+        if e.source in nodes and e.target in nodes and t_val in ("LEADS_TO", "SUPPORTS", "FROM_SOURCE"):
             out[e.source].append(e.target)
             inn[e.target].append(e.source)
     return inn, out
@@ -201,6 +203,8 @@ def rank(candidates: List[GraphNode], query: str, idf: Dict[str, float]) -> List
     out: List[Tuple[GraphNode, float, float]] = []
     for n in candidates:
         l, c = lex[n.id], cos.get(n.id, 0.0)
+        if not isinstance(c, (int, float)) or math.isnan(c) or math.isinf(c):
+            c = 0.0
         if l <= 0 and c < settings.RANK_VECTOR_MIN:
             out.append((n, 0.0, c))
             continue

@@ -40,7 +40,7 @@ def get_invariants(auth: AuthContext = Depends(get_auth_context)):
 @router.get("/cypher-log", response_model=List[CypherLogItem])
 def get_cypher_log(
     request_id: Optional[str] = Query(None),
-    limit: int = Query(20, le=100),
+    limit: int = Query(20, ge=1, le=100),
     auth: AuthContext = Depends(get_auth_context),
 ):
     """The Cypher this tenant's writes actually ran against FalkorDB, newest first. Nothing is made up."""

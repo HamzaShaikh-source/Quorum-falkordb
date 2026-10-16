@@ -58,8 +58,9 @@ class ActionExecutorService:
                 payload=action.action.payload,
             )
         except Exception as exc:
-            action.action.delivery_error = type(exc).__name__
-            store.commit(request_id)
+            with store._lock:
+                action.action.delivery_error = type(exc).__name__
+                store.commit(request_id)
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail={"error": {"code": ErrorCode.SERVICE_UNAVAILABLE.value, "message": "External service unavailable; execution outcome requires reconciliation."}},

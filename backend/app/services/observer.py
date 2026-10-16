@@ -24,12 +24,12 @@ _STARTERS = {"The", "This", "That", "These", "Those", "All", "Any", "Each", "Eve
 _STOP = set("the a an and or of to in on at by for with from is are was were be been it this that these those as if so we you i they their our your its has have had will would can could may also then than into about per".split())
 # Never keep a sentence that looks like it carries a credential, whatever else it says.
 _SECRET = re.compile(r"(\[redacted\]|sk-[A-Za-z0-9_-]{12,}|qrm_[a-z0-9_-]{6,}|AKIA[0-9A-Z]{12,}|ghp_[A-Za-z0-9]{20,}|xox[abp]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{20,}|bearer\s+[A-Za-z0-9._~+/-]{16,}|(?:-----)?BEGIN [A-Z ]*PRIVATE KEY|(?:password|passwd|secret|api[_-]?key|token)\s*[:=]\s*\S{6,})", re.I)
-_CODE_FENCE = re.compile(r"```.*?```", re.S)
+_CODE_FENCE = re.compile(r"```(?:.*?```|.*$)", re.S)
 _SENT_SPLIT = re.compile(r"(?<=[.!?])\s+|\n+|(?<=;)\s+")
 
 
 def _norm(s: str) -> str:
-    return re.sub(r"[^a-z0-9 ]", "", re.sub(r"\s+", " ", s.lower())).strip()
+    return re.sub(r"[^\w\s]", "", re.sub(r"\s+", " ", s.lower()), flags=re.UNICODE).strip()
 
 
 def fingerprint(s: str) -> str:
@@ -81,4 +81,4 @@ def candidates(text: str, max_facts: int = 12) -> List[Dict[str, Any]]:
             key = "_".join(entity_tokens + concepts)[:60] or None
         out.append({"text": s, "key": key, "value": value, "confidence": round(min(1.0, 0.25 * score), 2), "signals": signals, "fingerprint": fp})
     out.sort(key=lambda c: -c["confidence"])
-    return out[: max(1, max_facts)]
+    return out[: max(0, max_facts)]

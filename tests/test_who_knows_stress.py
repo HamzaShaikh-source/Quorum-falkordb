@@ -4,14 +4,10 @@ pytest tests/test_who_knows_stress.py -v
 """
 
 import pytest
-import os
 import time
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from graph import queries
-
-# Shared CI runners are several times slower than a dev machine; keep the budget tight locally, relaxed in CI.
-PERF_SLACK = 10 if os.environ.get("CI") else 1
 
 TENANT = "test_pytest_who_knows"
 
@@ -142,7 +138,7 @@ class TestComplexTopologies:
         t0 = time.time()
         res = queries.who_knows(TENANT, "top_cycle")
         ms = (time.time() - t0) * 1000
-        assert ms < 200 * PERF_SLACK, "Circular query should not hang"
+        assert ms < 200, "Circular query should not hang"
         assert len(res) == 2
         assert {r["evidence_count"] for r in res} == {2}
 
@@ -255,4 +251,4 @@ class TestBoundaryConditions:
         assert res[0]["evidence_count"] == 55
         assert res[-1]["person_id"] == f"p_usr_{num_contributors:02d}"
         assert res[-1]["evidence_count"] == 1
-        assert ms < 50 * PERF_SLACK, f"Query on 55 contributors should be fast (<{50 * PERF_SLACK}ms), got {ms:.2f}ms"
+        assert ms < 50, f"Query on 55 contributors should be fast (<50ms), got {ms:.2f}ms"

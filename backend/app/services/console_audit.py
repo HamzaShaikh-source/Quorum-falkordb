@@ -17,6 +17,7 @@ ACTIONS: Dict[Tuple[str, str], Tuple[str, str]] = {
     ("POST", "/api/workspace/members"): ("console.workspace", "added a member and issued a token"),
     ("POST", "/api/workspace/members/{member_id}/rotate"): ("console.workspace", "rotated a member's token"),
     ("DELETE", "/api/workspace/members/{member_id}"): ("console.workspace", "removed a member and revoked their token"),
+    ("POST", "/api/graph/restore"): ("console.restore", "a node"),
     ("POST", "/api/workspace/links"): ("console.workspace", "linked two members"),
     ("PATCH", "/api/workspace/links/{link_id}"): ("console.workspace", "paused or resumed a link"),
     ("DELETE", "/api/workspace/links/{link_id}"): ("console.workspace", "removed a link"),

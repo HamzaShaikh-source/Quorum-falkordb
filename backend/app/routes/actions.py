@@ -160,6 +160,9 @@ def approve_correction(
         {"action_id": action_id, "status": "APPROVED_PENDING_DELIVERY", "notice": notice},
     )
 
+    with store._lock:
+        store.commit()
+
     return {
         "status": "APPROVED_PENDING_DELIVERY",
         "action_id": action_id,

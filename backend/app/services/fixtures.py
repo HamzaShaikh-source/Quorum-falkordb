@@ -257,6 +257,16 @@ def get_fixture_procedures() -> List[ProcedureItem]:
             seeded=True,
         ),
         ProcedureItem(
+            id="proc_refund_strict",
+            task_type="refund",
+            steps=["verify_policy_root_only", "check_receipt", "verify_gate", "stage_refund", "execute_refund"],
+            uses=15,
+            successes=14,
+            failures=1,
+            rank_score=0.882,
+            seeded=True,
+        ),
+        ProcedureItem(
             id="proc_notify_customer",
             task_type="notify",
             steps=["draft_template", "verify_gate", "send_email"],

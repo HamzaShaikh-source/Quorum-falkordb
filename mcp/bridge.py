@@ -13,7 +13,10 @@ import asyncio
 import os
 import sys
 
-import mcp_types as types
+try:
+    import mcp.types as types
+except ImportError:
+    import mcp_types as types
 from mcp import Client
 from mcp.client.streamable_http import streamable_http_client
 from mcp.server.lowlevel import Server

@@ -20,7 +20,7 @@ _ROLES = ("agent", "auditor", "human")
 
 def _member_token(token: str) -> Optional[dict]:
     """qrm_<tenant>_<secret>: a token issued to a workspace member. Valid only if the tenant's workspace holds its hash."""
-    if not token or not isinstance(token, str):
+    if not isinstance(token, str):
         return None
     parts = token.split("_")
     if len(parts) < 3:
@@ -48,7 +48,7 @@ def resolve_token(token: str) -> Optional[dict]:
     token_<tenant>_<role> only work when QUORUM_ALLOW_DYNAMIC_TOKENS is on (the default outside production), because
     anyone could otherwise forge a token for any tenant.
     """
-    if not token or not isinstance(token, str):
+    if not isinstance(token, str) or not token:
         return None
     if token in settings.DEMO_TOKENS:
         return dict(settings.DEMO_TOKENS[token])

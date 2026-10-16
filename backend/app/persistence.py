@@ -53,11 +53,18 @@ class Persister:
 
     def _q(self, name: str, cypher: str, params: Dict[str, Any], request_id: Optional[str] = None):
         t0 = time.perf_counter()
-        try:
-            res = self.graph.query(cypher, params)
-        except Exception:
-            self.store.log_query(name, cypher, (time.perf_counter() - t0) * 1000, 0, request_id, real=True, outcome="failure")
-            raise
+        attempt = 0
+        while True:
+            try:
+                res = self.graph.query(cypher, params)
+                break
+            except Exception as exc:
+                if "max pending queries exceeded" in str(exc).lower() and attempt < 5:
+                    attempt += 1
+                    time.sleep(0.005 * (2 ** attempt))
+                    continue
+                self.store.log_query(name, cypher, (time.perf_counter() - t0) * 1000, 0, request_id, real=True, outcome="failure")
+                raise
         rows = len(res.result_set) if res.result_set else 0
         written = (res.nodes_created or 0) + (res.properties_set or 0) + (res.relationships_created or 0) + (res.nodes_deleted or 0)
         server_ms = getattr(res, "run_time_ms", None)

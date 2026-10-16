@@ -95,7 +95,7 @@ class GraphStore:
     def bump_epoch(self, request_id: Optional[str] = None) -> int:
         with self._lock:
             start = time.time()
-            self.epoch += 1
+            self.epoch = (self.epoch or 0) + 1
             self.log_query("bump_epoch", "MATCH (m:Meta) SET m.epoch = m.epoch + 1 RETURN m.epoch", (time.time() - start) * 1000, 1, request_id)
             return self.epoch
 
@@ -476,7 +476,7 @@ class GraphStore:
             for node in self.nodes.values():
                 if node.kind == NodeKind.ACTION and node.action and node.action.executed and node.status == Status.HEALTHY:
                     ancestors = self.get_ancestors(node.id, edge_types=["LEADS_TO", "SUPPORTS", "FROM_SOURCE"])
-                    if any(a.status != Status.HEALTHY for a in ancestors):
+                    if any(a.status == Status.QUARANTINED for a in ancestors):
                         bad_ancestors_count += 1
 
             checks = [

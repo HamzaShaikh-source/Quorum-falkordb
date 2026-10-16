@@ -16,6 +16,7 @@ class AgentMemoryItem(BaseModel):
     text: str
     source_ref: Optional[str] = None
     quote: Optional[str] = None
+    status: Status = Status.HEALTHY
 
 
 class AgentResumeResponse(BaseModel):

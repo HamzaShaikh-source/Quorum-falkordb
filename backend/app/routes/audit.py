@@ -32,6 +32,7 @@ _VERBS = {
     "console.review_handoff": ("reviewed in the console:", "alert"),
     "console.scenario": ("ran the scenario step", "write"),
     "console.workspace": ("changed the workspace:", "alert"),
+    "console.restore": ("restored in the console:", "alert"),
 }
 
 
@@ -58,6 +59,7 @@ _INFINITIVE = {
     "reviewed in the console:": "review in the console:",
     "ran the scenario step": "run the scenario step",
     "changed the workspace:": "change the workspace:",
+    "restored in the console:": "restore in the console:",
 }
 _QUOTED = ("retrieve_context", "remember_fact", "stage_action", "get_node", "observe")
 

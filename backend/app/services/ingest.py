@@ -22,16 +22,22 @@ class IngestGatewayService:
         tenant: str = "acme",
         request_id: Optional[str] = None,
     ) -> GraphNode:
+        if not auth_channel or not isinstance(auth_channel, str) or not auth_channel.strip():
+            raise ValueError("auth_channel must be a non-empty authenticated string")
+
+        title_clean = str(title or "").strip()[:120]
+        url_clean = str(url or "").strip()[:500]
+        version_clean = str(version or "").strip()[:60]
         source_id = f"src_{uuid.uuid4().hex[:6]}"
 
         source_node = GraphNode(
             id=source_id,
             kind=NodeKind.SOURCE,
-            label=title[:60],
+            label=title_clean[:60] or "Source",
             status=Status.HEALTHY,
             stale=False,
-            origin=auth_channel,  # Injected securely from gateway auth context
-            source=SourceInfo(kind=kind, title=title, url=url, version=version),
+            origin=auth_channel.strip(),  # Injected securely from gateway auth context
+            source=SourceInfo(kind=kind, title=title_clean, url=url_clean, version=version_clean),
         )
 
         store.add_node(source_node, request_id)

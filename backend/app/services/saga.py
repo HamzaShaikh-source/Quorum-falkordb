@@ -31,7 +31,9 @@ def generate_correction_notice(
     recipient = payload.get("recipient") or payload.get("customer_id")
     ancestors = store.get_ancestors(action_node.id, ["LEADS_TO", "SUPPORTS", "FROM_SOURCE"])
     affected = {n.id for n in ancestors}
-    verified = [n for n in store.nodes.values() if n.kind == NodeKind.FACT and n.status == Status.HEALTHY
+    with store._lock:
+        all_nodes = list(store.nodes.values())
+    verified = [n for n in all_nodes if n.kind == NodeKind.FACT and n.status == Status.HEALTHY
                 and not n.stale and n.asserted_by and n.asserted_by.tier == Tier.ROOT
                 and set(inherited_scopes([n])) <= set(inherited_scopes([action_node]))
                 and (n.id in affected or any(p.key and p.key == n.key for p in ancestors))]
@@ -96,10 +98,17 @@ class OutboxSagaWorker:
                     comp.last_error = comp.last_error or "Retry budget exhausted after interrupted delivery"
                     comp.lease_owner = None
                     comp.lease_until = None
-                    store.add_handoff(Handoff(id=f"hand_comp_fail_{uuid.uuid4().hex}", kind=HandoffKind.ESCALATION,
-                                              task=f"Confirm compensation result for {node.id}; last delivery was interrupted and retry budget is exhausted.",
-                                              status=HandoffStatus.PENDING, context_root_id=node.id))
+                    handoff = Handoff(id=f"hand_comp_fail_{uuid.uuid4().hex}", kind=HandoffKind.ESCALATION,
+                                      task=f"Confirm compensation result for {node.id}; last delivery was interrupted and retry budget is exhausted.",
+                                      status=HandoffStatus.PENDING, context_root_id=node.id)
+                    store.add_handoff(handoff)
                     store.commit()
+                    event_bus.publish(tenant, "handoff_updated", {"handoff": handoff.model_dump()})
+                    event_bus.publish(
+                        tenant,
+                        "compensation_updated",
+                        {"action_id": node.id, "status": comp.status.value, "attempts": comp.attempts},
+                    )
                     continue
                 comp.status = CompensationStatus.DISPATCHING
                 claim_owner = f"{self.owner}:{uuid.uuid4().hex}"
@@ -178,10 +187,12 @@ class OutboxSagaWorker:
                 if not action.external_key or action.execution_attempts == 0:
                     if action.delivery_error != "LEGACY_REQUIRES_REVIEW":
                         action.delivery_error = "LEGACY_REQUIRES_REVIEW"
-                        store.add_handoff(Handoff(id=f"hand_legacy_{uuid.uuid4().hex}", kind=HandoffKind.ESCALATION,
-                                                  task=f"Confirm historical external delivery for {node.id}; no durable delivery attempt was recorded.",
-                                                  status=HandoffStatus.PENDING, context_root_id=node.id))
+                        handoff = Handoff(id=f"hand_legacy_{uuid.uuid4().hex}", kind=HandoffKind.ESCALATION,
+                                          task=f"Confirm historical external delivery for {node.id}; no durable delivery attempt was recorded.",
+                                          status=HandoffStatus.PENDING, context_root_id=node.id)
+                        store.add_handoff(handoff)
                         store.commit()
+                        event_bus.publish(tenant, "handoff_updated", {"handoff": handoff.model_dump()})
                     continue
                 if any(n.status != Status.HEALTHY or n.stale for n in store.get_ancestors(node.id)):
                     continue
@@ -190,10 +201,12 @@ class OutboxSagaWorker:
                 if action.execution_attempts >= self.max_attempts:
                     if action.delivery_error != "RECONCILIATION_EXHAUSTED":
                         action.delivery_error = "RECONCILIATION_EXHAUSTED"
-                        store.add_handoff(Handoff(id=f"hand_execute_{uuid.uuid4().hex}", kind=HandoffKind.ESCALATION,
-                                                  task=f"Confirm external delivery for {node.id}; retries exhausted.",
-                                                  status=HandoffStatus.PENDING, context_root_id=node.id))
+                        handoff = Handoff(id=f"hand_execute_{uuid.uuid4().hex}", kind=HandoffKind.ESCALATION,
+                                          task=f"Confirm external delivery for {node.id}; retries exhausted.",
+                                          status=HandoffStatus.PENDING, context_root_id=node.id)
+                        store.add_handoff(handoff)
                         store.commit()
+                        event_bus.publish(tenant, "handoff_updated", {"handoff": handoff.model_dump()})
                     continue
                 action.execution_attempts += 1
                 action.execution_lease_until = now + self.lease_ms
@@ -207,7 +220,12 @@ class OutboxSagaWorker:
                     action.confirmed = True
                     action.delivery_error = None
                     action.execution_lease_until = None
-                else:
+                    event_bus.publish(
+                        tenant,
+                        "action_executed",
+                        {"action_id": node.id, "confirmed": True},
+                    )
+                elif not action.confirmed:
                     action.delivery_error = str(response.get("error") or response.get("status"))
                 store.commit()
 

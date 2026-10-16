@@ -26,6 +26,8 @@ def observe_route(body: ObserveIn, auth: AuthContext = Depends(get_auth_context)
         raise HTTPException(status_code=403, detail={"error": {"code": "FORBIDDEN_ROLE", "message": "Auditors do not write facts."}})
     info = {"tenant": auth.tenant, "role": auth.role, "agent_id": auth.agent_id, "member_id": auth.member_id, "team_id": auth.team_id}
     out = mcp_tools.observe_text(info, body.text, body.source, body.dry_run, body.scope)
+    if not out.get("success") and "scope" in out.get("error", "").lower():
+        raise HTTPException(status_code=400, detail={"error": {"code": "BAD_REQUEST", "message": out.get("error")}})
     if out.get("success") and not body.dry_run:
         first = (out.get("facts") or [{}])[0].get("text") or f"text from {body.source}"
         record_event(info, "observe", first)
