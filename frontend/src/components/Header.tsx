@@ -14,6 +14,7 @@ import { Skeleton } from './ui';
 import { fmt } from '../context/tokens';
 import { getTokenStats } from '../workspace/server';
 import { useLive } from '../workspace/live';
+import { startTour } from '../tour/tour';
 
 const VIEWS: { id: View; icon: string }[] = [
   { id: 'overview', icon: 'chart' },
@@ -201,6 +202,18 @@ export function Header() {
         </button>
         <button className="iconbtn" aria-pressed={presentation} aria-label={copy.presentationMode} title={`${copy.presentationMode} (P)`} onClick={() => set({ presentation: !presentation })}>
           <Icon name="present" size={17} />
+        </button>
+        <button
+          className="btn tour-btn"
+          aria-label="Take Product Tour"
+          title="Take Product Tour"
+          onClick={() => {
+            rememberFocus();
+            startTour();
+          }}
+        >
+          <Icon name="sparkle" size={14} />
+          <span>Tour</span>
         </button>
         <button className="btn guide-btn" aria-label="Open the guide: what the AI does here, and an A to Z glossary" title="Guide and A to Z glossary (G)" onClick={() => {
             rememberFocus();

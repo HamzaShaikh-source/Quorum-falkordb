@@ -237,6 +237,24 @@ export function Inspector() {
     <section className="card inspector" aria-label={copy.inspector.title}>
       <header className="card-h">
         <h2>{copy.inspector.title}</h2>
+        <button
+          className="btn quiet small cypher-drawer-toggle"
+          title="Inspect FalkorDB Cypher queries"
+          aria-label="Inspect Cypher queries"
+          onClick={() => {
+            const st = useStore.getState();
+            if (!st.selectedId) {
+              const first = Object.keys(st.nodes)[0];
+              if (first) st.set({ selectedId: first, inspectorTab: 'cypher' });
+            } else {
+              st.set({ inspectorTab: 'cypher' });
+            }
+          }}
+          style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.78rem', padding: '3px 8px' }}
+        >
+          <Icon name="console" size={13} />
+          <span>Cypher</span>
+        </button>
         {id && (
           <button className="iconbtn" aria-label={copy.dismiss} onClick={() => set({ selectedId: null })}>
             <Icon name="x" size={14} />
@@ -253,7 +271,13 @@ export function Inspector() {
         <>
           <div className="seg wide" role="tablist">
             {TABS.map((t) => (
-              <button key={t} role="tab" aria-selected={tab === t} className={`seg-btn${tab === t ? ' on' : ''}`} onClick={() => set({ inspectorTab: t })}>
+              <button
+                key={t}
+                role="tab"
+                aria-selected={tab === t}
+                className={`seg-btn${tab === t ? ' on' : ''}${t === 'cypher' ? ' cypher-drawer-toggle' : ''}`}
+                onClick={() => set({ inspectorTab: t })}
+              >
                 {copy.inspector.tabs[t]}
               </button>
             ))}

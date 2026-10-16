@@ -269,7 +269,7 @@ export function GraphCanvas({ active }: { active: boolean }) {
             </div>
           ))}
         </div>
-        <div ref={host} className="cy" role="img" aria-label={copy.canvas.graphAria} />
+        <div ref={host} id="cy" className="cy proof-room-canvas" role="img" aria-label={copy.canvas.graphAria} />
 
         <div className="overlay">
           <div className="ov-toolbar canvas-tools" role="toolbar" aria-label="Graph tools">

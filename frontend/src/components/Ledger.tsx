@@ -143,10 +143,10 @@ export function Ledger() {
   const tasks = (handoffs.data ?? []).filter((h) => h.kind === 'TASK');
 
   return (
-    <div className="ledger">
-      {activeNotice && (
+    <div className="ledger action-ledger">
+      {activeNotice ? (
         <div
-          className="damage-control-banner"
+          className="damage-control-banner damage-control-badge"
           style={{
             gridColumn: '1 / -1',
             padding: '14px 18px',
@@ -183,6 +183,36 @@ export function Ledger() {
           >
             Review Retraction Draft
           </button>
+        </div>
+      ) : (
+        <div
+          className="damage-control-banner damage-control-badge idle"
+          style={{
+            gridColumn: '1 / -1',
+            padding: '12px 18px',
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px dashed var(--line-2, #334155)',
+            borderRadius: 'var(--r-m, 12px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '1.2rem' }}>🛡️</span>
+            <div>
+              <strong style={{ fontSize: '0.88rem', color: 'var(--text)', display: 'block' }}>
+                Automated Retraction Notices (Damage Control)
+              </strong>
+              <span className="muted small" style={{ color: 'var(--text-3)' }}>
+                Standby: If an irreversible action (e.g. sent email) is invalidated by quarantine, verified retractions appear here for human sign-off.
+              </span>
+            </div>
+          </div>
+          <span className="badge small muted" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', border: '1px solid var(--line-2)' }}>
+            Zero pending retractions
+          </span>
         </div>
       )}
       <section className="panel" aria-label={copy.ledger.actionsTitle}>

@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { copy } from '../copy';
 import { Skeleton } from '../components/ui';
 import { Icon } from '../components/Icon';
@@ -11,6 +11,7 @@ import { ScenarioControls } from '../components/Scenario';
 import { Timeline } from '../components/Timeline';
 import { GraphCanvas } from '../graph/GraphCanvas';
 import { useStore, type Tab } from '../state/store';
+import { isTourSeen, startTour } from '../tour/tour';
 
 const PromptDiff = lazy(() => import('../components/PromptDiff').then((m) => ({ default: m.PromptDiff })));
 const Ledger = lazy(() => import('../components/Ledger').then((m) => ({ default: m.Ledger })));
@@ -39,6 +40,15 @@ export function Console({ visible }: { visible: boolean }) {
   const presentation = useStore((s) => s.presentation);
   const set = useStore((s) => s.set);
   const reportRoot = useStore((s) => s.reportRoot);
+
+  useEffect(() => {
+    if (!visible) return;
+    if (isTourSeen()) return;
+    const timer = setTimeout(() => {
+      startTour();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [visible]);
 
   return (
     <div className={`console${presentation ? ' presenting' : ''}`}>

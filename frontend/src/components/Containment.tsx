@@ -82,7 +82,18 @@ export function Containment() {
     handoffs.data?.find((h) => h.correction_notice)?.correction_notice ??
     null;
 
-  if (!root || !nodes[root]) return null;
+  if (!root || !nodes[root]) {
+    return (
+      <section className="card containment containment-trigger" aria-label={copy.containment.title}>
+        <header className="card-h">
+          <h2>{copy.containment.title}</h2>
+        </header>
+        <p className="empty" style={{ padding: '16px', fontSize: '0.84rem', color: 'var(--text-3)' }}>
+          {copy.containment.empty}
+        </p>
+      </section>
+    );
+  }
   const d = q.data;
   const segs: Seg[] = d
     ? [
@@ -96,7 +107,7 @@ export function Containment() {
   const total = segs.reduce((a, s) => a + s.value, 0);
 
   return (
-    <section className="card containment" aria-label={copy.containment.title} aria-live="polite">
+    <section className="card containment containment-trigger" aria-label={copy.containment.title} aria-live="polite">
       <header className="card-h">
         <h2>{copy.containment.title}</h2>
         <div className="card-actions">
@@ -128,7 +139,7 @@ export function Containment() {
           </div>
           {activeNotice && (
             <div
-              className="damage-control-card"
+              className="damage-control-card damage-control-badge"
               style={{
                 marginTop: '12px',
                 marginBottom: '12px',

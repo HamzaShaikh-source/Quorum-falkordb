@@ -37,7 +37,7 @@ export function ScenarioControls() {
   const failed = !active && scenario.lastState === 'failed' && scenario.detail;
 
   return (
-    <section className="card scenario" aria-label={copy.scenario.title}>
+    <section className="card scenario autopilot-controls" aria-label={copy.scenario.title}>
       <header className="card-h">
         <h2>{copy.scenario.title}</h2>
         <span className="card-sub">{copy.scenario.subtitle}</span>

@@ -97,14 +97,14 @@ export function Timeline() {
   const diff = compareBase ? diffGraphs(compareBase.nodes, graph.nodes) : null;
 
   return (
-    <section className="timeline" ref={root} aria-label={copy.timeline.title}>
+    <section className="timeline as-of-slider" ref={root} aria-label={copy.timeline.title}>
       <h2 className="sr">{copy.timeline.title}</h2>
       <div className="tl-controls">
         <button className="btn" disabled={empty} onClick={togglePlay}>
           <Icon name={playing ? 'pause' : 'play'} size={14} />
           {playing ? copy.timeline.pause : copy.timeline.play}
         </button>
-        <label className="tl-slider">
+        <label className="tl-slider as-of-slider">
           <span className="sr">{copy.timeline.asOf}</span>
           <div className="tl-track">
             <svg className="tl-hist" viewBox="0 0 60 10" preserveAspectRatio="none" aria-hidden="true">
