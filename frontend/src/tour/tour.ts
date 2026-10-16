@@ -96,12 +96,25 @@ const TOUR_STEPS: DriveStep[] = [
           opts.driver.movePrevious();
         }, 50);
       },
+      onNextClick: (_el, _step, opts) => {
+        useStore.getState().set({ view: 'console', tab: 'ledger' });
+        setTimeout(() => {
+          opts.driver.moveNext();
+        }, 50);
+      },
     },
   },
   {
     element: '.damage-control-badge',
-    onHighlightStarted: () => {
+    onHighlightStarted: (el, _step, opts) => {
       useStore.getState().set({ view: 'console', tab: 'ledger' });
+      if (!el || el.id === 'driver-dummy-element' || !document.querySelector('.damage-control-badge')) {
+        setTimeout(() => {
+          if (opts?.driver?.getActiveIndex?.() === 4) {
+            opts.driver.drive(4);
+          }
+        }, 60);
+      }
     },
     popover: {
       title: 'Automated Retraction Notices',
@@ -109,6 +122,12 @@ const TOUR_STEPS: DriveStep[] = [
         'For irreversible actions already executed (sent emails), Quorum automatically drafts a verified apology notice for human approval.',
       side: 'bottom',
       align: 'center',
+      onPrevClick: (_el, _step, opts) => {
+        useStore.getState().set({ view: 'console', tab: 'ledger' });
+        setTimeout(() => {
+          opts.driver.movePrevious();
+        }, 50);
+      },
       onNextClick: (_el, _step, opts) => {
         useStore.getState().set({ view: 'console', tab: 'graph' });
         setTimeout(() => {
