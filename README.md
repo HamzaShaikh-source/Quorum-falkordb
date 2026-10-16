@@ -181,7 +181,18 @@ Measured on FalkorDB 8.10.2, on one developer laptop, by the harness above. The 
 
 ## Track Focus Breakdown & Verification
 
-### Track 02: Agent Memory and Coordination (~80% Effort)
+Quorum is architected to address all three hackathon tracks natively:
+
+### Track 01: Agents That Act on Connected Data
+| Focus | Description | Implementation | Where to Verify |
+|---|---|---|---|
+| **T01-1: Multi-Hop Causal Reasoning** | Deep DAG traversal over `[:LEADS_TO\|SUPPORTS*]` to trace roots, leaf facts, and dependent conclusions. | `backend/app/graph/queries.py` (`get_leaf_facts`, `explain_blast_radius`) | `pytest backend/tests/test_auditor_qa.py` & `docs/PROOF.md` |
+| **T01-2: Graph Queries as Agent Tools** | Native Cypher algorithms and graph queries exposed directly to agents (`find_path`, `get_node`, `delta`). | `backend/app/services/mcp_tools.py`, `backend/app/services/context_pack.py` | `pytest backend/tests/test_mcp_hardening.py` & `docs/MCP.md` |
+| **T01-3: Tool Selection Through MCP** | 15-tool Model Context Protocol server over Streamable HTTP (`/mcp`) & stdio for Claude, Cursor, and Antigravity. | `backend/app/mcp_embed.py`, `mcp/server.py`, `mcp/bridge.py` | `GET /mcp` handshake & Connect tab in Console |
+| **T01-4: Actions Based on Graph Evidence** | Quorum Gate (Layer 1) & Atomic Execute Guard (Layer 2) enforce graph-backed policy verification before execution. | `backend/app/services/gate.py`, `backend/app/services/executor.py` | `pytest backend/tests/test_safety_engine.py` & `docs/screens/07-ledger.png` |
+| **T01-5: Explainable Agent Decisions** | Live Cytoscape causal DAG, prompt diff strikethrough, parameterised Cypher drawer, and Plain-English Activity feed. | `frontend/src/graph/GraphCanvas.tsx`, `frontend/src/views/Console.tsx` | Interactive Console (`#/app`) & `docs/screens/01-landing.png` |
+
+### Track 02: Agent Memory and Coordination (~50% Effort)
 | Focus | Description | Implementation | Where to Verify |
 |---|---|---|---|
 | **T02-1: Episodic, Semantic & Procedural Memory** | Multi-type memory: Messages, Facts, Conclusions, and Laplace-smoothed procedure ranking (`(successes+1)/(uses+2)`). | `backend/app/services/procedural.py`, `graph/queries.py` | `pytest backend/tests/test_safety_engine.py` & `docs/screens/10-memory.png` |
