@@ -133,7 +133,7 @@ const TOUR_STEPS: DriveStep[] = [
 export function createTourDriver(): Driver {
   const driverInstance: Driver = driver({
     animate: true,
-    overlayColor: 'rgba(0, 0, 0, 0.75)',
+    overlayColor: 'rgba(17, 24, 39, 0.5)',
     stagePadding: 8,
     stageRadius: 8,
     allowClose: true,
