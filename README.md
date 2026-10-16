@@ -12,8 +12,8 @@
 [![Frontend Tests](https://img.shields.io/badge/vitest-114%20passed-brightgreen?style=flat-square)](frontend)
 [![Accessibility](https://img.shields.io/badge/axe--core-0%20violations%20(22%20screens)-brightgreen?style=flat-square)](frontend/scripts/a11y.mjs)
 [![Types](https://img.shields.io/badge/mypy%20%2B%20ruff-clean-brightgreen?style=flat-square)](mypy.ini)
-[![Benchmark](https://img.shields.io/badge/historical%20helper%20throughput-757.6%20ops%2Fsec-blue?style=flat-square)](bench/results.json)
-[![Containment](https://img.shields.io/badge/historical%20helper%20traversal-0.4ms-blue?style=flat-square)](docs/PROOF.md)
+[![Benchmark](https://img.shields.io/badge/measured%20throughput-1911.1%20ops%2Fsec-blue?style=flat-square)](bench/results.json)
+[![Containment](https://img.shields.io/badge/measured%20containment-2.02ms-blue?style=flat-square)](docs/PROOF.md)
 [![Leakage](https://img.shields.io/badge/historical%20dataset%20leakage-0.0%25-brightgreen?style=flat-square)](bench/results.json)
 [![Hackathon](https://img.shields.io/badge/Graph%20Hacks-Oct%2015--18%2C%202026-orange?style=flat-square)](docs/QUORUM_BRIEF.md)
 
@@ -121,19 +121,19 @@ QUORUM COMPREHENSIVE BENCHMARK & PROOF HARNESS (make proof)
 ======================================================================
 
 [1/4] 30-Agent Concurrency Benchmark (30 threads, 70/30 read/write):
-      Throughput: 757.6 ops/sec | p50: 31.5ms | p95: 78.01ms | p99: 100.0ms
+      Throughput: 1911.1 ops/sec | p50: 13.24ms | p95: 27.42ms | p99: 46.25ms
       Invariant Violations: 0
 
 [2/4] Handoff Claim Race (100 handoffs x 30 concurrent claimers):
       Single-Winner Guarantee: 100.0% (100/100 clean claims, 0 double-claims)
 
 [3/4] Atomic Execute-vs-Quarantine Race (50 actions under concurrent audit):
-      Executed before quarantine: 1 | Refused after: 49 | Invariant Violations: 0
+      Executed before quarantine: 2 | Refused after: 48 | Invariant Violations: 0
 
 [4/4] Poison Benchmark across 3 Causal Depths (Fixed Seeds, No LLM):
-      Depth 1: Containment: 0.4ms | Quorum Leakage: 0.0% vs Baselines: 100.0%
-      Depth 2: Containment: 4.53ms | Quorum Leakage: 0.0% vs Baselines: 100.0%
-      Depth 3: Containment: 8.94ms | Quorum Leakage: 0.0% vs Baselines: 100.0%
+      Depth 1: Containment: 2.23ms | Quorum Leakage: 0.0% vs Baselines: 100.0%
+      Depth 2: Containment: 2.02ms | Quorum Leakage: 0.0% vs Baselines: 100.0%
+      Depth 3: Containment: 3.59ms | Quorum Leakage: 0.0% vs Baselines: 100.0%
 ```
 
 Measured on FalkorDB 8.10.2, on one developer laptop, by the harness above. The baselines are the harness's own two models (flat store with a TTL, and delete-the-root-fact-only); they are models, not products. Numbers depend on the machine: re-run `python bench/run.py` for yours.
@@ -141,8 +141,8 @@ Measured on FalkorDB 8.10.2, on one developer laptop, by the harness above. The 
 | Metric | Flat store + TTL (model) | Delete root fact only (model) | Quorum |
 |---|---|---|---|
 | **Poison leakage at depth 1 / 2 / 3** | 100.0% / 100.0% / 100.0% | 100.0% / 100.0% / 100.0% | **0.0% / 0.0% / 0.0%** |
-| **Time to containment, depth 1 / 2 / 3** | not measured | not measured | **0.4 / 4.53 / 8.94 ms** |
-| **Throughput, 30 agents** | not measured | not measured | **757.6 ops/sec** |
+| **Time to containment, depth 1 / 2 / 3** | not measured | not measured | **2.23 / 2.02 / 3.59 ms** |
+| **Throughput, 30 agents** | not measured | not measured | **1911.1 ops/sec** |
 
 ---
 
@@ -198,7 +198,7 @@ Quorum is architected to address all three hackathon tracks natively:
 | **T02-1: Episodic, Semantic & Procedural Memory** | Multi-type memory: Messages, Facts, Conclusions, and Laplace-smoothed procedure ranking (`(successes+1)/(uses+2)`). | `backend/app/services/procedural.py`, `graph/queries.py` | `pytest backend/tests/test_safety_engine.py` & `docs/screens/10-memory.png` |
 | **T02-2: Persistent Conversation History** | Private raw graphs per agent (`tenant_<id>:agent_<n>:raw`), kill-and-resume 2-query flow, deterministic session summaries. | `backend/app/services/store.py`, `backend/app/routes/meta.py` | `pytest backend/tests/test_api_contract.py` & `docs/screens/10-memory.png` |
 | **T02-3: Shared State & Handoffs** | Atomic handoffs with lease timeouts, role-based claims (`TASK` for agents, `REVIEW` for humans). Exactly one winner. | `backend/app/routes/handoffs.py`, `graph/queries.py` | `python bench/run.py` (Suite 2: 100/100 claims) & `docs/screens/07-ledger.png` |
-| **T02-4: High Concurrency** | 30 concurrent agent threads with zero orphan invariants under heavy read/write load. | FalkorDB query pool, atomic store | `python bench/run.py` (Suite 1: 757.6 ops/sec on FalkorDB) & `docs/screens/13-benchmark.png` |
+| **T02-4: High Concurrency** | 30 concurrent agent threads with zero orphan invariants under heavy read/write load. | FalkorDB query pool, atomic store | `python bench/run.py` (Suite 1: 1911.1 ops/sec on FalkorDB) & `docs/screens/13-benchmark.png` |
 | **T02-5: Per-Tenant Memory Isolation** | Per-tenant Redis ACL users (`~tenant_<id>:*`); forbidden cross-tenant reads return 403. | `scripts/users.acl`, `tests/test_tenant_isolation.py` | `GET /tenants/denied-demo` & `docs/screens/12-tenants.png` |
 
 ### Track 03: Company Brain (~20% Effort)
