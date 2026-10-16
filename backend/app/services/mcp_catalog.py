@@ -16,7 +16,7 @@ META: Dict[str, tuple] = {
     "claim_handoff": ("agent", True, "Two agents never do the same work", "Claim a task with an atomic lease"),
     "quarantine": ("auditor", True, "Bad context is removed, not re-read", "Quarantine a fact and everything built on it"),
     "restore": ("auditor", True, "Undo without re-ingesting", "Restore a quarantined fact and valid descendants"),
-    "explain_blast_radius": ("any", False, "Ids only, no node bodies", "Dry run: what a quarantine would touch"),
+    "explain_blast_radius": ("auditor", False, "Ids only, no node bodies", "Dry run: what a quarantine would touch"),
     "review_handoff": ("human", True, "Humans decide once, agents read the verdict", "Approve or reject a gate-blocked review"),
     "get_map": ("any", False, "Orientation in a few hundred tokens, for long sessions or an unfamiliar memory", "A small index of the shared memory: areas, hubs, how to ask"),
     "get_node": ("any", False, "A few lines instead of a document", "One node with its parents and children, by short id (F3) or full id"),
@@ -44,9 +44,6 @@ def catalog() -> List[Dict[str, Any]]:
             if p.name == "ctx":
                 continue
             req = p.default is inspect.Parameter.empty
-            p_type = p.annotation.__name__ if hasattr(p.annotation, "__name__") else str(p.annotation)
-            if p.annotation is inspect.Parameter.empty:
-                p_type = "any"
-            args.append({"name": p.name, "type": p_type, "required": req and p.name != "token", "default": None if req else p.default})
+            args.append({"name": p.name, "required": req and p.name != "token", "default": None if req else p.default})
         out.append({"name": name, "summary": summary, "doc": inspect.getdoc(fn) or "", "args": args, "who": who, "writes": writes, "saves": saves})
     return out

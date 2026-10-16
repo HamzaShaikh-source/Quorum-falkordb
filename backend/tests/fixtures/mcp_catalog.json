@@ -6,49 +6,41 @@
       "args": [
         {
           "name": "key",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "value",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "text",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         },
         {
           "name": "id",
-          "type": "Union",
           "required": false,
           "default": null
         },
         {
           "name": "quote",
-          "type": "Union",
           "required": false,
           "default": null
         },
         {
           "name": "origin",
-          "type": "Union",
           "required": false,
           "default": null
         },
         {
           "name": "scope",
-          "type": "str",
           "required": false,
           "default": "commons"
         }
@@ -63,37 +55,31 @@
       "args": [
         {
           "name": "text",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "parent_ids",
-          "type": "List",
           "required": true,
           "default": null
         },
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         },
         {
           "name": "id",
-          "type": "Union",
           "required": false,
           "default": null
         },
         {
           "name": "is_decision",
-          "type": "bool",
           "required": false,
           "default": false
         },
         {
           "name": "owner_team",
-          "type": "Union",
           "required": false,
           "default": null
         }
@@ -108,31 +94,26 @@
       "args": [
         {
           "name": "query",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         },
         {
           "name": "k",
-          "type": "int",
           "required": false,
           "default": 5
         },
         {
           "name": "format",
-          "type": "str",
           "required": false,
           "default": "full"
         },
         {
           "name": "budget_tokens",
-          "type": "Union",
           "required": false,
           "default": null
         }
@@ -147,55 +128,46 @@
       "args": [
         {
           "name": "label",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "action_type",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "reversibility",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "parent_ids",
-          "type": "List",
           "required": true,
           "default": null
         },
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         },
         {
           "name": "id",
-          "type": "Union",
           "required": false,
           "default": null
         },
         {
           "name": "procedure_id",
-          "type": "Union",
           "required": false,
           "default": null
         },
         {
           "name": "idempotency_key",
-          "type": "Union",
           "required": false,
           "default": null
         },
         {
           "name": "payload",
-          "type": "Union",
           "required": false,
           "default": null
         }
@@ -210,13 +182,11 @@
       "args": [
         {
           "name": "id",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         }
@@ -231,13 +201,11 @@
       "args": [
         {
           "name": "id",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         }
@@ -252,19 +220,16 @@
       "args": [
         {
           "name": "root_id",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         },
         {
           "name": "reason",
-          "type": "str",
           "required": false,
           "default": "Manual auditor quarantine"
         }
@@ -279,13 +244,11 @@
       "args": [
         {
           "name": "root_id",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         }
@@ -300,18 +263,16 @@
       "args": [
         {
           "name": "root_id",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         }
       ],
-      "who": "any",
+      "who": "auditor",
       "writes": false,
       "saves": "Ids only, no node bodies"
     },
@@ -321,25 +282,21 @@
       "args": [
         {
           "name": "id",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "decision",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         },
         {
           "name": "note",
-          "type": "Union",
           "required": false,
           "default": null
         }
@@ -354,7 +311,6 @@
       "args": [
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         }
@@ -369,13 +325,11 @@
       "args": [
         {
           "name": "id",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         }
@@ -390,19 +344,16 @@
       "args": [
         {
           "name": "from_id",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "to_id",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         }
@@ -417,7 +368,6 @@
       "args": [
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         }
@@ -432,31 +382,26 @@
       "args": [
         {
           "name": "text",
-          "type": "str",
           "required": true,
           "default": null
         },
         {
           "name": "token",
-          "type": "str",
           "required": false,
           "default": ""
         },
         {
           "name": "source",
-          "type": "str",
           "required": false,
           "default": "chat"
         },
         {
           "name": "dry_run",
-          "type": "bool",
           "required": false,
           "default": false
         },
         {
           "name": "scope",
-          "type": "str",
           "required": false,
           "default": "commons"
         }

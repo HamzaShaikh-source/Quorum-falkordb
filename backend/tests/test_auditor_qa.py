@@ -223,7 +223,7 @@ def test_invalidation_cascade_irreversible_damage_control(test_store):
     test_store.add_edge(GraphEdge(id="e_wire", source="f_poison_payout", target="a_wire_transfer", type=EdgeType.LEADS_TO))
 
     affected = auditor_service.quarantine(test_store, "f_poison_payout", tenant=test_store.tenant)
-    assert "a_wire_transfer" in affected
+    assert "a_wire_transfer" in [n["id"] for n in affected]
 
     assert a_wire.status == Status.QUARANTINED
     assert a_wire.action.correction_notice is not None
