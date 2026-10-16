@@ -6,9 +6,9 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.graph import queries
-from app.models.common import HandoffKind, HandoffStatus, GateStatus, NodeKind, Status, Reversibility, Tier
-from app.models.graph import GraphNode, ActionInfo, AssertedBy
-from app.models.handoffs import Handoff, ReviewRequest, ReviewDecision
+from app.models.common import HandoffKind, HandoffStatus, GateStatus, NodeKind, Status, Reversibility
+from app.models.graph import GraphNode, ActionInfo
+from app.models.handoffs import Handoff
 from app.services.event_bus import event_bus
 from app.services import mcp_write as t_write
 
@@ -479,7 +479,7 @@ def test_lease_clock_skew_and_rapid_cycles(clean_tenant):
     # Initial claim
     r1 = client.post(f"/api/handoffs/{h_id}/claim", headers=auth_header(clean_tenant, "agent"))
     assert r1.status_code == 200
-    lease1 = r1.json()["lease_until"]
+    assert r1.json()["lease_until"] > 0
 
     # Competing claim while lease is active -> 409
     r2 = client.post(f"/api/handoffs/{h_id}/claim", headers=auth_header(clean_tenant, "agent"))

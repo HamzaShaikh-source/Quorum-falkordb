@@ -2,6 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 from app.auth import get_auth_context, AuthContext
 from app.models.agents import AgentItem, AgentResumeResponse, AgentMemoryItem
+from app.models.common import Status
 from app.services.fixtures import get_fixture_agents
 
 router = APIRouter()

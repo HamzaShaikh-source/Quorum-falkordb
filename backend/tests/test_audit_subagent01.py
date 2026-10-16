@@ -3,18 +3,14 @@ Subagent_01 QA Test Suite: Authentication, Bearer Tokens & Proxy Security.
 Validates static and runtime bugs, edge cases, boundaries, and concurrency.
 """
 import concurrent.futures
-import ipaddress
-import re
-import time
 import pytest
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
-from starlette.requests import Request
 
-from app.auth import AuthContext, get_auth_context, resolve_token, _member_token
+from app.auth import get_auth_context, resolve_token, _member_token
 from app.config import settings
 from app.main import app, _is_trusted_proxy, _client_ip
-from app.ratelimit import FailureTracker, RateLimiter, http_limiter, auth_failures
+from app.ratelimit import FailureTracker, RateLimiter
 
 
 # ============================================================================
@@ -179,7 +175,7 @@ def test_failure_tracker_lockout_and_expiry():
     tracker = FailureTracker(limit=5)
     ip = "192.0.2.1"
 
-    for i in range(4):
+    for _ in range(4):
         tracker.record(ip)
         assert tracker.locked(ip) == 0.0
 
@@ -225,7 +221,7 @@ def test_rate_limiter_bypass_via_token_variation():
     ip = "192.0.2.99"
 
     # If key is IP: blocked after 5 requests
-    for i in range(5):
+    for _ in range(5):
         allowed, _ = limiter.allow(ip)
         assert allowed is True
     allowed, _ = limiter.allow(ip)

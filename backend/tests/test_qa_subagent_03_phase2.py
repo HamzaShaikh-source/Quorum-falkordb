@@ -15,8 +15,6 @@ Interfaces:
 - Downstream: backend/app/services/saga.py, backend/app/services/event_bus.py
 """
 import concurrent.futures
-import csv
-import io
 import time
 import pytest
 from starlette.testclient import TestClient
@@ -28,18 +26,13 @@ from app.models.common import (
     CompensationStatus,
     EdgeType,
     GateStatus,
-    HandoffKind,
-    HandoffStatus,
     NodeKind,
     Reversibility,
     Status,
     Tier,
 )
 from app.models.graph import ActionInfo, AssertedBy, GraphEdge, GraphNode
-from app.models.handoffs import Handoff
 from app.services.auditor import auditor_service
-from app.services.event_bus import event_bus
-from app.services.mcp_guard import record_event
 
 
 @pytest.fixture

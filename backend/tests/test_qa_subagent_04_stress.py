@@ -15,10 +15,7 @@ Author: Subagent_04 (Quorum Gate, Observation Pipeline & Ingestion Architect)
 
 import math
 import uuid
-import time
-import threading
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Dict, Any
 
 import pytest
 from pydantic import ValidationError
@@ -32,22 +29,18 @@ from app.models.common import (
     Reversibility,
     GateStatus,
     HandoffKind,
-    HandoffStatus,
     SourceKind,
 )
-from app.models.graph import GraphNode, GraphEdge, AssertedBy, ActionInfo, SourceInfo
+from app.models.graph import GraphNode, GraphEdge, AssertedBy, ActionInfo
 from app.models.agents import (
     AgentItem,
     AgentMemoryItem,
     AgentResumeResponse,
     ProcedureItem,
-    PromptDiffNode,
-    PromptDiffResponse,
 )
-from app.services.gate import QuorumGateService, quorum_gate
-from app.services.observer import candidates, fingerprint, _norm
-from app.services.ingest import IngestGatewayService, ingest_gateway
-from app.services.event_bus import event_bus
+from app.services.gate import quorum_gate
+from app.services.observer import candidates, fingerprint
+from app.services.ingest import ingest_gateway
 
 
 @pytest.fixture

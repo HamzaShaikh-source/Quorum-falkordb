@@ -1,5 +1,4 @@
 import time
-import math
 import random
 import threading
 from concurrent.futures import ThreadPoolExecutor
@@ -7,9 +6,9 @@ import pytest
 from pydantic import ValidationError
 from fastapi import HTTPException
 
-from app.models.common import Status, NodeKind, EdgeType, Tier, GateStatus, Reversibility
-from app.models.graph import GraphNode, GraphEdge, ActionInfo, AssertedBy
-from app.graph.queries import GraphStore, get_graph_store
+from app.models.common import Status, NodeKind, EdgeType, GateStatus, Reversibility
+from app.models.graph import GraphNode, GraphEdge, ActionInfo
+from app.graph.queries import GraphStore
 from graph.queries import _robust_query
 
 

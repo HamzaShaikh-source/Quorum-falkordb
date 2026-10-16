@@ -4,7 +4,7 @@ import concurrent.futures
 from fastapi.testclient import TestClient
 from app.main import app
 from app.graph.queries import get_graph_store
-from app.models.common import Status, NodeKind, EdgeType, CompensationStatus
+from app.models.common import Status, CompensationStatus
 
 @pytest.fixture
 def client():
@@ -197,7 +197,6 @@ def test_timetravel_as_of_queries(client):
     - After supersede (t3) -> checks if 30d policy valid_to was closed
     """
     headers = {"Authorization": "Bearer token_auditor"}
-    store = get_graph_store("acme")
 
     # t0: Reset
     client.post("/api/scenario/reset", headers=headers)

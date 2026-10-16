@@ -11,8 +11,6 @@ if backend_path not in sys.path:
     sys.path.insert(0, backend_path)
 
 from app.mcp_embed import build_mcp_app, TOOLS
-from app.services import mcp_tools
-from app.graph.queries import get_graph_store
 
 
 @pytest.fixture(scope="module")

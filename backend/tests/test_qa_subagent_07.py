@@ -4,17 +4,14 @@ Context Packing, Semantic Search, Neural Embeddings, Brain & Prompt Diff Service
 """
 import math
 import numpy as np
-import pytest
 from app.graph.queries import GraphStore
 from app.models.common import EdgeType, NodeKind, Status
-from app.models.graph import GraphEdge, GraphNode, SourceInfo, SourceKind, AssertedBy
+from app.models.graph import GraphEdge, GraphNode
 from app.services import context_pack as cp
 from app.services import embeddings
-from app.services.context_pack import Viewer, estimate_tokens
+from app.services.context_pack import Viewer
 from app.config import settings
-from app.models.brain import BrainAskRequest, Citation, WhoKnowsItem, DecisionTraceItem
 from app.models.agents import PromptDiffResponse, PromptDiffNode
-from app.services.llm import LLMAdapter
 
 
 def _node(nid, kind=NodeKind.FACT, label="test", text="test text", status=Status.HEALTHY,
@@ -223,9 +220,7 @@ def test_pack_delta_with_have_ids():
 
 
 def test_mcp_delta_invalidation():
-    from app.services import mcp_read
     s = GraphStore("test_tenant")
-    queries_patch = {s.tenant: s}
     
     # Store with nodes
     f1 = _node("f1", kind=NodeKind.FACT, label="Fact 1", text="refund 30 days")

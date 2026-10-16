@@ -2,13 +2,11 @@ import time
 import uuid
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.graph import queries
 from app.graph.queries import get_graph_store
 from app.models.common import (
     NodeKind,
@@ -22,10 +20,8 @@ from app.models.common import (
 )
 from app.models.graph import GraphNode, ActionInfo, GraphEdge
 from app.models.handoffs import Handoff
-from app.services.executor import action_executor
 from app.services.helpdesk import MockHelpdeskService, helpdesk_service
 from app.services.auditor import auditor_service
-from app.services.saga import generate_correction_notice, saga_worker
 
 client = TestClient(app)
 
@@ -120,7 +116,7 @@ def test_double_execute_race_50_concurrent_threads():
     assert call_count == 1, f"External service must be called exactly once, was called {call_count} times"
 
     # Verify error detail for conflicts
-    for status_code, body in conflicts:
+    for _, body in conflicts:
         assert body["error"]["code"] == ErrorCode.GUARD_REFUSED.value
 
     # Verify final node state

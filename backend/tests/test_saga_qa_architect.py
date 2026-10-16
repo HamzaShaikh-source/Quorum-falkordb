@@ -1,7 +1,7 @@
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import pytest
 
@@ -17,7 +17,7 @@ from app.models.common import (
 )
 from app.models.graph import GraphNode, ActionInfo, CompensationInfo
 from app.services.saga import OutboxSagaWorker
-from app.services.helpdesk import MockHelpdeskService, external_key
+from app.services.helpdesk import MockHelpdeskService
 from app.services.event_bus import event_bus
 
 

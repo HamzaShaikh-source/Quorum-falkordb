@@ -3,19 +3,15 @@ Comprehensive Multi-Vector Stress & Boundary Test Suite for Subagent 01:
 Core Auth, Configuration & Multi-Tenant Isolation Architect
 """
 import concurrent.futures
-import ipaddress
-import time
 import uuid
 import pytest
 from fastapi.testclient import TestClient
 
-from app.auth import AuthContext, get_auth_context, resolve_token, _member_token
+from app.auth import resolve_token, _member_token
 from app.config import settings
 from app.graph import queries
-from app.main import app, _client_ip, _is_trusted_proxy
-from app.ratelimit import FailureTracker, RateLimiter, auth_failures, http_limiter
-from app.services import roles
-from app.services import workspace as ws
+from app.main import app, _client_ip
+from app.ratelimit import FailureTracker, RateLimiter, auth_failures
 
 client = TestClient(app)
 
@@ -207,8 +203,6 @@ def test_rate_limiter_concurrency():
     def call():
         allowed, _ = limiter.allow(key)
         results.append(allowed)
-
-    threads = [concurrent.futures.ThreadPoolExecutor(max_workers=10)]
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         futures = [executor.submit(call) for _ in range(100)]
         concurrent.futures.wait(futures)

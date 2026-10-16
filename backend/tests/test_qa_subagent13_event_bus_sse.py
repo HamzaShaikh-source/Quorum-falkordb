@@ -1,12 +1,10 @@
 import asyncio
 import concurrent.futures
-import json
 import threading
 import time
 import uuid
 import pytest
 from app.auth import AuthContext
-from app.models.events import SSEEventEnvelope
 from app.routes.events import sse_events
 from app.services.event_bus import event_bus, TenantEventBuffer
 from agents.procedures import ProcedureRegistry, Procedure
@@ -296,7 +294,6 @@ async def test_high_throughput_event_storm_1000_events_20_clients():
     consumer_tasks = [asyncio.create_task(client_consumer(i, g)) for i, g in enumerate(generators)]
 
     # Fire 1,000 events in rapid succession
-    t0 = time.time()
     for i in range(1000):
         event_bus.publish(
             tenant=tenant,
@@ -305,7 +302,6 @@ async def test_high_throughput_event_storm_1000_events_20_clients():
         )
 
     await asyncio.gather(*consumer_tasks)
-    elapsed = time.time() - t0
 
     # Verification: every single client received 1,000 events strictly from 1 to 1000
     expected_seqs = list(range(1, 1001))
