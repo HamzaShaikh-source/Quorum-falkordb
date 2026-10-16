@@ -1,7 +1,9 @@
 import time
 import threading
 import uuid
+from collections import defaultdict
 from typing import Dict, Any, Optional
+from fastapi import HTTPException
 from app.graph.queries import get_graph_store
 from app.models.common import (
     Status,
@@ -25,6 +27,14 @@ from app.services.auditor import auditor_service
 from app.services.saga import saga_worker
 from app.services.helpdesk import helpdesk_service, MockHelpdeskService
 from agents.procedures import procedure_registry
+
+_tenant_reset_locks: Dict[str, threading.RLock] = defaultdict(threading.RLock)
+_tenant_reset_locks_guard = threading.Lock()
+
+
+def _get_tenant_reset_lock(tenant: str) -> threading.RLock:
+    with _tenant_reset_locks_guard:
+        return _tenant_reset_locks[tenant]
 
 
 class ScenarioOrchestrator:
@@ -50,68 +60,88 @@ class ScenarioOrchestrator:
             return method(tenant=tenant, request_id=request_id)
 
     def reset(self, tenant: str, request_id: Optional[str] = None) -> Dict[str, Any]:
-        store = get_graph_store(tenant)
-        with store._lock:
-            store.nodes.clear()
-            store.edges.clear()
-            store.epoch = 1
-            store.workspace["demo_run_id"] = uuid.uuid4().hex
+        lock = _get_tenant_reset_lock(tenant)
+        with lock:
+            store = get_graph_store(tenant)
+            expected_nodes = {"src_policy_v3", "fact_30d"}
 
-        if isinstance(helpdesk_service, MockHelpdeskService):
-            helpdesk_service.reset()
-        procedure_registry.reset()
-        with store.handoff_lock:
-            store.handoffs.clear()
+            try:
+                with store._lock:
+                    store.nodes.clear()
+                    store.edges.clear()
+                    store.epoch = 1
+                    store.workspace["demo_run_id"] = uuid.uuid4().hex
 
-        # Seed initial canonical policy (Beat 0)
-        now_ms = int(time.time() * 1000)
-        src_policy = GraphNode(
-            id="src_policy_v3",
-            kind=NodeKind.SOURCE,
-            label="Refund policy v3",
-            status=Status.HEALTHY,
-            stale=False,
-            source=SourceInfo(
-                kind=SourceKind.DOC,
-                title="Refund policy",
-                url="https://acme.example/policy",
-                version="3",
-            ),
-            valid_from=now_ms - 86400000,
-        )
-        fact_policy = GraphNode(
-            id="fact_30d",
-            kind=NodeKind.FACT,
-            label="Refund window is 30 days",
-            text="Refunds are allowed within 30 days of purchase.",
-            status=Status.HEALTHY,
-            stale=False,
-            key="refund_window_days",
-            value="30",
-            quote="Refunds are allowed within 30 days.",
-            owner_team="Support Ops",
-            asserted_by=AssertedBy(id="agent_root", name="Policy owner", tier=Tier.ROOT),
-            source_ref="src_policy_v3",
-            valid_from=now_ms - 86400000,
-        )
-        edge_policy = GraphEdge(
-            id="e_src_policy",
-            source="src_policy_v3",
-            target="fact_30d",
-            type=EdgeType.FROM_SOURCE,
-        )
+                    if isinstance(helpdesk_service, MockHelpdeskService):
+                        helpdesk_service.reset()
+                    procedure_registry.reset()
+                    store.handoffs.clear()
 
-        store.add_node(src_policy, request_id=request_id)
-        store.add_node(fact_policy, request_id=request_id)
-        store.add_edge(edge_policy, request_id=request_id)
+                    # Seed initial canonical policy (Beat 0)
+                    now_ms = int(time.time() * 1000)
+                    src_policy = GraphNode(
+                        id="src_policy_v3",
+                        kind=NodeKind.SOURCE,
+                        label="Refund policy v3",
+                        status=Status.HEALTHY,
+                        stale=False,
+                        source=SourceInfo(
+                            kind=SourceKind.DOC,
+                            title="Refund policy",
+                            url="https://acme.example/policy",
+                            version="3",
+                        ),
+                        valid_from=now_ms - 86400000,
+                    )
+                    fact_policy = GraphNode(
+                        id="fact_30d",
+                        kind=NodeKind.FACT,
+                        label="Refund window is 30 days",
+                        text="Refunds are allowed within 30 days of purchase.",
+                        status=Status.HEALTHY,
+                        stale=False,
+                        key="refund_window_days",
+                        value="30",
+                        quote="Refunds are allowed within 30 days.",
+                        owner_team="Support Ops",
+                        asserted_by=AssertedBy(id="agent_root", name="Policy owner", tier=Tier.ROOT),
+                        source_ref="src_policy_v3",
+                        valid_from=now_ms - 86400000,
+                    )
+                    edge_policy = GraphEdge(
+                        id="e_src_policy",
+                        source="src_policy_v3",
+                        target="fact_30d",
+                        type=EdgeType.FROM_SOURCE,
+                    )
 
-        event_bus.publish(tenant, "node_added", {"node": src_policy.model_dump()}, request_id=request_id)
-        event_bus.publish(tenant, "node_added", {"node": fact_policy.model_dump()}, request_id=request_id)
-        event_bus.publish(tenant, "edge_added", {"edge": edge_policy.model_dump()}, request_id=request_id)
-        event_bus.publish(tenant, "epoch_changed", {"epoch": store.epoch, "reason": "reset"}, request_id=request_id)
-        event_bus.publish(tenant, "invariant_status", {"ok": True, "violations": 0}, request_id=request_id)
+                    store.nodes.pop(src_policy.id, None)
+                    store.nodes.pop(fact_policy.id, None)
+                    store.edges = [e for e in store.edges if e.id != edge_policy.id]
 
-        return {"status": "reset", "tenant": tenant, "epoch": store.epoch}
+                    store.add_node(src_policy, request_id=request_id)
+                    store.add_node(fact_policy, request_id=request_id)
+                    store.add_edge(edge_policy, request_id=request_id)
+
+                event_bus.publish(tenant, "node_added", {"node": src_policy.model_dump()}, request_id=request_id)
+                event_bus.publish(tenant, "node_added", {"node": fact_policy.model_dump()}, request_id=request_id)
+                event_bus.publish(tenant, "edge_added", {"edge": edge_policy.model_dump()}, request_id=request_id)
+                event_bus.publish(tenant, "epoch_changed", {"epoch": store.epoch, "reason": "reset"}, request_id=request_id)
+                event_bus.publish(tenant, "invariant_status", {"ok": True, "violations": 0}, request_id=request_id)
+
+                return {"status": "reset", "tenant": tenant, "epoch": store.epoch}
+
+            except HTTPException as e:
+                if getattr(e, "status_code", None) == 409:
+                    with store._lock:
+                        if expected_nodes.issubset(set(store.nodes)):
+                            return {"status": "reset", "tenant": tenant, "epoch": store.epoch}
+                    for i in range(5):
+                        time.sleep(0.01 * (2 ** i))
+                        with store._lock:
+                            if expected_nodes.issubset(set(store.nodes)):
+                                return {"status": "reset", "tenant": tenant, "epoch": store.epoch}
+                raise
 
     def inject_poison(self, tenant: str, request_id: Optional[str] = None) -> Dict[str, Any]:
         store = get_graph_store(tenant)
