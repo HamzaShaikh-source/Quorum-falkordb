@@ -78,7 +78,7 @@ const TOUR_STEPS: DriveStep[] = [
       useStore.getState().set({ view: 'console', tab: 'ledger' });
       if (!el || el.id === 'driver-dummy-element') {
         setTimeout(() => {
-          if (opts.driver.getActiveIndex() === 3) {
+          if (opts?.driver?.getActiveIndex?.() === 3) {
             opts.driver.drive(3);
           }
         }, 60);
@@ -123,7 +123,7 @@ const TOUR_STEPS: DriveStep[] = [
       useStore.getState().set({ view: 'console', tab: 'graph' });
       if (!el || el.id === 'driver-dummy-element') {
         setTimeout(() => {
-          if (opts.driver.getActiveIndex() === 5) {
+          if (opts?.driver?.getActiveIndex?.() === 5) {
             opts.driver.drive(5);
           }
         }, 60);

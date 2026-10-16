@@ -1,15 +1,15 @@
 {
-  "timestamp": 1792144887177,
+  "timestamp": 1792147579699,
   "engine": "falkordb",
   "falkordb_version": "8.10.2",
   "concurrency": {
     "agents": 30,
     "total_operations": 1200,
-    "duration_seconds": 0.628,
-    "throughput_ops_sec": 1911.1,
-    "p50_ms": 13.24,
-    "p95_ms": 27.42,
-    "p99_ms": 46.25,
+    "duration_seconds": 0.835,
+    "throughput_ops_sec": 1437.1,
+    "p50_ms": 16.44,
+    "p95_ms": 34.44,
+    "p99_ms": 47.42,
     "healthy_children_under_quarantined": 0,
     "zero_orphans_invariant": true
   },
@@ -24,8 +24,8 @@
   },
   "execute_race": {
     "total_actions": 50,
-    "executed_before_quarantine": 2,
-    "refused_after_quarantine": 48,
+    "executed_before_quarantine": 0,
+    "refused_after_quarantine": 50,
     "actions_executed_after_ancestor_quarantined": 0,
     "race_invariant_passed": true
   },
@@ -33,7 +33,7 @@
     "depth_1": {
       "causal_depth": 1,
       "total_descendants": 1,
-      "containment_ms": 2.23,
+      "containment_ms": 4.62,
       "quorum_retrieval_leakage_rate": 0.0,
       "baseline_delete_only_leakage_rate": 1.0,
       "baseline_flat_ttl_leakage_rate": 1.0,
@@ -42,7 +42,7 @@
     "depth_2": {
       "causal_depth": 2,
       "total_descendants": 2,
-      "containment_ms": 2.02,
+      "containment_ms": 4.39,
       "quorum_retrieval_leakage_rate": 0.0,
       "baseline_delete_only_leakage_rate": 1.0,
       "baseline_flat_ttl_leakage_rate": 1.0,
@@ -51,7 +51,7 @@
     "depth_3": {
       "causal_depth": 3,
       "total_descendants": 3,
-      "containment_ms": 3.59,
+      "containment_ms": 4.33,
       "quorum_retrieval_leakage_rate": 0.0,
       "baseline_delete_only_leakage_rate": 1.0,
       "baseline_flat_ttl_leakage_rate": 1.0,

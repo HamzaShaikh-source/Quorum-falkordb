@@ -115,12 +115,46 @@ def test_zero_vector_and_nan_cosine_handling():
     try:
         embeddings.cosine_scores = lambda q, nodes: {n.id: float("nan")}
         n_fact = _node("n1", kind=NodeKind.FACT, label="something", text="something")
-        # Notice what happens if cosine is NaN: does rank() crash or produce NaN?
         res = cp.rank([n_fact], "unrelated query", cp.idf_weights([n_fact]))
         score = res[0][1]
-        print(f"NaN cosine result score: {score}")
+        assert score == 0.0, f"NaN cosine should be sanitized to 0.0, got {score}"
+        assert not math.isnan(score)
     finally:
         embeddings.cosine_scores = original_cosine_scores
+
+
+def test_resolve_ref_and_adjacency_edge_cases():
+    # resolve_ref with None, empty string, non-string
+    n1 = _node("f1", kind=NodeKind.FACT, label="Fact 1")
+    nodes = {"f1": n1}
+    assert cp.resolve_ref(nodes, None) is None
+    assert cp.resolve_ref(nodes, "") is None
+    assert cp.resolve_ref(nodes, "   ") is None
+    assert cp.resolve_ref(nodes, 123) is None
+    assert cp.resolve_ref(nodes, "f1") == n1
+
+    # node_view with None
+    s = GraphStore("test_tenant")
+    s.add_node(n1)
+    nv = cp.node_view(s, None)
+    assert nv["success"] is False
+    assert "not found" in nv["error"]
+
+    # find_path with None
+    fp = cp.find_path(s, None, "f1")
+    assert fp["success"] is False
+    assert "not found" in fp["error"]
+
+    # _adjacency with raw string edge types
+    class MockEdge:
+        source = "f1"
+        target = "f2"
+        type = "LEADS_TO"
+
+    inn, out = cp._adjacency({"f1": n1, "f2": _node("f2")}, [MockEdge()])
+    assert out["f1"] == ["f2"]
+    assert inn["f2"] == ["f1"]
+
 
 
 # ==============================================================================
