@@ -184,7 +184,7 @@ def _is_trusted_proxy(host: str) -> bool:
         return False
     try:
         ip = ipaddress.ip_address(host)
-        if getattr(ip, "ipv4_mapped", None):
+        if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped is not None:
             ip = ip.ipv4_mapped
     except ValueError:
         return False
@@ -195,7 +195,7 @@ def _is_trusted_proxy(host: str) -> bool:
                     return True
             else:
                 tip = ipaddress.ip_address(t)
-                if getattr(tip, "ipv4_mapped", None):
+                if isinstance(tip, ipaddress.IPv6Address) and tip.ipv4_mapped is not None:
                     tip = tip.ipv4_mapped
                 if ip == tip:
                     return True

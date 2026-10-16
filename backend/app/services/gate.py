@@ -112,7 +112,8 @@ class QuorumGateService:
 
         target_tier = target_fact.asserted_by.tier if target_fact.asserted_by else Tier.NEW
         target_val_norm = re.sub(r"\s+", " ", str(target_fact.value).strip().lower())
-        target_origin = target_fact.origin or (store.nodes.get(target_fact.source_ref).origin if target_fact.source_ref and store.nodes.get(target_fact.source_ref) else target_fact.source_ref)
+        ref_node = store.nodes.get(target_fact.source_ref) if target_fact.source_ref else None
+        target_origin = target_fact.origin or getattr(ref_node, "origin", None) or target_fact.source_ref
 
         for node in store.nodes.values():
             if node.id == target_fact.id or node.kind != NodeKind.FACT or node.status != Status.HEALTHY or getattr(node, "stale", False):
@@ -123,7 +124,8 @@ class QuorumGateService:
 
             node_val_norm = re.sub(r"\s+", " ", str(node.value).strip().lower()) if node.value else ""
             if node.key == target_fact.key and node_val_norm == target_val_norm:
-                node_origin = node.origin or (store.nodes.get(node.source_ref).origin if node.source_ref and store.nodes.get(node.source_ref) else node.source_ref)
+                node_ref = store.nodes.get(node.source_ref) if node.source_ref else None
+                node_origin = node.origin or getattr(node_ref, "origin", None) or node.source_ref
                 # Check different origin
                 if node_origin and target_origin and node_origin != target_origin:
                     candidate_tier = node.asserted_by.tier if node.asserted_by else Tier.NEW

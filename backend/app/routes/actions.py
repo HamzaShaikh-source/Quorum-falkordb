@@ -121,7 +121,6 @@ def approve_correction(
 ):
     store = get_graph_store(tenant=auth.tenant)
     node_for(store, auth, action_id)
-    from app.models.common import HandoffStatus
     from app.services.event_bus import event_bus
 
     with store._lock:

@@ -5,7 +5,6 @@ for MCP Tool Handlers & Write Safety Guards (Subagent 12)
 import sys
 import os
 import traceback
-from typing import Any, Dict
 
 os.environ["QUORUM_ENV"] = "development"
 os.environ["QUORUM_DEMO"] = "1"
@@ -18,8 +17,7 @@ if backend_path not in sys.path:
 from app.config import settings
 settings.ENV = "development"
 from app.graph import queries
-from app.models.common import Status, NodeKind, HandoffKind, HandoffStatus
-from app.models.graph import GraphNode
+from app.models.common import HandoffKind, HandoffStatus
 from app.models.handoffs import Handoff
 from app.services import mcp_tools as t
 from app.services import mcp_guard

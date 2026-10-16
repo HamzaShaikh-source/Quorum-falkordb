@@ -15,11 +15,7 @@ Dependencies:
 import sys
 import os
 import time
-import uuid
-import json
-import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, Any, List
 
 # Ensure backend is on sys.path
 _current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -37,14 +33,11 @@ from app.models.common import (
     Tier,
     Reversibility,
     GateStatus,
-    HandoffKind,
     HandoffStatus,
-    ErrorCode,
 )
-from app.models.graph import GraphNode, GraphEdge, ActionInfo, AssertedBy, SourceInfo
-from app.models.handoffs import Handoff, ReviewDecision, ReviewRequest
-from app.graph.queries import GraphStore, get_graph_store
-from app.services.gate import QuorumGateService, quorum_gate
+from app.models.graph import GraphNode, GraphEdge, ActionInfo, AssertedBy
+from app.graph.queries import GraphStore
+from app.services.gate import quorum_gate
 from app.services import observer
 from app.services import mcp_write
 from app.services.executor import action_executor

@@ -1,6 +1,5 @@
 import concurrent.futures
 import time
-from typing import List
 import pytest
 from fastapi.testclient import TestClient
 
@@ -159,6 +158,7 @@ def test_concurrent_sibling_quarantine_race_condition():
         f2 = executor.submit(run_q, "sib_2")
         res1 = f1.result()
         res2 = f2.result()
+        assert res1 is not None and res2 is not None
 
     # Both completed
     assert s1.status == Status.QUARANTINED

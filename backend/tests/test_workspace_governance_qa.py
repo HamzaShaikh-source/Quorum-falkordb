@@ -14,7 +14,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.auth import resolve_token
-from app.config import settings
 from app.graph import queries
 from app.main import app
 from app.services import workspace as ws

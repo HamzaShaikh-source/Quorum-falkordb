@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.auth import get_auth_context, AuthContext, require_role
 from app.models.handoffs import Handoff, ReviewRequest, ReviewDecision
-from app.models.common import ErrorCode, HandoffStatus, HandoffKind
+from app.models.common import ErrorCode, HandoffStatus, HandoffKind, Status
 from app.graph.queries import get_graph_store
 from app.services.event_bus import event_bus
 
