@@ -62,6 +62,8 @@ export type Peers = z.infer<typeof Peers>;
 export const Inbox = z.object({
   requests: z.array(z.object({ id: z.string(), person: z.string(), from_hub: z.string(), message: z.string(), status: z.string(), created_at: z.number() }).passthrough()),
 });
+export const LeaverReport = z.object({ text: z.string(), owned: z.number(), sole_source: z.number() }).passthrough();
+export const getLeaverReport = (id: string) => api(LeaverReport, 'GET', `workspace/members/${encodeURIComponent(id)}/leaver-report`, human);
 export const getPeers = () => api(Peers, 'GET', 'peers', human);
 export const getInbox = () => api(Inbox, 'GET', 'connect/inbox', human);
 export const respondRequest = (id: string, approve: boolean, role: string) =>

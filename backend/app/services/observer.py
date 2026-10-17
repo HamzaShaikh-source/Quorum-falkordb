@@ -28,6 +28,11 @@ _CODE_FENCE = re.compile(r"```(?:.*?```|.*$)", re.S)
 _SENT_SPLIT = re.compile(r"(?<=[.!?])\s+|\n+|(?<=;)\s+")
 
 
+def has_secret(s: str) -> bool:
+    """True if the text looks like it carries a credential (keys, bearer tokens, private keys, password= pairs)."""
+    return bool(_SECRET.search(s or ""))
+
+
 def _norm(s: str) -> str:
     return re.sub(r"[^\w\s]", "", re.sub(r"\s+", " ", s.lower()), flags=re.UNICODE).strip()
 

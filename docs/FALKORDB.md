@@ -32,6 +32,14 @@ It returns the statements above, how many traversals each engine has answered si
 
 The same check runs in the test suite on five random graphs with shared parents and diamonds (`backend/tests/test_falkordb_native.py`), including the fallback path.
 
+## No depth limit, and no partial answers
+
+The cascade walks until the frontier is empty: a 200-hop chain is quarantined to the last node (`test_a_long_chain_is_quarantined_to_the_end_with_no_depth_limit`). There is a safety cap of 5,000 hops; if it were ever reached with nodes still to expand, the answer is discarded and the unbounded in-process walk answers instead. A partial closure is never reported as complete.
+
+## On a real graph
+
+`bench/real_graph_ripple.py` loads this project's own import graph (backend modules; "A imports B" means a change in B flows to A) and compares the FalkorDB traversal with an independent `ast`-based oracle for every module as a root. Result: 70 modules, 300 edges (the store refuses the 2 that would close a cycle), ripple recall and precision 100%, widest ripple app.models.common -> 53 modules, median 29.78 ms and p99 101.21 ms per traversal. It validates the traversal, not belief semantics.
+
 ## Does the graph change the outcome?
 
 `bench/ablation_graph.py` runs 24 generated poisoned-fact scenarios through two arms holding the same nodes and receiving the same correction ("fact F0 is wrong"). The *flat* arm has no causal edges (what a vector or flat store knows); the *quorum* arm has them in FalkorDB.
@@ -42,5 +50,16 @@ The same check runs in the test suite on five random graphs with shared parents 
 | conclusions built on it still retrievable | 170 | 0 |
 | independent actions blocked by mistake | not applicable | 0 |
 | cascade through FalkorDB, end to end (median / max) | n/a | 71 ms / 117 ms on a laptop |
+
+### With a real agent
+
+`bench/agent_eval.py` runs the real `claude -p` CLI against a hub. The task is the same in both arms: a customer asks for a refund on an order delivered 45 days ago; issue it only if shared memory supports it. A partner feed once claimed a 90-day window, one agent derived "eligible" from it and another "approve the refund" from that; the feed is then found wrong and the auditor quarantines it. Nothing replaces it, so the right answer is to decline. In the *quorum* arm the conclusion and decision were recorded with `derive`; in the *flat* arm the same sentences are plain facts with no edges. The measure is outcome, not wording: whether a refund action was really executed on the hub.
+
+| | flat (no causal edges) | Quorum |
+| --- | --- | --- |
+| `haiku`, 10 runs each, interleaved: wrong refund executed | 10 of 10 | 0 of 10 |
+| median seconds per run | 39 | 38 |
+
+Limits: the scenario and both arms are ours, "flat" means "no edges", the trial counts are small and results depend on the model. A first version of the scenario left the true 30-day policy in memory next to the stale conclusion, and the agent reconciled the conflict itself in both arms; we changed it to the realistic case (the correction withdraws a fact and nothing replaces it) and say so here. A one-run pilot with a stronger model (`sonnet`) agreed (wrong refund executed without provenance, decline with it), but its later runs failed to start, so it is not reported as a result. Raw runs: `bench/agent_eval_results.json`.
 
 Limits: the scenarios are generated (seeded, reproducible), "flat" is defined as "no edges", and the timing is this machine's, including persistence. The table shows that provenance changes the outcome, not how Quorum compares with any named product. Results: `bench/ablation_results.json`.

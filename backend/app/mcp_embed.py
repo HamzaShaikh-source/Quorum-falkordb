@@ -24,6 +24,12 @@ CORE_TOOLS = (
     "observe",
 )
 
+# Coordination and time: collision warnings and "what did we believe then".
+COORD_TOOLS = (
+    "announce_work",
+    "recall_as_of",
+)
+
 # The chat layer: onboarding, status, team management and connecting hubs from inside the AI chat.
 CHAT_TOOLS = (
     "quorum_help",
@@ -40,13 +46,13 @@ CHAT_TOOLS = (
 
 
 def active_tools():
-    """QUORUM_TOOL_PROFILE=core lists only the 15 memory tools (fewest tokens in the client's prompt)."""
+    """QUORUM_TOOL_PROFILE=core lists only the 17 memory and coordination tools (fewest tokens in the client's prompt)."""
     from app.config import settings
 
-    return CORE_TOOLS if settings.TOOL_PROFILE == "core" else CORE_TOOLS + CHAT_TOOLS
+    return CORE_TOOLS + COORD_TOOLS if settings.TOOL_PROFILE == "core" else CORE_TOOLS + COORD_TOOLS + CHAT_TOOLS
 
 
-TOOLS = CORE_TOOLS + CHAT_TOOLS
+TOOLS = CORE_TOOLS + COORD_TOOLS + CHAT_TOOLS
 
 
 def build_mcp_app():

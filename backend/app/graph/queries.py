@@ -61,6 +61,8 @@ class GraphStore:
         # What each agent has already been handed, so delta() can say what changed since its last read.
         self.agent_state: Dict[str, Dict[str, Any]] = {}
         self.last_cascade_engine = "none"
+        # Expiring "I am working on X" notes (announce_work). Not facts, not persisted.
+        self.work: List[Dict[str, Any]] = []
 
     MAX_CALLS = 5000
 
@@ -177,7 +179,7 @@ class GraphStore:
         seen.pop(root_id, None)
         return seen
 
-    def closure_in_falkordb(self, root_id: str, edge_types: Sequence[str], direction: str = "out", max_depth: int = 64) -> Optional[Dict[str, int]]:
+    def closure_in_falkordb(self, root_id: str, edge_types: Sequence[str], direction: str = "out", max_depth: int = 5000) -> Optional[Dict[str, int]]:
         """
         The nodes reachable from root_id (not including it) and their hop depth, computed by FalkorDB.
         One Cypher expansion per hop (a level-synchronous BFS driven by the database, linear in the edges touched rather
@@ -208,6 +210,10 @@ class GraphStore:
                         seen[nid] = depth
                         nxt.append(nid)
                 frontier = nxt
+            if frontier:
+                # The safety cap was reached with nodes still to expand: never report a partial closure. The in-process walk is unbounded.
+                _count("process")
+                return None
             seen.pop(root_id, None)
             _count("falkordb")
             return seen

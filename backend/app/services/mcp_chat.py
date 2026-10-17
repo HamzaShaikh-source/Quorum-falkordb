@@ -47,6 +47,8 @@ COMMANDS: Dict[str, tuple] = {
     "get_node": ("anyone", "One node with its parents and children"),
     "find_path": ("anyone", "How two facts are connected (FalkorDB shortest path)"),
     "delta": ("anyone", "What stopped being true since you last looked"),
+    "announce_work": ("contributor+", "Say what you are about to work on (a file, an order, a ticket); get a warning if someone else is on it or near it"),
+    "recall_as_of": ("anyone", "What the team believed at an earlier time, and what happened to those facts since"),
     "quorum_manage": ("admin", "Teams, people, permission levels, tokens and sharing links, all from chat (action=overview lists what you can do)"),
     "quorum_discover": ("anyone", "Other Quorum hubs visible on this network"),
     "quorum_connect": ("admin", "Ask to join a hub you discovered; its admin is notified and approves"),
@@ -256,7 +258,7 @@ def _role(value: str) -> str:
 
 
 ACTIONS = (
-    "overview", "team_create", "team_seats", "team_remove", "member_add", "member_set_level", "member_move", "member_new_token", "member_remove",
+    "overview", "team_create", "team_seats", "team_remove", "member_add", "member_set_level", "member_move", "member_new_token", "member_remove", "leaver_report",
     "link", "pause_link", "resume_link", "unlink",
 )
 
@@ -276,7 +278,7 @@ def quorum_manage(
     """
     Run the workspace from chat (Admin only except overview). action is one of: overview, team_create(name, seats),
     team_seats(team, seats), team_remove(team), member_add(name, team, level, client), member_set_level(member, level),
-    member_move(member, team), member_new_token(member), member_remove(member), link(member, other, scope team|commons),
+    member_move(member, team), member_new_token(member), leaver_report(member) (what leaves with them), member_remove(member), link(member, other, scope team|commons),
     pause_link(member, other), resume_link(member, other), unlink(member, other). level is contributor, reviewer or admin.
     A new token is shown once.
     """
@@ -341,10 +343,21 @@ def quorum_manage(
             msg = f"New token for {m['name']} (the old one stopped working; shown once): {tok}\n{cfg['claude_code']}"
             out["token"] = tok
             out["config"] = cfg
+        elif act == "leaver_report":
+            from app.services.mcp_coord import leaver_report
+
+            rep = leaver_report(store, _member(store, member or name))
+            msg = rep["text"]
+            out.update({k: rep[k] for k in ("owned", "sole_source", "facts", "tasks_held", "successors")})
         elif act == "member_remove":
+            from app.services.mcp_coord import leaver_report
+
             m = _member(store, member or name)
+            rep = leaver_report(store, m)
             wsvc.remove_member(store, m["id"])
             msg = f"{m['name']} was removed and their token revoked."
+            if rep["sole_source"] or rep["tasks_held"]:
+                msg += f" Heads up: {rep['sole_source']} fact(s) had no other source and {len(rep['tasks_held'])} task(s) were held by them; they stay in memory with provenance. Next time run leaver_report first."
         else:
             a, b = _member(store, member or name), _member(store, other)
             if act == "link":

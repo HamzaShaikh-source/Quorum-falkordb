@@ -7,7 +7,7 @@ WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --legacy-peer-deps
 
-COPY bench/results.json bench/token_bench_short.json bench/token_bench_long.json bench/retrieval_bench.json bench/ai_retrieval_summary.json bench/ablation_results.json /app/bench/
+COPY bench/results.json bench/token_bench_short.json bench/token_bench_long.json bench/retrieval_bench.json bench/ai_retrieval_summary.json bench/ablation_results.json bench/agent_eval_results.json bench/real_graph_ripple_results.json /app/bench/
 COPY contracts /app/contracts
 COPY backend/tests/fixtures /app/backend/tests/fixtures
 COPY frontend/ .

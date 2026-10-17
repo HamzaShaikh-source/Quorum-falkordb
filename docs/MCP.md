@@ -37,16 +37,25 @@ Three levels, shown with plain names on the Team page (the stored role names are
 
 An admin changes a person's level on the **Team** page (the Permission level column) or with `PATCH /api/workspace/members/{id}` `{"role": "auditor"}`. It applies on that token's next call; no new token is needed. A refused call now says who was refused, why, what level is needed and where to change it (Activity shows a "Change permissions" button on those rows). The table on the Team page is the hub's own (`GET /api/roles`, `backend/app/services/roles.py`); a test checks every row against what is enforced. When the levels change, regenerate `backend/tests/fixtures/roles.json` (`python -c "import json; from app.services import roles; open('backend/tests/fixtures/roles.json','w').write(json.dumps(roles.catalog(), indent=2)+chr(10))"` with `backend` on the path).
 
+## Coordination and time
+
+| Tool | Who | What it does |
+| --- | --- | --- |
+| `announce_work` | Contributor and up | Say what you are about to work on (a file, an order, a ticket). Returns who else announced it, or something inside or around it, in the last `minutes` (default 30). `done=true` releases your note. Notes expire and are not facts. The same call is `POST /api/work/announce`, which `scripts/quorum_conflict_hook.py` (a Claude Code `PreToolUse` hook) uses to warn before an edit. |
+| `recall_as_of` | anyone | What the team believed at `as_of` (milliseconds) or `minutes_ago`; each fact says whether it is still believed, replaced or quarantined since. Scope rules apply as for `retrieve_context`. |
+
+Every `remember_fact` result carries `outcome` (`ACCEPT`, `SUPERSEDE`, `REJECT`, `REVIEW`) and a plain `receipt`; every retrieval carries `outcome` (`ANSWERED` or `NOT_IN_MEMORY`). Writes are refused when a field looks like a credential, contains control characters, is oversize, or when an id is malformed; the origin always names the caller.
+
 ## The chat layer: set up and run a team without the console
 
-Ten more tools sit beside the 15 memory tools (25 in all; `QUORUM_TOOL_PROFILE=core` lists only the memory tools). Each returns a short `text` the AI can show as is, plus the data behind it. Full walkthrough: [`AI_SETUP.md`](AI_SETUP.md).
+Ten more tools sit beside the 17 memory and coordination tools (27 in all; `QUORUM_TOOL_PROFILE=core` lists only the 17). Each returns a short `text` the AI can show as is, plus the data behind it. Full walkthrough: [`AI_SETUP.md`](AI_SETUP.md).
 
 | Tool | Who | What it does |
 | --- | --- | --- |
 | `quorum_help` | anyone | Every command and what it does. |
 | `quorum_start` | anyone to read, Admin to apply | No arguments: the five survey questions. With answers: names the team, sets seats, records the capture preference, looks for teammates. |
 | `quorum_status` | anyone | What is remembered, what will be remembered, who it is shared with, who is connected, tokens saved. |
-| `quorum_manage` | Admin (overview: Reviewer too) | `team_create`, `team_seats`, `team_remove`, `member_add`, `member_set_level`, `member_move`, `member_new_token`, `member_remove`, `link`, `pause_link`, `resume_link`, `unlink`. A new token is shown once. |
+| `quorum_manage` | Admin (overview: Reviewer too) | `team_create`, `team_seats`, `team_remove`, `member_add`, `member_set_level`, `member_move`, `member_new_token`, `member_remove`, `leaver_report`, `link`, `pause_link`, `resume_link`, `unlink`. A new token is shown once. |
 | `quorum_discover` | anyone | Other Quorum hubs on the network (found by the host-side beacon). |
 | `quorum_connect` | Admin | Ask to join a hub by name or by address. Its admin is notified. |
 | `quorum_inbox`, `quorum_respond` | Admin | See and answer requests; approving adds a member at the level chosen (Contributor by default). |

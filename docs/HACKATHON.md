@@ -22,16 +22,36 @@ Or just the console with the guided story: `QUORUM_DEMO=1 docker compose up -d`,
 | --- | --- | --- |
 | **Real, essential use of FalkorDB** | The cascade, the execute guard's ancestry check and the blast radius run as Cypher in FalkorDB (one statement per hop); shortest path, vector index, one-statement checkpoint. A live endpoint compares FalkorDB's answer with an independent in-process walk. | [`FALKORDB.md`](FALKORDB.md), `GET /api/falkordb/proof`, `backend/tests/test_falkordb_native.py` |
 | **Does the graph change the outcome?** | 24 generated scenarios: a flat memory let 62 of 62 at-risk actions run, the same nodes with edges in FalkorDB let 0 of 62 run; 170 tainted conclusions stay retrievable in the flat arm versus 0. | `bench/ablation_graph.py`, `bench/ablation_results.json` |
+| **Does a real agent behave differently?** | The real `claude -p` CLI (haiku, 10 runs per arm, interleaved) issued a wrong refund from a lingering conclusion **10 of 10** times when memory had no causal edges and **0 of 10** times with Quorum, same memory and same correction. Outcome is whether the action really executed, not wording. | `bench/agent_eval.py`, [`FALKORDB.md`](FALKORDB.md#with-a-real-agent) |
+| **Real data, not only generated** | The cascade on this project's own import graph (70 modules, 300 edges, ripple up to 53 modules): recall and precision 100% against an independent `ast` oracle. A 200-hop chain is quarantined to the end (no depth limit). | `bench/real_graph_ripple.py`, `test_falkordb_native.py` |
+| **Hardening** | A red team of the write path and permissions: 31 attacks, all refused or inert. Five got through when we first ran it (forged origin, credentials in facts, oversize and malformed fields, control characters) and are fixed. | `backend/tests/test_redteam.py` |
 | **Working product, end to end** | Two hubs set up by one command each, found each other on the network, connected with approval, and read each other's memory over the real MCP protocol: 18 of 18 checks. Console live QA: 59 of 59. | `scripts/e2e_connect.py`, `frontend/scripts/live.mjs` |
 | **Ease of use** | One command, one pasted prompt. The AI shows every command, runs a five-question survey, discovers teammates, shows what is remembered and shared, and manages teams and permission levels, in any MCP-capable AI. No console needed. | [`AI_SETUP.md`](AI_SETUP.md) |
 | **Token efficiency** | Compact retrieval with short ids and provenance, `delta` instead of re-reading, `get_map` orientation, tool profile `core`. Measured savings against a top-8 retriever are shown per call and per member. | [`TOKEN_SAVING.md`](TOKEN_SAVING.md), `QUORUM_TOOL_PROFILE` |
 | **Security** | Production rules by default: hashed expiring member tokens, header auth on `/mcp`, rate limits, lockout, trusted-proxy allowlist, role levels checked per call, private-network-only peers, approval for every connection. | [`../SECURITY.md`](../SECURITY.md), [`AI_SETUP.md`](AI_SETUP.md#how-connecting-stays-safe) |
-| **Verification** | CI on every push: ruff, mypy, 439 backend tests against a real FalkorDB, frontend types, lint, 215 tests, contrast, contract check, both builds, compose validation. Accessibility: axe-core, 0 violations across every screen at desktop and phone width. | `.github/workflows/ci.yml`, `frontend/scripts/a11y.mjs` |
+| **Verification** | CI on every push: ruff, mypy, 480+ backend tests against a real FalkorDB, frontend types, lint, 215 tests, contrast, contract check, both builds, compose validation. Accessibility: axe-core, 0 violations across every screen at desktop and phone width. | `.github/workflows/ci.yml`, `frontend/scripts/a11y.mjs` |
 | **Design** | An editorial, print-proof-room console: every control says what it is in words; reduced-motion respected; the onboarding tour never traps the screen (Escape, Skip and Close all end it). | `docs/screens/` |
+
+## Where it stands against the public Track 02 entries
+
+From their public READMEs (not a verified ranking; entries can change before judging):
+
+| Idea | Seen in | Quorum |
+| --- | --- | --- |
+| A real with-and-without agent evaluation | Hivemind (Claude Code, 2 runs per variant) | Adopted: `bench/agent_eval.py`, 10 runs per arm, outcome-based. Ours measures a bad belief reaching an external action; theirs measures a coding task that depends on remembered conventions. |
+| Warn before two agents collide | Hivemind (PreToolUse hook on files) | Adopted and generalised: `announce_work` plus `scripts/quorum_conflict_hook.py`; a file, an order or a ticket. |
+| Temporal memory, "what did we believe then" | Hivemind, Crewbrain | `recall_as_of`, with what happened to each fact since. |
+| What leaves with a person | What Leaves With Them, Lineage (a person left, as a graph copy) | `leaver_report` (sole-source facts, what is built on them via FalkorDB, tasks held, likely successors) and a Team page button. Simpler than their island and bridge analysis. |
+| A write gate with receipts, and a red team of it | What Leaves With Them (36 attacks) | `ACCEPT`/`SUPERSEDE`/`REJECT`/`REVIEW` receipts and a 31-attack suite. |
+| Answers that say "not in memory" | What Leaves With Them, Lineage | `ANSWERED` / `NOT_IN_MEMORY` on every retrieval. |
+| Un-learning a belief and everything built on it, including actions | Lineage, MnemoIR | Core to Quorum, and the only one here that also blocks and compensates *external actions*. |
+
+Still ahead of us: Lineage's large real corpus (about 28,000 nodes) with a 20-question deterministic evaluation against a plain-search baseline; Hivemind's automatic procedure capture from failed-then-fixed commands and its graph algorithms (PageRank, communities); counterfactual replay of an affected decision (MnemoIR). Our real-data evidence is a 70-node import graph and a one-scenario agent test, which is honest but small.
 
 ## Honest limits
 
 - **One writer per FalkorDB.** The atomic check-and-set runs under a lock in the single API process; FalkorDB decides ancestry, the lock makes the decision atomic. Horizontal scaling of writers is out of scope.
+- **The agent test is one scenario we wrote**, with small trial counts and a model-dependent outcome; a first version, where the true policy sat next to the stale conclusion, did not discriminate (the agent reconciled it in both arms), so we changed it to the realistic case and say so in `docs/FALKORDB.md`.
 - **The ablation is generated data** and "flat" means "no causal edges". It shows provenance changes the outcome; it is not a product comparison.
 - **The built-in retrieval vectors are not a neural model.** They handle inflection and a lexicon of business paraphrases; connect an OpenAI-compatible embedding endpoint for broad coverage.
 - **LAN discovery** needs UDP broadcast on the network (many guest or corporate Wi-Fi networks block it). Connecting by address is the fallback: the same request flow works once a peer is known.

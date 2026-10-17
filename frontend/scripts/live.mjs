@@ -94,7 +94,7 @@ check('live feed is labelled as coming from the backend, not simulated', !(await
 await rpc('initialize', { protocolVersion: '2025-03-26', capabilities: {}, clientInfo: { name: 'live-qa', version: '1' } });
 await rpc('notifications/initialized', undefined, true);
 const listed = (await rpc('tools/list', {})).result.tools.map((t) => t.name);
-check('MCP server lists all 25 tools (memory, token savers, observe, chat layer)', listed.length === 25 && ['quorum_help', 'quorum_start', 'quorum_status', 'quorum_manage', 'quorum_connect', 'peer_retrieve'].every((n) => listed.includes(n)) && ['get_map', 'get_node', 'find_path', 'delta', 'observe'].every((n) => listed.includes(n)), listed.join(','));
+check('MCP server lists all 27 tools (memory, token savers, observe, chat layer)', listed.length === 27 && ['quorum_help', 'quorum_start', 'quorum_status', 'quorum_manage', 'quorum_connect', 'peer_retrieve'].every((n) => listed.includes(n)) && ['get_map', 'get_node', 'find_path', 'delta', 'observe'].every((n) => listed.includes(n)), listed.join(','));
 await page.keyboard.press('1');
 await sleep(500);
 await page.getByRole('button', { name: 'List view' }).click();
@@ -229,7 +229,7 @@ await page.getByRole('tab', { name: 'Sessions' }).click();
 await page.locator('.cn-people button', { hasText: miraName }).click();
 await sleep(1200);
 check("a member's session shows their tool calls", (await page.locator('.cn-turn').count()) >= 2);
-check('Connect reads the tool list from the hub', (await page.locator('.cn-table tbody tr').count()) === 25 && (await text('.card-sub >> nth=-1')).length > 0 && (await page.locator('.cn-table tbody th', { hasText: /^observe$/ }).count()) === 1);
+check('Connect reads the tool list from the hub', (await page.locator('.cn-table tbody tr').count()) === 27 && (await text('.card-sub >> nth=-1')).length > 0 && (await page.locator('.cn-table tbody th', { hasText: /^observe$/ }).count()) === 1);
 check('Connect shows the hub policy (header, limit, ranking)', /Authorization header/.test(await text('.cn')) && /tool calls a minute/.test(await text('.cn')));
 
 /* ---- header auth, passive capture, semantic ranking and the audit log, on the live hub ---- */

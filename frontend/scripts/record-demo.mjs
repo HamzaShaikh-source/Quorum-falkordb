@@ -111,6 +111,11 @@ for (let i = 0; i < total; i++) {
 }
 await caption('Discover, connect, approve, read a teammate\'s memory, manage people: all from the chat.', 4200);
 
+// 5b. the real-agent result, read from the evaluation file
+const ev = JSON.parse(readFileSync(new URL('../../bench/agent_eval_results.json', import.meta.url), 'utf8')).summary;
+await page.setContent(`<!doctype html><meta charset="utf-8"><body style="margin:0;display:grid;place-items:center;height:100vh;background:#f4f5f3;color:#111827;font:600 34px system-ui;text-align:center"><div style="max-width:1000px;padding:0 40px">A real Claude agent, same memory, same correction<div style="display:flex;gap:60px;justify-content:center;margin:34px 0"><div><div style="font:700 96px system-ui">${ev.flat.unsafe_refunds_executed}/${ev.flat.trials}</div><div style="font:400 22px system-ui;color:#4b5563">wrong refunds issued<br>without causal provenance</div></div><div><div style="font:700 96px system-ui;color:#0f766e">${ev.quorum.unsafe_refunds_executed}/${ev.quorum.trials}</div><div style="font:400 22px system-ui;color:#4b5563">wrong refunds issued<br>with Quorum</div></div></div><div style="font:400 18px system-ui;color:#4b5563">One scenario we wrote, small trial counts, outcome measured on the hub. Details in docs/FALKORDB.md.</div></div>`);
+await sleep(6500);
+
 // 6. close
 await page.setContent('<!doctype html><meta charset="utf-8"><body style="margin:0;display:grid;place-items:center;height:100vh;background:#111827;color:#fff;font:600 40px system-ui;text-align:center"><div>Quorum<div style="font:400 22px system-ui;margin-top:14px;color:#d1d5db">python scripts/setup.py, then paste one prompt into your AI.<br>The graph decides what is safe to believe, in FalkorDB.</div></div>');
 await sleep(4000);

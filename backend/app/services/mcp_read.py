@@ -51,6 +51,7 @@ def retrieve_context(
             "format": "compact",
             "count": len(p["ids"]),
             "matched": p["matched"],
+            "outcome": "ANSWERED" if p["ids"] else "NOT_IN_MEMORY",
             "truncated": p["truncated"],
             "packed": p["text"],
             "ids": p["short_ids"],
@@ -84,7 +85,7 @@ def retrieve_context(
         if score > 0
     ]
     k_val = max(1, int(k or 5)) if not isinstance(k, int) else max(1, k)
-    out = {"epoch": store.epoch, "count": len(matched), "context": matched[:k_val]}
+    out = {"epoch": store.epoch, "count": len(matched), "outcome": "ANSWERED" if matched else "NOT_IN_MEMORY", "context": matched[:k_val]}
     _remember_delivery(store, auth, [m["id"] for m in out["context"]], query)
     out["tokens"] = estimate_tokens(json.dumps(out))
     out["tokens_baseline"] = baseline

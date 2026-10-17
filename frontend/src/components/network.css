@@ -13,3 +13,5 @@
 .nw-state.ok { color: var(--text); font-weight: 600; }
 .nw-state.ok::before { content: "\2713\00a0"; }
 .ai-prompt-text { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto; margin: 10px 0 0; padding: 12px; border: 1.5px solid var(--text); border-radius: 14px; background: #fff; font-size: var(--t12); }
+.tm-leaver { margin-top: 12px; align-items: flex-start; }
+.tm-leaver pre { flex: 1 1 320px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--t12); }

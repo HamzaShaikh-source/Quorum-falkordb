@@ -2,6 +2,20 @@
 
 All notable changes to Quorum. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] - 2026-10-17
+
+### Added
+- **A real-agent evaluation** (`bench/agent_eval.py`): the real `claude -p` CLI with and without causal provenance, outcome measured by whether a refund really executed.
+- **Cascade on a real graph** (`bench/real_graph_ripple.py`): this project's import graph against an independent `ast` oracle.
+- **Red team** (`backend/tests/test_redteam.py`): 31 attacks on the write path, permissions, isolation and the connect handshake.
+- **Coordination and time:** `announce_work` (and `scripts/quorum_conflict_hook.py`, a Claude Code PreToolUse hook), `recall_as_of`, `leaver_report` (MCP, REST and a Team page button). 27 tools in all; `QUORUM_TOOL_PROFILE=core` lists 17.
+- **Write outcomes:** `ACCEPT`/`SUPERSEDE`/`REJECT`/`REVIEW` with a receipt on every `remember_fact`; `ANSWERED`/`NOT_IN_MEMORY` on every retrieval.
+
+### Fixed
+- The cascade had a 64-hop traversal limit despite claiming every descendant. It now walks to the end; a safety cap never returns a partial answer.
+- The write gate refuses credentials, control characters, oversize fields, malformed ids and a forged `origin` (these got through before).
+- Facts and conclusions written by agents now carry `valid_from`, so time travel no longer treats them as having always existed.
+
 ## [1.1.0] - 2026-10-17
 
 ### Added

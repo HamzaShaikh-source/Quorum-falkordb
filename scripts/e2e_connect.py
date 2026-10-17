@@ -61,7 +61,7 @@ async def main(a):
     async with client(a.a, a.a_token) as A, client(a.b, a.b_token) as B:
         LABELS[id(A)], LABELS[id(B)] = "Maya's AI", "Hamza's AI"
         names = {t.name for t in (await A.list_tools()).tools}
-        check("hub A lists the memory tools and the chat layer", len(names) == 25 and {"quorum_help", "quorum_start", "quorum_connect", "retrieve_context"} <= names, len(names))
+        check("hub A lists the memory tools and the chat layer", len(names) == 27 and {"quorum_help", "quorum_start", "quorum_connect", "retrieve_context"} <= names, len(names))
 
         h = await call(A, "quorum_help")
         check("quorum_help shows every command and what it does", all(n in h["text"] for n in ("quorum_connect", "quorum_manage", "retrieve_context")), h["tokens"])
@@ -127,6 +127,18 @@ async def main(a):
         check("hub B holds a three-step causal chain", root.get("success", True) and c1.get("success", True) and c2.get("success", True), [root.get("fact_id"), c1.get("id") or c1.get("conclusion_id"), c2.get("id") or c2.get("conclusion_id")])
         q = await call(B, "quarantine", root_id="e2e_root", reason="wrong policy")
         check("quarantining the root takes everything built on it", q.get("success") and q.get("affected_count") == 3, q.get("affected_count"))
+        # coordination and time: a collision warning, a leaver report, and what was believed before the quarantine
+        n1 = await call(B, "announce_work", target="order 1042", intent="refund review")
+        check("announce_work: the first agent is clear", n1.get("clear") is True, n1.get("text"))
+        ename = f"Eve {uuid.uuid4().hex[:4]}"
+        async with client(a.b, (await call(B, "quorum_manage", action="member_add", name=ename, team="Platform", level="contributor"))["token"]) as E:
+            n2 = await call(E, "announce_work", target="Order 1042", intent="refund")
+            check("announce_work: a second agent is warned about the same order", n2.get("clear") is False and "refund review" in n2["text"], n2.get("text"))
+        rec = await call(B, "recall_as_of", query="refund window", minutes_ago=0.5)
+        check("recall_as_of answers from the past and says what happened since", rec.get("success") and rec["outcome"] in ("ANSWERED", "NOT_IN_MEMORY"), rec.get("text", "")[:80])
+        lv = await call(B, "quorum_manage", action="leaver_report", member=ename)
+        check("leaver_report says what leaves with a person", lv.get("success") and f"If {ename} leaves" in lv["text"], lv.get("text", "")[:90])
+
         proof = httpx.get(a.b.rstrip("/") + "/api/falkordb/proof", params={"root": "e2e_root"}, headers={"Authorization": f"Bearer {a.b_token}"}).json()
         cmp = proof.get("comparison") or {}
         check("FalkorDB's traversal equals the independent in-process walk", cmp.get("identical") is True and (cmp.get("falkordb") or {}).get("descendants") == 2, cmp)

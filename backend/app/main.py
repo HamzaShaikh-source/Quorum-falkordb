@@ -53,6 +53,7 @@ from app.routes import (
     session as session_routes,
     falkordb_proof,
     connect as connect_routes,
+    work as work_routes,
 )
 
 _mcp_app = None
@@ -352,6 +353,7 @@ app.include_router(audit.router, prefix=api_prefix, tags=["MCP"])
 app.include_router(session_routes.router, prefix=api_prefix, tags=["Session"])
 app.include_router(falkordb_proof.router, prefix=api_prefix, tags=["FalkorDB"])
 app.include_router(connect_routes.router, prefix=api_prefix, tags=["Connect"])
+app.include_router(work_routes.router, prefix=api_prefix, tags=["Coordination"])
 app.include_router(meta.router, prefix=api_prefix, tags=["Meta"])
 app.include_router(graph.router, prefix=api_prefix, tags=["Graph"])
 app.include_router(events.router, prefix=api_prefix, tags=["Events"])

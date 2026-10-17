@@ -21,6 +21,8 @@ META: Dict[str, tuple] = {
     "get_map": ("any", False, "Orientation in a few hundred tokens, for long sessions or an unfamiliar memory", "A small index of the shared memory: areas, hubs, how to ask"),
     "get_node": ("any", False, "A few lines instead of a document", "One node with its parents and children, by short id (F3) or full id"),
     "delta": ("any", False, "Refresh without re-reading", "What stopped being true since your last read, plus new matches"),
+    "announce_work": ("agent", True, "Two agents never redo or break each other's work", "Say what you are about to work on; get a warning if someone else is on it or near it"),
+    "recall_as_of": ("any", False, "Answers about the past without re-reading history", "What the team believed at an earlier time, and what happened to those facts since"),
     "quorum_help": ("any", False, "One short list instead of reading documentation", "Every command and what it does"),
     "quorum_start": ("any", True, "Setup happens in the chat, not in a console", "Guided setup: team size, name, focus, capture, teammates"),
     "quorum_status": ("any", False, "A few lines instead of a dashboard", "What is remembered, what will be, what is shared with whom"),

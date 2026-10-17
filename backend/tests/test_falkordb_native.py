@@ -106,3 +106,21 @@ def test_the_proof_endpoint_compares_both_engines(falkor):
     assert body["database"]["nodes"] == 30
     assert any("Quarantine cascade" == s["decision"] for s in body["statements"])
     assert client.get("/api/falkordb/proof", headers={"Authorization": f"Bearer token_{falkor}_agent"}).status_code == 403
+
+
+def test_a_long_chain_is_quarantined_to_the_end_with_no_depth_limit(falkor):
+    """The cascade must reach every descendant however deep: a 200-hop chain, then a cap that forces the unbounded fallback."""
+    store = queries.get_graph_store(falkor)
+    n = 200
+    for i in range(n):
+        store.add_node(_node(f"c{i}"))
+    for i in range(n - 1):
+        store.add_edge(GraphEdge(id=f"ce{i}", source=f"c{i}", target=f"c{i + 1}", type=EdgeType.LEADS_TO))
+    store.commit()
+    closure = store.closure_in_falkordb("c0", CAUSAL, "out")
+    assert closure is not None and len(closure) == n - 1 and closure[f"c{n - 1}"] == n - 1
+    affected = store.cascade_quarantine("c0")
+    assert store.last_cascade_engine == "falkordb" and len(affected) == n
+    assert all(store.nodes[f"c{i}"].status == Status.QUARANTINED for i in range(n))
+    # a cap lower than the chain is never reported as a complete answer
+    assert store.closure_in_falkordb("c0", CAUSAL, "out", max_depth=50) is None

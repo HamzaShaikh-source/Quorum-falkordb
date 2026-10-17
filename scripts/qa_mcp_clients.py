@@ -70,7 +70,7 @@ async def main(hub, strict):
     async with http_client(mcp_url, tok) as c:
         tools = (await c.list_tools()).tools
         names = {t.name for t in tools}
-        check("http: 25 tools listed", len(names) == 25 and {"observe", "retrieve_context", "get_map"} <= names, str(len(names)))
+        check("http: 27 tools listed", len(names) == 27 and {"observe", "retrieve_context", "get_map"} <= names, str(len(names)))
         rc = next(t for t in tools if t.name == "retrieve_context")
         check("http: token is optional in the tool schema", "token" not in (rc.input_schema or {}).get("required", []), str(rc.input_schema.get("required")))
         r = body(await c.call_tool("remember_fact", {"key": "refund_chile", "value": "21", "text": "The refund window in Chile is 21 days from delivery."}))
@@ -104,7 +104,7 @@ async def main(hub, strict):
     bridge = StdioServerParameters(command=sys.executable, args=[str(ROOT / "mcp" / "bridge.py"), "--url", mcp_url], env={**os.environ, "QUORUM_MCP_TOKEN": tok})
     async with Client(bridge, mode="legacy") as b:
         names = {t.name for t in (await b.list_tools()).tools}
-        check("bridge: same 25 tools through stdio", len(names) == 25, str(len(names)))
+        check("bridge: same 27 tools through stdio", len(names) == 27, str(len(names)))
         r = body(await b.call_tool("remember_fact", {"key": "bridge_probe", "value": "7", "text": "Bridge probe fact: the retention period is 7 days.", "id": "bridge_probe"}))
         check("bridge: a write through stdio", r.get("fact_id") == "bridge_probe", str(r)[:60])
     g = httpx.get(f"{hub}/api/graph", headers=human(hub, tenant)).json()

@@ -1,6 +1,8 @@
 import { PageTag } from '../components/PageTag';
 import { Network } from '../components/Network';
 import { useMemo, useState } from 'react';
+import { API_MODE } from '../api/client';
+import { getLeaverReport } from '../workspace/server';
 import { Icon } from '../components/Icon';
 import { fmt } from '../context/tokens';
 import { useStore } from '../state/store';
@@ -181,6 +183,7 @@ function Teams({ ws }: { ws: Ws }) {
 function Members({ ws }: { ws: Ws }) {
   const set = useStore((s) => s.set);
   const pushToast = useStore((s) => s.pushToast);
+  const [leaver, setLeaver] = useState<{ name: string; text: string } | null>(null);
   const [name, setName] = useState('');
   const [role, setRole] = useState<MemberRole>('agent');
   const [teamId, setTeamId] = useState('');
@@ -274,6 +277,15 @@ function Members({ ws }: { ws: Ws }) {
                     <button className="btn quiet" onClick={() => set({ view: 'connect' })}>
                       Set up
                     </button>
+                    {API_MODE === 'live' && (
+                      <button
+                        className="btn quiet"
+                        aria-label={`What leaves with ${m.name}`}
+                        onClick={() => void getLeaverReport(m.id).then((r) => setLeaver({ name: m.name, text: r.text })).catch((e: Error) => setErr(e.message))}
+                      >
+                        What leaves
+                      </button>
+                    )}
                     <button className="btn quiet" aria-label={`Rotate ${m.name}'s token`} onClick={() => void ws.rotate(m.id).then(setErr)}>
                       Rotate
                     </button>
@@ -286,6 +298,14 @@ function Members({ ws }: { ws: Ws }) {
             </tbody>
           </table>
         </div>
+      )}
+      {leaver && (
+        <section className="nw-row tm-leaver" role="status" aria-label={`What leaves with ${leaver.name}`}>
+          <pre className="mono">{leaver.text}</pre>
+          <button className="btn quiet" onClick={() => setLeaver(null)}>
+            Close
+          </button>
+        </section>
       )}
       <form
         className="tm-form"

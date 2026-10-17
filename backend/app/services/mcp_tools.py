@@ -7,3 +7,4 @@ from app.services.mcp_guard import AuthError, _get_auth, effective_token, guarde
 from app.services.mcp_read import delta, find_path, get_map, get_node, retrieve_context  # noqa: F401
 from app.services.mcp_write import claim_handoff, derive, execute_action, observe, observe_text, remember_fact, review_handoff, stage_action  # noqa: F401
 from app.services.mcp_chat import peer_retrieve, quorum_connect, quorum_connections, quorum_discover, quorum_help, quorum_inbox, quorum_manage, quorum_respond, quorum_start, quorum_status  # noqa: F401
+from app.services.mcp_coord import announce_work, recall_as_of  # noqa: F401

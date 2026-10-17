@@ -90,15 +90,24 @@ It runs the traversal in FalkorDB and in the API process, compares the two, and 
 
 | What | Result | How to reproduce |
 | --- | --- | --- |
-| Backend tests | 439 pass, against a real FalkorDB in CI | `python -m pytest backend/tests` |
+| **A real agent, with and without provenance** | A Claude agent (`haiku`, the real `claude -p` CLI, 10 runs per arm) issued the wrong refund **10 of 10** times from a lingering conclusion when memory had no causal edges, and **0 of 10** times with the same memory and the same correction in Quorum | `python bench/agent_eval.py` ([`bench/agent_eval_results.json`](bench/agent_eval_results.json)) |
+| **Cascade on a real graph** | This project's own import graph (70 modules, 300 edges, ripple up to 53 modules): ripple recall and precision **100%** against an independent `ast` oracle | `python bench/real_graph_ripple.py` |
+| **Red team of the write path** | 31 attacks (forged origin, credentials, oversize and malformed fields, injection text, id collisions, cross-tenant and cross-team reads, privilege escalation, hostile peers, secret guessing): all refused or inert. Five got through at first and are fixed | `pytest backend/tests/test_redteam.py` |
+| Flat memory vs causal edges, 24 generated scenarios | 62 of 62 at-risk actions ran vs 0 of 62 | `python bench/ablation_graph.py` |
+| Backend tests | 480+ pass, against a real FalkorDB in CI | `python -m pytest backend/tests` |
 | Console, live | 59 of 59 checks, with an MCP client acting as an agent | `cd frontend && npm run qa:live` |
-| Two real hubs, real MCP protocol | 18 of 18: discover, connect, notify, approve, read, manage, cascade in FalkorDB | `python scripts/e2e_connect.py` ([`docs/AI_SETUP.md`](docs/AI_SETUP.md)) |
+| Two real hubs, real MCP protocol | discover, connect, notify, approve, read, manage, cascade in FalkorDB | `python scripts/e2e_connect.py` ([`docs/AI_SETUP.md`](docs/AI_SETUP.md)) |
 | Accessibility | axe-core, 0 serious or critical violations on every screen, desktop and phone | `cd frontend && npm run qa:a11y` |
 | Poison leakage vs baseline models, depth 1 / 2 / 3 | 0% vs 100% | `python bench/run.py` |
 
-Every number is produced by a script in this repository; the harness and its limits are described in [`docs/PROOF.md`](docs/PROOF.md).
+Every number is produced by a script in this repository; their limits are stated in each script and in [`docs/HACKATHON.md`](docs/HACKATHON.md).
 
----
+## More than memory: coordination, time and people
+
+- **Collision warnings.** `announce_work` (and a Claude Code hook, `scripts/quorum_conflict_hook.py`) tells an agent when another agent announced the same file, order or ticket, or something inside or around it, in the last half hour. Notes expire by themselves and never become facts.
+- **Time.** `recall_as_of` answers "what did we believe then?" from bitemporal data, and says what happened to each fact since (still believed, replaced, quarantined). The console's time-travel slider reads the same data.
+- **What leaves with a person.** `quorum_manage action=leaver_report` (and a **What leaves** button on the Team page) lists the facts only that person recorded, how much is built on each (a FalkorDB traversal), the tasks they hold and the teammates who already read their material.
+- **A write gate that says what it did.** Every write returns `ACCEPT`, `SUPERSEDE`, `REJECT` or `REVIEW` with a plain receipt, and credentials, control characters, oversize fields and forged origins are refused before anything is stored. Retrieval says `NOT_IN_MEMORY` instead of guessing.
 
 ## Deployment boundary
 
@@ -221,7 +230,7 @@ Measured on FalkorDB 8.10.2, on one developer laptop, by the harness above. The 
 |---|---|---|---|
 | **Frontend Console & Landing** | `3000` / `5173` | HTTP (React + Vite + Cytoscape) | Dual interface: Landing page (`#/`) and Incident Command Room (`#/app`) |
 | **Backend REST & SSE** | `8000` | HTTP / Server-Sent Events | FastAPI core causal API, event streaming, scenario driver |
-| **MCP Server** (embedded in the single backend writer; stdio through the bridge) | `8000` (`/mcp`) | Streamable HTTP (`/mcp`) & Stdio | Model Context Protocol server exposing 25 tools: 15 memory, token-saving and auditor tools plus 10 chat tools for setup, teams and connecting hubs |
+| **MCP Server** (embedded in the single backend writer; stdio through the bridge) | `8000` (`/mcp`) | Streamable HTTP (`/mcp`) & Stdio | Model Context Protocol server exposing 27 tools: 15 memory, token-saving and auditor tools, 2 coordination tools and 10 chat tools for setup, teams and connecting hubs |
 | **Mock Helpdesk API** | `8002` | HTTP / JSON | External ticketing and refund API with atomic Tombstone protection |
 | **FalkorDB Graph Engine** | `6379` | Redis / Cypher | Graph database engine with vector indexing and per-tenant Redis ACLs |
 | **FalkorDB Web Browser** | `8080` | HTTP | Interactive FalkorDB graph visualizer |
@@ -251,7 +260,7 @@ Measured on FalkorDB 8.10.2, on one developer laptop, by the harness above. The 
 ### The console beyond the graph
 
 - **Team** manages plan, teams, seats, members and links on the server, plus **Connect with teammates**: hubs visible on your network, requests waiting for your approval (with a permission level), and connections. Each member gets their own token (shown once, stored as a hash); presence comes from their real calls. Facts saved with `scope="team"` stay private to the team until a link shares them.
-- **Connect** shows a real MCP handshake, paste-ready setup for Claude Code, Claude Desktop, Cursor, VS Code, Windsurf, Antigravity and any MCP client, a **paste-into-your-AI prompt**, the 25 tools read from the hub, and every real tool call (who, what, tokens used against a top-8 retriever).
+- **Connect** shows a real MCP handshake, paste-ready setup for Claude Code, Claude Desktop, Cursor, VS Code, Windsurf, Antigravity and any MCP client, a **paste-into-your-AI prompt**, the 27 tools read from the hub, and every real tool call (who, what, tokens used against a top-8 retriever).
 - **Context** shows the memory as a mind map for people and as a compact map plus packed answer for agents, with live token numbers measured by the backend.
 - **Activity** is the audit log in plain sentences (who did what, when, what it cost), filterable, with a CSV export.
 
@@ -264,7 +273,7 @@ Quorum is architected to address all three hackathon tracks natively:
 |---|---|---|---|
 | **T01-1: Multi-Hop Causal Reasoning** | Deep DAG traversal over `[:LEADS_TO\|SUPPORTS*]` to trace roots, leaf facts, and dependent conclusions. | `backend/app/graph/queries.py` (`get_leaf_facts`, `explain_blast_radius`) | `pytest backend/tests/test_auditor_qa.py` & `docs/PROOF.md` |
 | **T01-2: Graph Queries as Agent Tools** | Native Cypher algorithms and graph queries exposed directly to agents (`find_path`, `get_node`, `delta`). | `backend/app/services/mcp_tools.py`, `backend/app/services/context_pack.py` | `pytest backend/tests/test_mcp_hardening.py` & `docs/MCP.md` |
-| **T01-3: Tool Selection Through MCP** | 25-tool Model Context Protocol server (15 memory and auditor tools, 10 chat tools) over Streamable HTTP (`/mcp`) & stdio for Claude, Cursor, and Antigravity. | `backend/app/mcp_embed.py`, `mcp/server.py`, `mcp/bridge.py` | `GET /mcp` handshake & Connect tab in Console |
+| **T01-3: Tool Selection Through MCP** | 27-tool Model Context Protocol server (15 memory and auditor tools, 2 coordination tools, 10 chat tools) over Streamable HTTP (`/mcp`) & stdio for Claude, Cursor, and Antigravity. | `backend/app/mcp_embed.py`, `mcp/server.py`, `mcp/bridge.py` | `GET /mcp` handshake & Connect tab in Console |
 | **T01-4: Actions Based on Graph Evidence** | Quorum Gate (Layer 1) & Atomic Execute Guard (Layer 2) enforce graph-backed policy verification before execution. | `backend/app/services/gate.py`, `backend/app/services/executor.py` | `pytest backend/tests/test_safety_engine.py` & `docs/screens/07-ledger.png` |
 | **T01-5: Explainable Agent Decisions** | Live Cytoscape causal DAG, prompt diff strikethrough, parameterised Cypher drawer, and Plain-English Activity feed. | `frontend/src/graph/GraphCanvas.tsx`, `frontend/src/views/Console.tsx` | Interactive Console (`#/app`) & `docs/screens/04-wave.png` |
 

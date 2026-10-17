@@ -156,3 +156,15 @@ def remove_link(link_id: str, auth: AuthContext = Depends(require_role(["human"]
     except ws.WorkspaceError as e:
         raise _fail(e)
     return _done(auth, store)
+
+@router.get("/workspace/members/{member_id}/leaver-report")
+def leaver_report(member_id: str, auth: AuthContext = Depends(require_role(["human"]))):
+    """What leaves with this person: facts only they recorded, what is built on them, tasks they hold, likely successors."""
+    from app.services.mcp_coord import leaver_report as report
+
+    store = get_graph_store(auth.tenant)
+    with store._lock:
+        m = next((x for x in ws._ws(store)["members"] if x["id"] == member_id), None)
+    if m is None:
+        raise HTTPException(status_code=404, detail={"error": {"code": "NOT_FOUND", "message": "That member does not exist."}})
+    return report(store, m)

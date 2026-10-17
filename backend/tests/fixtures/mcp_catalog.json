@@ -411,6 +411,74 @@
       "saves": "Facts are captured from what you already wrote, with no extra tool call per fact"
     },
     {
+      "name": "announce_work",
+      "summary": "Say what you are about to work on; get a warning if someone else is on it or near it",
+      "args": [
+        {
+          "name": "target",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "intent",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "minutes",
+          "required": false,
+          "default": 30
+        },
+        {
+          "name": "done",
+          "required": false,
+          "default": false
+        }
+      ],
+      "who": "agent",
+      "writes": true,
+      "saves": "Two agents never redo or break each other's work"
+    },
+    {
+      "name": "recall_as_of",
+      "summary": "What the team believed at an earlier time, and what happened to those facts since",
+      "args": [
+        {
+          "name": "query",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "as_of",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "minutes_ago",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "k",
+          "required": false,
+          "default": 5
+        }
+      ],
+      "who": "any",
+      "writes": false,
+      "saves": "Answers about the past without re-reading history"
+    },
+    {
       "name": "quorum_help",
       "summary": "Every command and what it does",
       "args": [

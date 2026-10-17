@@ -1,4 +1,5 @@
 """Write tools: remember_fact, observe, derive, stage_action, execute_action, claim_handoff, review_handoff."""
+import re
 import time
 import hashlib
 from fastapi import HTTPException
@@ -20,6 +21,31 @@ from app.services.gate import quorum_gate
 from app.services.mcp_guard import AuthError, _get_auth, effective_token, emit as _emit, guarded, viewer_of as _viewer  # noqa: F401
 
 
+_ID_OK = re.compile(r"^[A-Za-z0-9_.:-]{1,80}$")
+_CTRL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+_LIMITS = {"key": 120, "value": 500, "text": 4000, "quote": 1000, "origin": 40}
+
+
+def validate_fields(**fields: Any) -> Optional[str]:
+    """The write gate's plain-code checks: ids, sizes, control characters, credentials. Returns the reason to refuse, or None."""
+    for name, v in fields.items():
+        if v is None:
+            continue
+        if name == "id":
+            if not isinstance(v, str) or not _ID_OK.match(v):
+                return "id must be 1 to 80 characters of letters, digits and _ . : -"
+            continue
+        if not isinstance(v, str):
+            return f"{name} must be a string."
+        if len(v) > _LIMITS.get(name, 4000):
+            return f"{name} is too long (limit {_LIMITS.get(name, 4000)} characters)."
+        if _CTRL.search(v):
+            return f"{name} contains control characters."
+        if observer.has_secret(v):
+            return f"{name} looks like a credential, so it was not stored. Remove the secret and describe the fact without it."
+    return None
+
+
 def remember_fact(
     key: str,
     value: str,
@@ -33,6 +59,9 @@ def remember_fact(
     """Stores a Fact. scope="commons" (default) is readable by everyone in the tenant; scope="team" only by your team and teams linked to it."""
     auth = _get_auth(token)
     store = get_graph_store(auth["tenant"])
+    refusal = validate_fields(id=id, key=key, value=value, text=text, quote=quote, origin=origin)
+    if refusal:
+        return {"error": refusal, "success": False}
     fact_id = id or f"fact_{uuid.uuid4().hex[:6]}"
 
     tier_val = Tier.ROOT if (auth.get("member_id") is None and auth.get("agent_id") in ("agent_root", "root")) or auth.get("role") in ("admin", "human") else Tier.NEW
@@ -56,8 +85,10 @@ def remember_fact(
         value=value,
         text=text,
         quote=quote,
-        origin=origin or f"agent:{auth.get('agent_id', 'unknown')}",
+        # the origin always names the caller; a label the caller adds is appended, never substituted
+        origin=(f"agent:{auth.get('agent_id', 'unknown')}" + (f":{origin}" if origin else ""))[:80],
         scope_team=scope_team,
+        valid_from=int(time.time() * 1000),
         asserted_by=AssertedBy(
             id=auth.get("agent_id", "agent_scout"),
             name=auth.get("agent_id", "Agent"),
@@ -69,7 +100,10 @@ def remember_fact(
             existing = store.nodes.get(fact.id)
             store.add_node(fact)
             if existing is not None:
-                return {"epoch": store.epoch, "fact_id": existing.id, "status": existing.status.value, "verdict": None, "success": True}
+                # an idempotent retry answers exactly as the first write did (same outcome, same receipt)
+                healthy = existing.status == Status.HEALTHY
+                return {"epoch": store.epoch, "fact_id": existing.id, "status": existing.status.value, "verdict": None,
+                        "outcome": "ACCEPT" if healthy else "REJECT", "receipt": "Stored." if healthy else "Kept out of circulation: it is quarantined.", "success": True}
     except HTTPException:
         return {"error": "Node ID unavailable; use a new ID or authorized restore.", "success": False}
     _emit(auth["tenant"], nodes=[fact])
@@ -77,11 +111,22 @@ def remember_fact(
     # Check contradiction with Auditor
     verdict = auditor_service.check_contradiction(store, fact, tenant=auth["tenant"])
 
+    # A plain-language receipt for the write: what the gate decided, so the agent (and the audit log) never has to guess.
+    v = (verdict or {}).get("verdict") if isinstance(verdict, dict) else None
+    outcome = {None: "ACCEPT", "OLD_FACT_QUARANTINED": "SUPERSEDE", "CHALLENGER_QUARANTINED": "REJECT"}.get(v, "REVIEW")
+    receipt = {
+        "ACCEPT": "Stored.",
+        "SUPERSEDE": "Stored. It replaces an older conflicting fact, which was quarantined.",
+        "REJECT": "Kept out of circulation: a stronger established fact contradicts it.",
+        "REVIEW": "Stored, and a person was asked to settle a conflict with an existing fact.",
+    }[outcome]
     return {
         "epoch": store.epoch,
         "fact_id": fact.id,
         "status": fact.status.value,
         "verdict": verdict,
+        "outcome": outcome,
+        "receipt": receipt,
         "success": True,
     }
 
@@ -135,6 +180,7 @@ def observe_text(auth: Dict[str, Any], text: str, source: str = "chat", dry_run:
                 quote=c["text"],
                 origin=f"observer:{source}"[:60],
                 scope_team=auth["team_id"] if scope == "team" else None,
+                valid_from=int(time.time() * 1000),
                 asserted_by=AssertedBy(id=auth.get("agent_id", "agent"), name=auth.get("agent_id", "Agent"), tier=Tier.NEW),
             )
             store.add_node(fact)
@@ -175,6 +221,9 @@ def derive(
     """Derives a new Conclusion or Decision node. Requires all parents to exist and be HEALTHY."""
     auth = _get_auth(token)
     store = get_graph_store(auth["tenant"])
+    refusal = validate_fields(id=id, text=text)
+    if refusal:
+        return {"error": refusal, "success": False}
 
     viewer = _viewer(auth, store)
 
@@ -214,6 +263,7 @@ def derive(
             owner_team=owner_team,
             scope_team=next((p.scope_team for p in parents if p.scope_team), None),
             scope_teams=inherited_scopes(parents),
+            valid_from=int(time.time() * 1000),
         )
         existing = store.nodes.get(conc_id)
         if existing:
@@ -256,6 +306,9 @@ def stage_action(
     """Stages an action node and passes through the Quorum Gate."""
     auth = _get_auth(token)
     store = get_graph_store(auth["tenant"])
+    refusal = validate_fields(id=id, text=label if isinstance(label, str) else None)
+    if refusal:
+        return {"error": refusal, "success": False}
 
     rev_str = str(reversibility or "").strip().upper()
     rev_enum = getattr(Reversibility, rev_str, Reversibility.IRREVERSIBLE)

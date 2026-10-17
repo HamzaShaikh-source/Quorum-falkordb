@@ -162,7 +162,7 @@ def test_the_embedded_mcp_registers_every_tool_and_serves_routes():
     from app.mcp_embed import TOOLS, build_mcp_app
 
     mcp_app = build_mcp_app()
-    assert mcp_app is not None and len(TOOLS) == 25
+    assert mcp_app is not None and len(TOOLS) == 27
     assert any(getattr(r, "path", "").startswith("/mcp") for r in mcp_app.routes)
 
 

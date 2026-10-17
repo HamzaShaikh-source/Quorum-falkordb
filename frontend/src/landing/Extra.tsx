@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import ablation from '../../../bench/ablation_results.json';
+import agentEval from '../../../bench/agent_eval_results.json';
+import ripple from '../../../bench/real_graph_ripple_results.json';
 import { Icon } from '../components/Icon';
 import { Measured } from '../components/Measured';
 import { buildMap, pack, savings } from '../context/packer';
@@ -174,6 +176,24 @@ export function FalkorSection() {
           <span>median cascade through FalkorDB, end to end</span>
         </div>
       </div>
+      <div className="lp-stats" role="list">
+        <div role="listitem" className="lp-stat">
+          <b className="num">
+            {agentEval.summary.flat.unsafe_refunds_executed}/{agentEval.summary.flat.trials}
+          </b>
+          <span>wrong refunds a real Claude agent issued from a lingering conclusion (no provenance)</span>
+        </div>
+        <div role="listitem" className="lp-stat">
+          <b className="num">
+            {agentEval.summary.quorum.unsafe_refunds_executed}/{agentEval.summary.quorum.trials}
+          </b>
+          <span>with the same memory and the same correction, quarantined through the graph</span>
+        </div>
+        <div role="listitem" className="lp-stat">
+          <b className="num">{Math.round(ripple.summary.ripple_recall * 100)}%</b>
+          <span>ripple recall and precision on a real graph: {ripple.summary.modules} modules, {ripple.summary.import_edges} import edges</span>
+        </div>
+      </div>
       <ul className="lp-team-points">
         <li>
           <Icon name="graph" size={18} /> Verify it on a running hub: <code className="mono">GET /api/falkordb/proof</code>
@@ -183,7 +203,7 @@ export function FalkorSection() {
         </li>
       </ul>
       <p className="lp-note">
-        {a.scenarios} generated, seeded scenarios; &ldquo;flat&rdquo; means the same nodes with no causal edges. It shows that provenance changes the outcome, not how Quorum compares with any product. Read from bench/ablation_results.json.
+        {a.scenarios} generated, seeded scenarios; &ldquo;flat&rdquo; means the same nodes with no causal edges. The agent test is {agentEval.params.trials_per_arm} runs per arm of the real Claude CLI ({agentEval.params.model}) on one scenario we wrote. The graph is this project&rsquo;s own import graph. None of it compares Quorum with any product. Read from bench/*.json.
       </p>
     </section>
   );
