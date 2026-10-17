@@ -178,3 +178,15 @@ def test_leaver_report_over_rest_is_admin_only_and_404s_cleanly(tenant):
     assert ok.status_code == 200 and ok.json()["owned"] == 1 and ok.json()["sole_source"] == 1
     assert client.get(f"/api/workspace/members/{aid}/leaver-report", headers=H(tenant, "agent")).status_code == 403
     assert client.get("/api/workspace/members/nope/leaver-report", headers=H(tenant)).status_code == 404
+
+
+def test_an_idempotent_retry_of_remember_fact_still_succeeds_with_the_same_answer(tenant):
+    """valid_from is stamped at the first write; a retry of the identical call must answer exactly as the first did, not conflict."""
+    a = f"token_{tenant}_agent"
+    first = t.remember_fact("refund_window", "30", "Refunds are allowed within 30 days of delivery.", a, id="same_id")
+    time.sleep(0.05)
+    retry = t.remember_fact("refund_window", "30", "Refunds are allowed within 30 days of delivery.", a, id="same_id")
+    assert first["success"] and retry["success"] and retry["fact_id"] == "same_id"
+    assert (first["outcome"], first["receipt"]) == (retry["outcome"], retry["receipt"])
+    different = t.remember_fact("refund_window", "99", "Refunds are allowed within 99 days of delivery, honest.", a, id="same_id")
+    assert different["success"] is False, "a different payload under the same id is still refused"

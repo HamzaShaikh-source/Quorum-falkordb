@@ -98,6 +98,8 @@ def remember_fact(
     try:
         with store._lock:
             existing = store.nodes.get(fact.id)
+            if existing is not None:
+                fact.valid_from = existing.valid_from  # a retry is the same write: it must not look like a different one
             store.add_node(fact)
             if existing is not None:
                 # an idempotent retry answers exactly as the first write did (same outcome, same receipt)
