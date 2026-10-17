@@ -30,6 +30,7 @@ class FalkorUnavailable(Exception):
 _client = None
 _client_lock = threading.Lock()
 _health_lock = threading.Lock()
+_health_refreshing = False  # single-flight: one caller pings, the rest reuse the last answer meanwhile
 _health: Dict[str, Any] = {"checked_at": 0.0, "up": False, "error": "not checked yet", "latency_ms": None, "version": None}
 HEALTH_TTL_S = 1.0
 
@@ -78,9 +79,13 @@ def reset_client() -> None:
 def check_health(force: bool = False) -> Dict[str, Any]:
     """Pings FalkorDB and verifies the graph module is loaded. Cached for one second so hot paths stay cheap."""
     now = time.time()
+    global _health_refreshing
     with _health_lock:
         if not force and now - _health["checked_at"] < HEALTH_TTL_S:
             return dict(_health)
+        if not force and _health_refreshing and _health["checked_at"] > 0:
+            return dict(_health)  # a refresh is already in flight: under load, never stampede the database with pings
+        _health_refreshing = True
     t0 = time.time()
     result: Dict[str, Any] = {"up": False, "error": None, "latency_ms": None, "version": None}
     conn = None
@@ -126,6 +131,7 @@ def check_health(force: bool = False) -> Dict[str, Any]:
     with _health_lock:
         _health.update(result)
         _health["checked_at"] = time.time()
+        _health_refreshing = False
         return dict(_health)
 
 

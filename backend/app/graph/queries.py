@@ -61,6 +61,10 @@ class GraphStore:
         # What each agent has already been handed, so delta() can say what changed since its last read.
         self.agent_state: Dict[str, Dict[str, Any]] = {}
         self.last_cascade_engine = "none"
+        self._commit_cv = threading.Condition()
+        self._req_gen = 0
+        self._done_gen = 0
+        self._running = False
         # Expiring "I am working on X" notes (announce_work). Not facts, not persisted.
         self.work: List[Dict[str, Any]] = []
 
@@ -81,10 +85,43 @@ class GraphStore:
         return handoff
 
     def commit(self, request_id: Optional[str] = None) -> int:
-        """Persist what changed. Called at the end of every API request and tool call, and by the background flusher."""
+        """
+        Persist what changed. Called at the end of every API request and tool call, and by the background flusher.
+        Group commit: while one sync is running, requests that arrive wait and share the NEXT one instead of each serialising the whole
+        store. A caller returns only after a sync that started after it asked has finished, so every acknowledged write is durable.
+        """
         if self.persister is None:
             return 0
-        return self.persister.sync(request_id)
+        owned = getattr(self._lock, "_is_owned", None)
+        if owned is not None and owned():
+            # This thread holds the store lock (the auditor and the executor commit while they hold it). Waiting for another thread's
+            # sync would deadlock, because that sync needs this very lock. A sync takes the store lock, so syncing directly here is
+            # already mutually exclusive with any group-commit leader.
+            return self.persister.sync(request_id)
+        cv = self._commit_cv
+        with cv:
+            self._req_gen += 1
+            mine = self._req_gen
+            while True:
+                if self._done_gen >= mine:
+                    return 0  # a sync that began after this write was made has completed, and it included the write
+                if not self._running:
+                    break
+                cv.wait(timeout=60)
+            self._running = True
+            target = self._req_gen
+        try:
+            n = self.persister.sync(request_id)
+        except BaseException:
+            with cv:
+                self._running = False
+                cv.notify_all()
+            raise
+        with cv:
+            self._done_gen = target
+            self._running = False
+            cv.notify_all()
+        return n
 
     def log_query(self, name: str, cypher: str, ms: float, rows: int, request_id: Optional[str] = None, real: bool = False, timing_boundary: str = "client_round_trip", outcome: str = "success"):
         # With FalkorDB behind the store the log shows only Cypher that actually ran (persistence passes real=True).

@@ -1,7 +1,11 @@
 import { useMemo, useState } from 'react';
 import ablation from '../../../bench/ablation_results.json';
 import agentEval from '../../../bench/agent_eval_results.json';
+import agentAccess from '../../../bench/agent_eval_access_results.json';
+import agentQuote from '../../../bench/agent_eval_quote_results.json';
+import agentDeploy from '../../../bench/agent_eval_deploy_results.json';
 import ripple from '../../../bench/real_graph_ripple_results.json';
+import corpus from '../../../bench/real_corpus_results.json';
 import { Icon } from '../components/Icon';
 import { Measured } from '../components/Measured';
 import { buildMap, pack, savings } from '../context/packer';
@@ -151,6 +155,10 @@ export function ConnectSection() {
 
 export function FalkorSection() {
   const a = ablation.summary;
+  const runs = [agentEval, agentAccess, agentQuote, agentDeploy].map((r) => r.summary as { flat: Record<string, number>; quorum: Record<string, number> });
+  const agentTrials = runs.reduce((n, r) => n + r.flat.trials!, 0);
+  const agentFlat = runs.reduce((n, r) => n + (r.flat.unsafe_actions_executed ?? r.flat.unsafe_refunds_executed ?? 0), 0);
+  const agentQuorum = runs.reduce((n, r) => n + (r.quorum.unsafe_actions_executed ?? r.quorum.unsafe_refunds_executed ?? 0), 0);
   return (
     <section className="lp-section" id="falkordb">
       <Head tag="06" kicker="Graph-native" title="The graph decides what is safe to believe." sub="The quarantine cascade, the execute guard ancestry check and the blast radius run as Cypher inside FalkorDB, one statement per hop. A live endpoint compares FalkorDB with an independent walk, so the claim can be checked, not trusted." />
@@ -179,19 +187,33 @@ export function FalkorSection() {
       <div className="lp-stats" role="list">
         <div role="listitem" className="lp-stat">
           <b className="num">
-            {agentEval.summary.flat.unsafe_refunds_executed}/{agentEval.summary.flat.trials}
+            {agentFlat}/{agentTrials}
           </b>
-          <span>wrong refunds a real Claude agent issued from a lingering conclusion (no provenance)</span>
+          <span>wrong actions a real Claude agent took from a lingering conclusion with no provenance (four scenarios)</span>
         </div>
         <div role="listitem" className="lp-stat">
           <b className="num">
-            {agentEval.summary.quorum.unsafe_refunds_executed}/{agentEval.summary.quorum.trials}
+            {agentQuorum}/{agentTrials}
           </b>
           <span>with the same memory and the same correction, quarantined through the graph</span>
         </div>
         <div role="listitem" className="lp-stat">
           <b className="num">{Math.round(ripple.summary.ripple_recall * 100)}%</b>
           <span>ripple recall and precision on a real graph: {ripple.summary.modules} modules, {ripple.summary.import_edges} import edges</span>
+        </div>
+      </div>
+      <div className="lp-stats" role="list">
+        <div role="listitem" className="lp-stat">
+          <b className="num">{corpus.summary.corpus.packages}</b>
+          <span>real packages as source material: {corpus.summary.corpus.facts.toLocaleString()} facts, each citing its own metadata line</span>
+        </div>
+        <div role="listitem" className="lp-stat">
+          <b className="num">{corpus.summary.answers.quorum.abstained_on_nonexistent_pct}%</b>
+          <span>of questions about things that do not exist were refused, versus {corpus.summary.answers.plain.abstained_on_nonexistent_pct}% for plain search</span>
+        </div>
+        <div role="listitem" className="lp-stat">
+          <b className="num">{corpus.summary.impact_question.quorum.exact_set_pct}%</b>
+          <span>exact answers to &ldquo;what is affected if this is wrong?&rdquo;, versus {corpus.summary.impact_question.plain.exact_set_pct}% for plain search</span>
         </div>
       </div>
       <ul className="lp-team-points">
@@ -203,7 +225,7 @@ export function FalkorSection() {
         </li>
       </ul>
       <p className="lp-note">
-        {a.scenarios} generated, seeded scenarios; &ldquo;flat&rdquo; means the same nodes with no causal edges. The agent test is {agentEval.params.trials_per_arm} runs per arm of the real Claude CLI ({agentEval.params.model}) on one scenario we wrote. The graph is this project&rsquo;s own import graph. None of it compares Quorum with any product. Read from bench/*.json.
+        {a.scenarios} generated, seeded scenarios; &ldquo;flat&rdquo; means the same nodes with no causal edges. The agent test is {agentTrials / 2} runs per arm of the real Claude CLI ({agentEval.params.model}) across four scenarios we wrote. The graph is this project&rsquo;s own import graph. None of it compares Quorum with any product. Read from bench/*.json.
       </p>
     </section>
   );

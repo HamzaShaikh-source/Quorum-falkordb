@@ -2,6 +2,18 @@
 
 All notable changes to Quorum. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] - 2026-10-18
+
+### Added
+- **A real corpus with a plain-search baseline** (`bench/real_corpus_eval.py`): 437 installed Python packages as source material, 120 generated questions, no LLM judge.
+- **Three more real-agent scenarios** (access grant, discount quote, production release): `bench/agent_eval.py --scenario all`. Across the four, a wrong action ran 28 of 14 times with flat memory and 0 of 14 with Quorum.
+- **A load and race test over real HTTP** (`bench/hub_load.py`): 100 concurrent agents; the guard let exactly one through in every race.
+
+### Fixed
+- **Retrieval now says "I do not know"** about something memory has never seen: a fact matched only by generic words is no longer an answer (0.0% to 100.0% abstention on questions about packages that do not exist).
+- Read-only POSTs (`/api/context/retrieve`, `/api/work/announce`, `/api/brain/ask`, `/api/blast/*`) skip the durability sync: a retrieval went from about 90 ms to about 4 ms.
+- Concurrent writers share one durable sync (group commit), written so a caller already holding the store lock never waits on another thread; the FalkorDB health check no longer stampedes the database.
+
 ## [1.2.0] - 2026-10-17
 
 ### Added

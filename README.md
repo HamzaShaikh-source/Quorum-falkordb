@@ -6,7 +6,7 @@
 Shared memory for AI agents and teammates, built on FalkorDB. When a fact turns out to be wrong, one step quarantines it and everything built on it, blocks any action that depends on it, and compensates the ones that already ran.
 
 [![CI](https://github.com/HamzaShaikh-source/Quorum-falkordb/actions/workflows/ci.yml/badge.svg)](https://github.com/HamzaShaikh-source/Quorum-falkordb/actions/workflows/ci.yml)
-[![Backend](https://img.shields.io/badge/backend%20tests-483%20passed-brightgreen?style=flat-square)](backend/tests)
+[![Backend](https://img.shields.io/badge/backend%20tests-490%2B%20passed-brightgreen?style=flat-square)](backend/tests)
 [![Frontend](https://img.shields.io/badge/frontend%20tests-215%20passed-brightgreen?style=flat-square)](frontend)
 [![Accessibility](https://img.shields.io/badge/axe--core-0%20violations-brightgreen?style=flat-square)](frontend/scripts/a11y.mjs)
 [![Types](https://img.shields.io/badge/mypy%20%2B%20ruff-clean-brightgreen?style=flat-square)](mypy.ini)
@@ -90,11 +90,13 @@ It runs the traversal in FalkorDB and in the API process, compares the two, and 
 
 | What | Result | How to reproduce |
 | --- | --- | --- |
-| **A real agent, with and without provenance** | A Claude agent (`haiku`, the real `claude -p` CLI, 10 runs per arm) issued the wrong refund **10 of 10** times from a lingering conclusion when memory had no causal edges, and **0 of 10** times with the same memory and the same correction in Quorum | `python bench/agent_eval.py` ([`bench/agent_eval_results.json`](bench/agent_eval_results.json)) |
+| **A real agent, with and without provenance** | The real `claude -p` CLI (`haiku`) in four scenarios (refund, access grant, discount quote, production release), 14 runs per arm in total: a wrong action ran **28 of 14** times when memory had no causal edges and **0 of 14** times with the same memory and the same correction in Quorum | `python bench/agent_eval.py --scenario all` ([`bench/agent_eval_*results.json`](bench)) |
 | **Cascade on a real graph** | This project's own import graph (70 modules, 300 edges, ripple up to 53 modules): ripple recall and precision **100%** against an independent `ast` oracle | `python bench/real_graph_ripple.py` |
 | **Red team of the write path** | 31 attacks (forged origin, credentials, oversize and malformed fields, injection text, id collisions, cross-tenant and cross-team reads, privilege escalation, hostile peers, secret guessing): all refused or inert. Five got through at first and are fixed | `pytest backend/tests/test_redteam.py` |
+| **A real corpus** | 437 installed Python packages (1,326 facts citing their own METADATA): plain search never refuses a question about a package that does not exist (0.0%), Quorum refuses 100.0%; on "which packages are affected if this is wrong?" plain search names the exact set 10.0% of the time, Quorum 100.0%; ripple recall and precision 100% (widest: typing-extensions -> 385 nodes) | `python bench/real_corpus_eval.py` |
+| **100 concurrent agents over HTTP** | 750 mixed requests in 23.5 s, 0 errors, every acknowledged write present; 20 races of 100 agents on one execute guard: exactly one winner every time. Throughput on this laptop (Docker for Windows): 31.9 ops/s mixed, 132.9 ops/s reads. Modest, and stated plainly | `python bench/hub_load.py` |
 | Flat memory vs causal edges, 24 generated scenarios | 62 of 62 at-risk actions ran vs 0 of 62 | `python bench/ablation_graph.py` |
-| Backend tests | 483 pass, against a real FalkorDB in CI | `python -m pytest backend/tests` |
+| Backend tests | 490+ pass, against a real FalkorDB in CI | `python -m pytest backend/tests` |
 | Console, live | 59 of 59 checks, with an MCP client acting as an agent | `cd frontend && npm run qa:live` |
 | Two real hubs, real MCP protocol | discover, connect, notify, approve, read, manage, cascade in FalkorDB | `python scripts/e2e_connect.py` ([`docs/AI_SETUP.md`](docs/AI_SETUP.md)) |
 | Accessibility | axe-core, 0 serious or critical violations on every screen, desktop and phone | `cd frontend && npm run qa:a11y` |

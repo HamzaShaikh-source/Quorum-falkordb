@@ -138,6 +138,15 @@ async def request_id_middleware(request: Request, call_next):
     return response
 
 
+# POST routes that only read (a question needs a body, so it is a POST). They change nothing, so there is nothing to make durable:
+# skipping the write-through sync for them is what lets a hub serve hundreds of retrievals a second.
+_READ_ONLY_POSTS = ("/api/context/retrieve", "/api/work/announce", "/api/brain/ask", "/api/blast/")
+
+
+def _is_read_only_post(path: str) -> bool:
+    return path == "/api/events" or path.startswith(_READ_ONLY_POSTS)
+
+
 def _is_open_path(path: str) -> bool:
     return path in ("/api/health", "/docs", "/openapi.json", "/redoc") or path.startswith("/docs/")
 
@@ -296,7 +305,7 @@ async def falkordb_gate(request: Request, call_next):
         return _unavailable(h["error"] or "unreachable")
     try:
         response = await call_next(request)
-        if path != "/api/events" and request.method != "GET":
+        if request.method != "GET" and not _is_read_only_post(path):
             # Writes are durable before the caller hears "accepted".
             await run_in_threadpool(sync_all, getattr(request.state, "request_id", None))
         return response

@@ -1,0 +1,52 @@
+{
+  "params": {
+    "hub": "http://127.0.0.1:8013",
+    "script": "bench/hub_load.py"
+  },
+  "mixed_workload": {
+    "agents": 100,
+    "seconds": 23.5,
+    "requests": 750,
+    "throughput_ops_s": 31.9,
+    "p50_ms": 2833.1,
+    "p95_ms": 4544.2,
+    "p99_ms": 4929.5,
+    "median_ms_by_kind": {
+      "retrieve": 2774.0,
+      "observe": 3013.7,
+      "announce": 2598.3
+    },
+    "errors": 0,
+    "acknowledged_observe_facts": 138,
+    "facts_in_graph": 138,
+    "books_balance": true
+  },
+  "execute_race": {
+    "trials": 20,
+    "agents_per_trial": 100,
+    "winners_per_trial": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "exactly_one_winner_every_trial": true
+  },
+  "limits": "One machine, FalkorDB in Docker beside the hub, rate limits off, a development hub; numbers are for that setup only."
+}

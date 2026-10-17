@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     RANK_KEYWORD_WEIGHT: float = 0.5
     RANK_VECTOR_WEIGHT: float = 0.5
     RANK_VECTOR_MIN: float = 0.30
+    # "I do not know": a fact matched only by words most facts share is not an answer when the question names something unseen.
+    RANK_SPECIFIC_DF: float = 0.20
+    RANK_UNGROUNDED_MIN_COS: float = 0.60
     # Largest request body the API accepts, in bytes.
     MAX_BODY_BYTES: int = 1_000_000
     # Failed sign-ins from one address per minute before it is locked out for a minute. 0 turns it off.

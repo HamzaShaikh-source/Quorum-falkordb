@@ -124,3 +124,105 @@ def test_a_long_chain_is_quarantined_to_the_end_with_no_depth_limit(falkor):
     assert all(store.nodes[f"c{i}"].status == Status.QUARANTINED for i in range(n))
     # a cap lower than the chain is never reported as a complete answer
     assert store.closure_in_falkordb("c0", CAUSAL, "out", max_depth=50) is None
+
+
+def test_concurrent_writers_share_syncs_and_every_acknowledged_write_is_durable(falkor):
+    """Group commit: 60 threads each add a fact and commit. Far fewer than 60 syncs run, and a restart still finds all 60."""
+    import threading
+
+    store = queries.get_graph_store(falkor)
+    real_sync = store.persister.sync
+    syncs = {"n": 0}
+
+    def counting(*a, **k):
+        syncs["n"] += 1
+        return real_sync(*a, **k)
+
+    store.persister.sync = counting
+    errors = []
+
+    def writer(i):
+        try:
+            store.add_node(_node(f"w{i}"))
+            store.commit()
+            # durable on return: the checkpoint written by the sync that covered this write must contain it
+            assert f"w{i}" in store.persister.nodes
+        except BaseException as e:  # noqa: BLE001
+            errors.append(e)
+
+    threads = [threading.Thread(target=writer, args=(i,)) for i in range(60)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert not errors, errors
+    assert syncs["n"] < 60, f"{syncs['n']} syncs for 60 writers: no sharing happened"
+    queries.forget_stores()
+    reloaded = queries.get_graph_store(falkor)
+    assert all(f"w{i}" in reloaded.nodes for i in range(60))
+
+
+def test_a_failed_sync_surfaces_to_the_caller_and_does_not_wedge_later_commits(falkor):
+    store = queries.get_graph_store(falkor)
+    store.add_node(_node("x1"))
+    real = store.persister.sync
+    calls = {"n": 0}
+
+    def flaky(*a, **k):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise RuntimeError("database went away")
+        return real(*a, **k)
+
+    store.persister.sync = flaky
+    with pytest.raises(RuntimeError):
+        store.commit()
+    assert store.commit() >= 0  # the next commit runs normally
+    queries.forget_stores()
+    assert "x1" in queries.get_graph_store(falkor).nodes
+
+
+def test_committing_while_holding_the_store_lock_never_deadlocks_against_a_group_commit(falkor):
+    """The auditor and executor commit while holding the store lock; another thread running a group commit must not wedge them."""
+    import threading
+
+    store = queries.get_graph_store(falkor)
+    for i in range(20):
+        store.add_node(_node(f"d{i}"))
+    store.commit()
+    stop = threading.Event()
+    errors = []
+
+    def background_writers():
+        i = 0
+        while not stop.is_set():
+            try:
+                store.add_node(_node(f"bg{threading.get_ident()}_{i}"))
+                store.commit()
+                i += 1
+            except BaseException as e:  # noqa: BLE001
+                errors.append(e)
+                return
+
+    ts = [threading.Thread(target=background_writers, daemon=True) for _ in range(6)]
+    for t in ts:
+        t.start()
+    done = threading.Event()
+
+    def holder():
+        for i in range(25):
+            with store._lock:  # exactly what auditor.quarantine does
+                store.add_node(_node(f"h{i}"))
+                store.commit()
+        done.set()
+
+    h = threading.Thread(target=holder, daemon=True)
+    h.start()
+    assert done.wait(60), "a commit made while holding the store lock deadlocked"
+    stop.set()
+    for t in ts:
+        t.join(10)
+    assert not errors, errors
+    queries.forget_stores()
+    reloaded = queries.get_graph_store(falkor)
+    assert all(f"h{i}" in reloaded.nodes for i in range(25))

@@ -209,7 +209,32 @@ def rank(candidates: List[GraphNode], query: str, idf: Dict[str, float]) -> List
             out.append((n, 0.0, c))
             continue
         out.append((n, settings.RANK_KEYWORD_WEIGHT * min(1.0, l / lmax) + settings.RANK_VECTOR_WEIGHT * c + (0.02 if _kind(n) in ("fact", "conclusion") else 0.0), c))
+    out = _grounding_gate(out, candidates, qw, idf)
     return sorted(out, key=lambda x: -x[1])
+
+
+def _grounding_gate(out: List[Tuple[GraphNode, float, float]], candidates: List[GraphNode], qw: Set[str], idf: Dict[str, float]) -> List[Tuple[GraphNode, float, float]]:
+    """
+    Say "I do not know" when the question names something memory has never seen. If a question word is unknown to a memory of
+    any size (an unresolved entity, like a package or customer that does not exist) and the only evidence for a fact is generic words
+    that most facts share ("version", "installed"), the fact is not an answer. A vector match above RANK_UNGROUNDED_MIN_COS still
+    rescues a typo or a paraphrase. Small memories are left alone: there, every word is informative.
+    """
+    from app.config import settings
+
+    if len(candidates) < 30:
+        return out
+    unresolved = [w for w in qw if w not in _STOP and w not in idf and len(w) >= 4]
+    if not unresolved:
+        return out
+    n_docs = len(candidates)
+    specific = {w for w in qw if w in idf and 1.0 / max(1e-9, math.exp(idf[w]) - 1.0) <= settings.RANK_SPECIFIC_DF}
+    kept: List[Tuple[GraphNode, float, float]] = []
+    for n, sc, c in out:
+        if sc > 0 and not (specific & _node_words(n)) and c < settings.RANK_UNGROUNDED_MIN_COS:
+            sc = 0.0
+        kept.append((n, sc, c))
+    return kept if n_docs else out
 
 
 def _raw(n: GraphNode) -> Dict[str, Any]:
