@@ -409,6 +409,266 @@
       "who": "agent",
       "writes": true,
       "saves": "Facts are captured from what you already wrote, with no extra tool call per fact"
+    },
+    {
+      "name": "quorum_help",
+      "summary": "Every command and what it does",
+      "args": [
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "any",
+      "writes": false,
+      "saves": "One short list instead of reading documentation"
+    },
+    {
+      "name": "quorum_start",
+      "summary": "Guided setup: team size, name, focus, capture, teammates",
+      "args": [
+        {
+          "name": "team_size",
+          "required": false,
+          "default": 0
+        },
+        {
+          "name": "team_name",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "focus",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "auto_remember",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "look_for_teammates",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "any",
+      "writes": true,
+      "saves": "Setup happens in the chat, not in a console"
+    },
+    {
+      "name": "quorum_status",
+      "summary": "What is remembered, what will be, what is shared with whom",
+      "args": [
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "any",
+      "writes": false,
+      "saves": "A few lines instead of a dashboard"
+    },
+    {
+      "name": "quorum_manage",
+      "summary": "Teams, people, permission levels, tokens and sharing links",
+      "args": [
+        {
+          "name": "action",
+          "required": false,
+          "default": "overview"
+        },
+        {
+          "name": "name",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "team",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "member",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "level",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "seats",
+          "required": false,
+          "default": 0
+        },
+        {
+          "name": "client",
+          "required": false,
+          "default": "custom"
+        },
+        {
+          "name": "other",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "scope",
+          "required": false,
+          "default": "team"
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "human",
+      "writes": true,
+      "saves": "Team changes without leaving the chat"
+    },
+    {
+      "name": "quorum_discover",
+      "summary": "Other Quorum hubs on this network",
+      "args": [
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "any",
+      "writes": false,
+      "saves": "Find teammates without typing addresses"
+    },
+    {
+      "name": "quorum_connect",
+      "summary": "Ask to join a discovered hub; its admin is notified",
+      "args": [
+        {
+          "name": "peer",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "message",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "human",
+      "writes": true,
+      "saves": "Join a teammate's memory with one sentence"
+    },
+    {
+      "name": "quorum_inbox",
+      "summary": "Connection requests waiting for you",
+      "args": [
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "human",
+      "writes": false,
+      "saves": "Requests reach you in the chat you already use"
+    },
+    {
+      "name": "quorum_respond",
+      "summary": "Approve or decline a request and pick a level",
+      "args": [
+        {
+          "name": "request_id",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "decision",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "level",
+          "required": false,
+          "default": "contributor"
+        },
+        {
+          "name": "team",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "human",
+      "writes": true,
+      "saves": "One decision, access follows automatically"
+    },
+    {
+      "name": "quorum_connections",
+      "summary": "Hubs you are connected to and requests you sent",
+      "args": [
+        {
+          "name": "reveal",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "human",
+      "writes": false,
+      "saves": "Connection state and settings in one call"
+    },
+    {
+      "name": "peer_retrieve",
+      "summary": "Ask a connected hub a question within your granted scope",
+      "args": [
+        {
+          "name": "peer",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "query",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "k",
+          "required": false,
+          "default": 3
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "human",
+      "writes": false,
+      "saves": "Read a teammate's shared context without copying it"
     }
   ]
 }

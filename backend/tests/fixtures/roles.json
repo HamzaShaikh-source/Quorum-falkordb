@@ -69,7 +69,7 @@
     {
       "key": "manage",
       "label": "Manage people, teams, links, plan and tokens",
-      "detail": "the Team page and /api/workspace",
+      "detail": "the Team page, /api/workspace, and quorum_manage, quorum_connect, quorum_respond in chat",
       "agent": false,
       "auditor": false,
       "human": true

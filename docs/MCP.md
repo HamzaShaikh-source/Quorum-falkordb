@@ -37,6 +37,24 @@ Three levels, shown with plain names on the Team page (the stored role names are
 
 An admin changes a person's level on the **Team** page (the Permission level column) or with `PATCH /api/workspace/members/{id}` `{"role": "auditor"}`. It applies on that token's next call; no new token is needed. A refused call now says who was refused, why, what level is needed and where to change it (Activity shows a "Change permissions" button on those rows). The table on the Team page is the hub's own (`GET /api/roles`, `backend/app/services/roles.py`); a test checks every row against what is enforced. When the levels change, regenerate `backend/tests/fixtures/roles.json` (`python -c "import json; from app.services import roles; open('backend/tests/fixtures/roles.json','w').write(json.dumps(roles.catalog(), indent=2)+chr(10))"` with `backend` on the path).
 
+## The chat layer: set up and run a team without the console
+
+Ten more tools sit beside the 15 memory tools (25 in all; `QUORUM_TOOL_PROFILE=core` lists only the memory tools). Each returns a short `text` the AI can show as is, plus the data behind it. Full walkthrough: [`AI_SETUP.md`](AI_SETUP.md).
+
+| Tool | Who | What it does |
+| --- | --- | --- |
+| `quorum_help` | anyone | Every command and what it does. |
+| `quorum_start` | anyone to read, Admin to apply | No arguments: the five survey questions. With answers: names the team, sets seats, records the capture preference, looks for teammates. |
+| `quorum_status` | anyone | What is remembered, what will be remembered, who it is shared with, who is connected, tokens saved. |
+| `quorum_manage` | Admin (overview: Reviewer too) | `team_create`, `team_seats`, `team_remove`, `member_add`, `member_set_level`, `member_move`, `member_new_token`, `member_remove`, `link`, `pause_link`, `resume_link`, `unlink`. A new token is shown once. |
+| `quorum_discover` | anyone | Other Quorum hubs on the network (found by the host-side beacon). |
+| `quorum_connect` | Admin | Ask to join a hub by name or by address. Its admin is notified. |
+| `quorum_inbox`, `quorum_respond` | Admin | See and answer requests; approving adds a member at the level chosen (Contributor by default). |
+| `quorum_connections` | Admin | Hubs you joined and requests you sent; `reveal=true` prints the MCP settings for attaching a hub to an AI client. |
+| `peer_retrieve` | Admin | Ask a connected hub a question, within the level its admin granted you. |
+
+An Admin token also gets one extra line, `N connection request(s) waiting for you`, on any tool result while a request is open. REST equivalents for the console: `GET /api/peers`, `GET /api/connect/inbox`, `POST /api/connect/inbox/{id}/respond`, `POST /api/connect/outgoing`; the public handshake another hub uses is `GET /api/connect/hello`, `POST /api/connect/request`, `GET /api/connect/requests/{id}/status` (with the requester's secret in `X-Connect-Secret`).
+
 ## Rate limits
 
 A token bucket per caller: `QUORUM_RATE_LIMIT_TOOLS_PER_MIN` (default 600, burst 100) for tool calls per token, and `QUORUM_RATE_LIMIT_HTTP_PER_MIN` (default 3000, burst 500) for HTTP requests per token or address. `/api/health` and the event stream are exempt. A throttled HTTP request gets `429` and `Retry-After`; a throttled tool call returns `{"rate_limited": true, "retry_after": …}` and writes nothing. `0` turns a limit off. **A bulk import (hundreds of `remember_fact` calls in a burst) will be throttled: raise the limit or set it to `0` for the import**, and check the count afterwards. The limiter is in memory in one process; it protects the hub from a runaway loop, it is not a billing quota.
@@ -72,7 +90,7 @@ Measured: `bench/retrieval_bench.py` (offline) and `bench/ai_retrieval_bench.py`
 
 ## State that survives a restart
 
-Everything is in FalkorDB: nodes, links, handoffs, the epoch, the workspace, the call log (last 5,000 calls), **what each agent has already read** (so `delta` still works after a restart) and the node vectors.
+Everything is in FalkorDB: nodes, links, handoffs, the epoch, the workspace (teams, members, links, connection requests and the survey answers), the call log (last 5,000 calls), **what each agent has already read** (so `delta` still works after a restart) and the node vectors.
 
 ## HTTPS for a team
 

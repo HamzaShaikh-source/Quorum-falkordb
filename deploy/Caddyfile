@@ -1,0 +1,35 @@
+# TLS front door for the hub. One address serves the console, the API and /mcp over HTTPS, so laptops on other
+# machines connect to https://<your-host>:8443/mcp with their token in an Authorization header.
+#
+#   Local / LAN:   QUORUM_TLS=internal (default). Caddy makes its own certificate authority; trust it on each laptop
+#                  (docs/SETUP.md, "HTTPS for a team").
+#   Public host:   QUORUM_DOMAIN=quorum.example.com  QUORUM_TLS=you@example.com  -> a Let's Encrypt certificate.
+{
+	auto_https disable_redirects
+}
+
+{$QUORUM_DOMAIN:localhost}:8443 {
+	tls {$QUORUM_TLS:internal}
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		-Server
+	}
+
+	# Server-sent events and MCP streams must not be buffered.
+	@live path /api/events* /mcp*
+	handle @live {
+		reverse_proxy backend:8000 {
+			flush_interval -1
+		}
+	}
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+	handle {
+		reverse_proxy frontend:5173
+	}
+}

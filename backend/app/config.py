@@ -58,6 +58,14 @@ class Settings(BaseSettings):
     EMBED_URL: str = ""
     EMBED_MODEL: str = ""
     EMBED_API_KEY: str = ""
+    # Name other people see when they discover this hub on the network (default: the workspace name).
+    HUB_NAME: str = ""
+    # Accept "connect to your hub" requests from other hubs on the network (a person still approves each one). Off = invisible.
+    DISCOVERY: bool = True
+    # Peers are private-network addresses only unless this is set (e.g. a hub on a VPN with public addressing).
+    PEERS_ALLOW_PUBLIC: bool = False
+    # Which tools the MCP server lists: "full" (memory + chat layer) or "core" (the 15 memory tools only, fewest tokens in the prompt).
+    TOOL_PROFILE: Literal["full", "core"] = "full"
     # JSON object {"<token>": {"tenant": "...", "role": "agent|auditor|human", "agent_id": "..."}} added to the demo tokens.
     TOKENS_JSON: str = ""
 

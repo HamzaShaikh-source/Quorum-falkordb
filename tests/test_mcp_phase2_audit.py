@@ -111,7 +111,7 @@ class TestMCPProtocolAndJSONRPC:
         payload = json.loads(line[6:])
         tools = payload["result"]["tools"]
         tool_names = {t["name"] for t in tools}
-        assert len(tools) == 15
+        assert len(tools) == len(TOOLS) == 25
         assert tool_names == set(TOOLS)
 
 

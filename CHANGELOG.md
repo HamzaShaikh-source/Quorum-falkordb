@@ -2,6 +2,24 @@
 
 All notable changes to Quorum. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-10-17
+
+### Added
+- **Cascade, execute-guard ancestry and blast radius run as Cypher in FalkorDB** (one statement per hop, plus a Cypher status flip). `GET /api/falkordb/proof` compares FalkorDB's answer with an independent in-process walk and reports which engine answered each traversal. See `docs/FALKORDB.md`.
+- **Chat layer:** ten tools (`quorum_help`, `quorum_start`, `quorum_status`, `quorum_manage`, `quorum_discover`, `quorum_connect`, `quorum_inbox`, `quorum_respond`, `quorum_connections`, `peer_retrieve`) to set up, run a team and connect hubs from inside any AI chat.
+- **Hub-to-hub connection** with approval: a host-side UDP beacon (`scripts/quorum_beacon.py`), a public rate-limited handshake, an inbox with notification in the chat and the console, tokens minted at collection and never stored in plaintext, connect by address as a fallback.
+- **One-command setup:** `scripts/setup.py` (and `setup.bat`, `setup.sh`) writes `.env` with strong secrets, starts a production-rules hub reachable on the network (`docker-compose.team.yml`), starts the beacon, and prints the prompt to paste into an AI.
+- Console: **Connect with teammates** card on Team (approve with a level, ask to connect, toast on arrival) and a paste-into-your-AI prompt on Connect.
+- `bench/ablation_graph.py`: 24 generated scenarios, flat memory versus the same nodes with causal edges in FalkorDB.
+- `scripts/e2e_connect.py`: a real two-hub, real-protocol check of the whole flow; `frontend/scripts/record-demo.mjs`: records the demo video.
+- Restored the scripts and benchmarks the docs reference (`make_token`, `doctor`, `quorum_observer`, `reset_data`, retrieval and scale benches, TLS Caddyfile).
+
+### Fixed
+- A resync no longer leaves the guided story stuck on "running" (the buttons stayed disabled after a reset; roughly one live run in three).
+- The onboarding tour opens by itself only in story mode and never under automation, and honours reduced motion.
+- Phone navigation: the accessible name now contains the visible text (axe `label-content-name-mismatch`).
+- The Connect page shows the hub's real address instead of `localhost:8000`.
+
 ## [1.0.0] - 2026-10-15
 
 First production release.

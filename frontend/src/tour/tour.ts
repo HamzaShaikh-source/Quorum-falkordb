@@ -189,7 +189,7 @@ const TOUR_STEPS: DriveStep[] = [
 
 export function createTourDriver(): Driver {
   const driverInstance: Driver = driver({
-    animate: true,
+    animate: !(typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches),
     overlayColor: 'rgba(17, 24, 39, 0.5)',
     stagePadding: 8,
     stageRadius: 8,

@@ -11,6 +11,17 @@ from app.config import settings
 from app.graph.candidates import NodeRegistry
 
 
+# Which engine answered each graph traversal. `falkordb` means a Cypher statement ran in the database; `process` means the
+# in-process fallback answered (FalkorDB unreachable mid-call). /api/falkordb/proof reports these counters.
+GRAPH_STATS: Dict[str, int] = {"falkordb": 0, "process": 0}
+_stats_lock = threading.Lock()
+
+
+def _count(engine: str) -> None:
+    with _stats_lock:
+        GRAPH_STATS[engine] = GRAPH_STATS.get(engine, 0) + 1
+
+
 class CypherLogEntry(BaseModel):
     ts: int
     request_id: Optional[str] = None
@@ -49,6 +60,7 @@ class GraphStore:
         self.call_seq = 0
         # What each agent has already been handed, so delta() can say what changed since its last read.
         self.agent_state: Dict[str, Dict[str, Any]] = {}
+        self.last_cascade_engine = "none"
 
     MAX_CALLS = 5000
 
@@ -148,23 +160,70 @@ class GraphStore:
                     parents.append(p)
             return parents
 
+    def _process_closure(self, root_id: str, edge_types: Sequence[str]) -> Dict[str, int]:
+        """The same closure computed in this process (fallback and test oracle)."""
+        out_by_id: Dict[str, List[str]] = {}
+        for e in self.edges:
+            if e.type.value in edge_types:
+                out_by_id.setdefault(e.source, []).append(e.target)
+        seen: Dict[str, int] = {root_id: 0}
+        queue = deque([root_id])
+        while queue:
+            cur = queue.popleft()
+            for nxt in out_by_id.get(cur, []):
+                if nxt not in seen and nxt in self.nodes:
+                    seen[nxt] = seen[cur] + 1
+                    queue.append(nxt)
+        seen.pop(root_id, None)
+        return seen
+
+    def closure_in_falkordb(self, root_id: str, edge_types: Sequence[str], direction: str = "out", max_depth: int = 64) -> Optional[Dict[str, int]]:
+        """
+        The nodes reachable from root_id (not including it) and their hop depth, computed by FalkorDB.
+        One Cypher expansion per hop (a level-synchronous BFS driven by the database, linear in the edges touched rather
+        than in the number of paths). Returns None when there is no FalkorDB behind this store or the call failed, so the
+        caller can fall back to the in-process walk and the proof counters say which engine answered.
+        """
+        if self.persister is None:
+            return None
+        from app.persistence import _label
+
+        rel = "|".join(_label(t) for t in edge_types)
+        if direction == "out":
+            cypher = f"MATCH (a:QNode)-[:{rel}]->(b:QNode) WHERE a.id IN $ids RETURN DISTINCT b.id"
+        else:
+            cypher = f"MATCH (b:QNode)-[:{rel}]->(a:QNode) WHERE a.id IN $ids RETURN DISTINCT b.id"
+        try:
+            self.persister.sync()
+            seen: Dict[str, int] = {root_id: 0}
+            frontier = [root_id]
+            depth = 0
+            while frontier and depth < max_depth:
+                depth += 1
+                res = self.persister._q("traverse_hop", cypher, {"ids": frontier})
+                nxt = []
+                for row in res.result_set or []:
+                    nid = row[0]
+                    if nid not in seen:
+                        seen[nid] = depth
+                        nxt.append(nid)
+                frontier = nxt
+            seen.pop(root_id, None)
+            _count("falkordb")
+            return seen
+        except Exception:
+            _count("process")
+            return None
+
     def get_ancestors(self, node_id: str, edge_types: Optional[Sequence[str]] = None) -> List[GraphNode]:
         """Traverses backwards from node_id along incoming edges of given types."""
         types = list(edge_types) if edge_types is not None else ["LEADS_TO", "SUPPORTS"]
         if not types:
             return []
         with self._lock:
-            if self.persister is not None:
-                try:
-                    self.persister.sync()
-                    from app.persistence import _label
-                    rel_pattern = "|".join(_label(t) for t in types)
-                    cypher = f"MATCH (d:QNode {{id: $node_id}})<-[:{rel_pattern}*1..]-(root:QNode) RETURN DISTINCT root.id AS id"
-                    res = self.persister._q("get_ancestors", cypher, {"node_id": node_id})
-                    ids = [row[0] for row in (res.result_set or [])]
-                    return [self.nodes[i] for i in ids if i in self.nodes]
-                except Exception:
-                    pass
+            found = self.closure_in_falkordb(node_id, types, "in")
+            if found is not None:
+                return [self.nodes[i] for i in found if i in self.nodes]
 
             visited = set()
             queue = [node_id]
@@ -190,17 +249,9 @@ class GraphStore:
         if not types:
             return []
         with self._lock:
-            if self.persister is not None:
-                try:
-                    self.persister.sync()
-                    from app.persistence import _label
-                    rel_pattern = "|".join(_label(t) for t in types)
-                    cypher = f"MATCH (root:QNode {{id: $node_id}})-[:{rel_pattern}*1..]->(d:QNode) RETURN DISTINCT d.id AS id"
-                    res = self.persister._q("get_descendants", cypher, {"node_id": node_id})
-                    ids = [row[0] for row in (res.result_set or [])]
-                    return [self.nodes[i] for i in ids if i in self.nodes]
-                except Exception:
-                    pass
+            found = self.closure_in_falkordb(node_id, types, "out")
+            if found is not None:
+                return [self.nodes[i] for i in found if i in self.nodes]
 
             visited = set()
             queue = [node_id]
@@ -295,14 +346,6 @@ class GraphStore:
 
             now_ms = int(time.time() * 1000)
 
-            # One process owns traversal; the auditor commits status and compensation intent together.
-            cypher = (
-                "MATCH (root:Fact {id:$root_id}) "
-                "OPTIONAL MATCH (root)-[:LEADS_TO|SUPPORTS*]->(descendant) "
-                "SET descendant.status='QUARANTINED', descendant.quarantined_at=timestamp(), descendant.quarantine_root=$root_id "
-                "RETURN descendant, depth"
-            )
-
             root.status = Status.QUARANTINED
             root.quarantined_at = now_ms
             root.released_at = None
@@ -310,39 +353,41 @@ class GraphStore:
             root.depth = 0
 
             affected = [{"id": root.id, "status": Status.QUARANTINED, "depth": 0, "root_id": root_id}]
+            causal = ("LEADS_TO", "SUPPORTS", "FROM_SOURCE")
 
-            # BFS for descendants to compute exact hop depth
-            queue = deque([(root_id, 0)])
-            visited = {root_id}
-            outgoing_by_id: Dict[str, List[GraphEdge]] = {}
-            for edge in self.edges:
-                if edge.type in (EdgeType.LEADS_TO, EdgeType.SUPPORTS, EdgeType.FROM_SOURCE):
-                    outgoing_by_id.setdefault(edge.source, []).append(edge)
+            # The decisive traversal runs in FalkorDB: it returns every descendant and its hop depth. The in-process walk below
+            # is only the fallback for a database that went away mid-call (and the oracle the tests compare against).
+            reached = self.closure_in_falkordb(root_id, causal, "out")
+            if reached is None:
+                reached = self._process_closure(root_id, causal)
+                self.last_cascade_engine = "process"
+            else:
+                self.last_cascade_engine = "falkordb"
+            for cid, hop in sorted(reached.items(), key=lambda kv: (kv[1], kv[0])):
+                child = self.nodes.get(cid)
+                if not child:
+                    continue
+                child.status = Status.QUARANTINED
+                child.quarantined_at = now_ms
+                child.released_at = None
+                child.quarantine_root = root_id
+                child.depth = hop
+                affected.append({"id": child.id, "status": Status.QUARANTINED, "depth": hop, "root_id": root_id})
 
-            while queue:
-                curr_id, curr_depth = queue.popleft()
-                outgoing = outgoing_by_id.get(curr_id, [])
-                for edge in outgoing:
-                    child_id = edge.target
-                    if child_id not in visited:
-                        visited.add(child_id)
-                        child = self.nodes.get(child_id)
-                        if child:
-                            child.status = Status.QUARANTINED
-                            child.quarantined_at = now_ms
-                            child.released_at = None
-                            child.quarantine_root = root_id
-                            child.depth = curr_depth + 1
-                            affected.append({
-                                "id": child.id,
-                                "status": Status.QUARANTINED,
-                                "depth": curr_depth + 1,
-                                "root_id": root_id,
-                            })
-                            queue.append((child_id, curr_depth + 1))
+            if self.last_cascade_engine == "falkordb" and self.persister is not None:
+                # The status flip itself is a Cypher write too, so the database holds the quarantine before the API answers.
+                try:
+                    self.persister._q(
+                        "cascade_flip",
+                        "UNWIND $rows AS r MATCH (n:QNode {id: r.id}) SET n.status = 'QUARANTINED', n.depth = r.depth",
+                        {"rows": [{"id": a["id"], "depth": a["depth"]} for a in affected]},
+                        request_id,
+                    )
+                except Exception:
+                    pass  # the checkpoint written by commit() carries the same state
 
             self.bump_epoch(request_id)
-            self.log_query("cascade_quarantine", cypher, (time.time() - start) * 1000, len(affected), request_id)
+            self.log_query("cascade_quarantine", "MATCH (a:QNode)-[:LEADS_TO|SUPPORTS|FROM_SOURCE]->(b:QNode) WHERE a.id IN $frontier RETURN DISTINCT b.id", (time.time() - start) * 1000, len(affected), request_id)
             return affected
 
     def restore_node(self, root_id: str, request_id: Optional[str] = None) -> List[str]:

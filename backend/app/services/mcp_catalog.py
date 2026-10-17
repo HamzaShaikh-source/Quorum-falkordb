@@ -21,6 +21,16 @@ META: Dict[str, tuple] = {
     "get_map": ("any", False, "Orientation in a few hundred tokens, for long sessions or an unfamiliar memory", "A small index of the shared memory: areas, hubs, how to ask"),
     "get_node": ("any", False, "A few lines instead of a document", "One node with its parents and children, by short id (F3) or full id"),
     "delta": ("any", False, "Refresh without re-reading", "What stopped being true since your last read, plus new matches"),
+    "quorum_help": ("any", False, "One short list instead of reading documentation", "Every command and what it does"),
+    "quorum_start": ("any", True, "Setup happens in the chat, not in a console", "Guided setup: team size, name, focus, capture, teammates"),
+    "quorum_status": ("any", False, "A few lines instead of a dashboard", "What is remembered, what will be, what is shared with whom"),
+    "quorum_manage": ("human", True, "Team changes without leaving the chat", "Teams, people, permission levels, tokens and sharing links"),
+    "quorum_discover": ("any", False, "Find teammates without typing addresses", "Other Quorum hubs on this network"),
+    "quorum_connect": ("human", True, "Join a teammate's memory with one sentence", "Ask to join a discovered hub; its admin is notified"),
+    "quorum_inbox": ("human", False, "Requests reach you in the chat you already use", "Connection requests waiting for you"),
+    "quorum_respond": ("human", True, "One decision, access follows automatically", "Approve or decline a request and pick a level"),
+    "quorum_connections": ("human", False, "Connection state and settings in one call", "Hubs you are connected to and requests you sent"),
+    "peer_retrieve": ("human", False, "Read a teammate's shared context without copying it", "Ask a connected hub a question within your granted scope"),
     "find_path": ("any", False, "Provenance without the whole subgraph", "Shortest causal chain between two nodes"),
 }
 
@@ -32,11 +42,11 @@ def _summary(doc: str) -> str:
 
 
 def catalog() -> List[Dict[str, Any]]:
-    from app.mcp_embed import TOOLS
+    from app.mcp_embed import active_tools
     from app.services import mcp_tools
 
     out = []
-    for name in TOOLS:
+    for name in active_tools():
         fn = getattr(mcp_tools, name)
         who, writes, saves, summary = META.get(name, ("any", False, "", _summary(inspect.getdoc(fn) or "")))
         args = []

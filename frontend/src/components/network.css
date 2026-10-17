@@ -1,0 +1,15 @@
+/* Connect with teammates: same paper-and-ink language as the Team page (1.5px ink borders, soft corners). */
+.nw { display: grid; gap: 18px; }
+.nw-head h2 { margin: 0 0 4px; }
+.nw-head p { margin: 0; color: var(--text-3); max-width: 70ch; }
+.nw-block h3 { margin: 0 0 8px; font-size: var(--t14); display: flex; align-items: center; gap: 8px; }
+.nw-badge { background: var(--text); color: #fff; border-radius: 99px; padding: 1px 8px; font-size: var(--t12); }
+.nw-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.nw-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding: 10px 12px; border: 1.5px solid var(--text); border-radius: 14px; background: #fff; }
+.nw-row > div:first-child { flex: 1 1 220px; min-width: 0; overflow-wrap: anywhere; }
+.nw-msg { display: block; color: var(--text-3); margin-top: 2px; }
+.nw-level select { min-width: 120px; }
+.nw-state { font-size: var(--t13); color: var(--text-3); }
+.nw-state.ok { color: var(--text); font-weight: 600; }
+.nw-state.ok::before { content: "\2713\00a0"; }
+.ai-prompt-text { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto; margin: 10px 0 0; padding: 12px; border: 1.5px solid var(--text); border-radius: 14px; background: #fff; font-size: var(--t12); }

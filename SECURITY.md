@@ -14,6 +14,8 @@
 | What gets stored from agent text | The capture hook and `observe` drop sentences that look like credentials (API keys, bearer tokens, private keys, `password=` pairs), and the hook redacts them before sending. |
 | Team privacy | Facts saved with `scope="team"` are visible only to that team and linked teams, on every read path (tools, graph, events, calls). |
 | Audit | Every MCP tool call and every write made through the console is in `GET /api/audit` (also the Activity page), with a CSV export that neutralises spreadsheet formulas. |
+| Connecting hubs | Discovery broadcasts a name and an address, never a token, and a packet is ignored unless its advertised address is the machine it came from. Peers must be on a private network (`QUORUM_PEERS_ALLOW_PUBLIC` to change), redirects are not followed. The public handshake is rate limited (12 a minute per address), capped at 25 open requests and off with `QUORUM_DISCOVERY=0`. Nothing is granted until an Admin approves, at a level they choose; the token is minted when the requester collects it, once, and the approving hub keeps only its hash. |
+| Management from chat | `quorum_manage`, `quorum_connect`, `quorum_respond` and friends need an Admin token and are checked per call, recorded in the audit log, and take effect on the target's next call. |
 
 ## What is not protected
 
@@ -21,6 +23,7 @@
 - No OAuth. Tokens are bearer secrets: anyone who has one has its role.
 - The call log keeps the last 5,000 calls.
 - The local vectors are not a security boundary; scope filtering happens before ranking, not after.
+- Setup's team mode serves plain HTTP on your local network: tokens cross it in clear text. On a network you do not control, put the TLS profile in front, or keep discovery off and use the stdio bridge over SSH.
 - A hub reached over plain HTTP (the default local demo) sends tokens in clear text. Use the TLS profile for anything beyond localhost.
 
 ## Checks that run

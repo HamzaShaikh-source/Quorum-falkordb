@@ -42,13 +42,15 @@ export function Console({ visible }: { visible: boolean }) {
   const reportRoot = useStore((s) => s.reportRoot);
 
   useEffect(() => {
-    if (!visible) return;
-    if (isTourSeen()) return;
+    // The tour walks through the guided story, so it opens by itself only there (a fresh install has nothing to point at yet; the
+    // header still offers it). It never opens under automation, and Escape, Skip or the close button always end it for good.
+    if (!visible || !story) return;
+    if (isTourSeen() || (typeof navigator !== 'undefined' && navigator.webdriver)) return;
     const timer = setTimeout(() => {
       startTour();
     }, 500);
     return () => clearTimeout(timer);
-  }, [visible]);
+  }, [visible, story]);
 
   return (
     <div className={`console${presentation ? ' presenting' : ''}`}>

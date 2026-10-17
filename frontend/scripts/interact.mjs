@@ -264,7 +264,7 @@ check('the graph area stays clear of the minimap and zoom dock', cyBox.b <= part
 // popovers: one at a time, close on outside click and Escape, focus returns to the trigger
 await page.getByRole('button', { name: /Filters/ }).click();
 check('filters popover opens', await page.locator('.filters').isVisible());
-await page.getByRole('button', { name: /Invariants hold/ }).click();
+await page.getByRole('button', { name: /Safety checks pass/ }).click();
 check('opening another popover closes the first', !(await page.locator('.filters').count()) && (await page.locator('.popover').isVisible()));
 await page.mouse.click(700, 500);
 await wait(200);
@@ -360,7 +360,7 @@ await wait(1000);
 await page.keyboard.press('p');
 await wait(500);
 check('P enters presentation mode and hides the scenario panel', (await page.locator('.scenario').count()) === 0);
-check('sample-data chip stays while presenting', await page.locator('.pill.sample').isVisible());
+check('sample-data chip stays while presenting', await page.locator('.pill.sample').first().isVisible());
 await page.keyboard.press('Escape');
 
 // responsive
@@ -387,7 +387,7 @@ await page.evaluate(() => document.activeElement instanceof HTMLElement && docum
 await page.keyboard.press('7');
 await page.locator('.cn').waitFor({ timeout: 3000 }).catch(() => {});
 check('Connect page reports MCP status honestly in sample mode', (await text('.cn-status')).includes('Sample data (simulated)'));
-check('Connect page lists the real MCP tools', (await page.locator('.cn-table tbody tr').count()) === 15);
+check('Connect page lists the real MCP tools', (await page.locator('.cn-table tbody tr').count()) === 25);
 check('Connect shows a getting-started checklist that ticks itself from real state', (await page.locator('.gs-steps li').count()) === 4 && (await page.locator('.gs-steps li.done').count()) >= 1 && (await page.locator('.gs-bar[role=progressbar]').count()) === 1);
 check('exactly one step is marked as the next one to do', (await page.locator('.gs-steps li.next').count()) === 1);
 check('Connect page lists the observe tool', (await page.locator('.cn-table tbody th', { hasText: /^observe$/ }).count()) === 1);

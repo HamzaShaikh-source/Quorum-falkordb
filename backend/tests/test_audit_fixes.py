@@ -271,8 +271,14 @@ def test_falkordb_cypher_cascade_and_path_finding():
     def fake_q(name, cypher, params=None, request_id=None):
         executed_queries.append((name, cypher, params))
         store.log_query(name, cypher, 1.5, 1, request_id, real=True)
-        if name == "cascade_quarantine":
-            return mock_res_cascade
+        if name == "traverse_hop":
+            res = MagicMock()
+            ids = set((params or {}).get("ids", []))
+            if "<-" in cypher or cypher.startswith("MATCH (b:QNode)-"):
+                res.result_set = [["root1"]] if "child1" in ids else []
+            else:
+                res.result_set = [["child1"]] if "root1" in ids else []
+            return res
         if name == "shortest_path":
             res = MagicMock()
             res.result_set = [[["root1", "child1"]]]
@@ -293,16 +299,17 @@ def test_falkordb_cypher_cascade_and_path_finding():
     mock_persister.sync = MagicMock()
     store.persister = mock_persister
 
-    # 1. The production auditor traverses under its process lock and commits the
-    # complete diff, rather than executing a separate partial Cypher cascade.
+    # 1. The auditor's cascade is a Cypher traversal in FalkorDB (one statement per hop) plus a Cypher status flip,
+    # all under the store lock, and the complete diff is committed afterwards.
     from app.services.auditor import auditor_service
     affected = auditor_service.quarantine(store, "root1", tenant=store.tenant)
-    mock_persister.sync.assert_called_once()
-    assert not any(q[0] == "cascade_quarantine" for q in executed_queries)
+    assert mock_persister.sync.called
+    assert [q[0] for q in executed_queries].count("traverse_hop") >= 2
+    assert any(q[0] == "cascade_flip" for q in executed_queries)
+    assert store.last_cascade_engine == "falkordb"
     assert store.nodes["root1"].status == Status.QUARANTINED
     assert store.nodes["child1"].status == Status.QUARANTINED
     assert len(affected) == 2
-    assert not any(e.name == "cascade_quarantine" for e in store.query_log)
 
     # 2. Test Cypher shortestPath via find_path
     res_path = cp.find_path(store, "root1", "child1")
@@ -313,9 +320,9 @@ def test_falkordb_cypher_cascade_and_path_finding():
     # 3. Test Cypher get_descendants & get_ancestors
     descs = store.get_descendants("root1")
     assert [d.id for d in descs] == ["child1"]
-    assert any(q[0] == "get_descendants" for q in executed_queries)
+    assert any(q[0] == "traverse_hop" for q in executed_queries)
 
     ancs = store.get_ancestors("child1")
     assert [a.id for a in ancs] == ["root1"]
-    assert any(q[0] == "get_ancestors" for q in executed_queries)
+    assert sum(1 for q in executed_queries if q[0] == "traverse_hop") >= 4
 

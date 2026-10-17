@@ -50,7 +50,7 @@
   .header .nav[data-count='10'] .navbtn svg {
     display: none;
   }
-  .header:has(.nav[data-count='10']) .pill.sample,
+  .header:has(.nav[data-count='10']) .pill.sample[title^="Demo sandbox"],
   .header:has(.nav[data-count='10']) .pill.saved .saved-w {
     display: none;
   }
@@ -363,5 +363,61 @@
   }
   .as-row time {
     grid-column: 2;
+  }
+}
+
+/* Between the phone layout and a wide desktop the ten-tab status row ran off the right edge (Guide was clipped at 1024px).
+   Keep every control, drop the words of the secondary ones; their names stay in aria-label and title. */
+@media (max-width: 1180px) {
+  .header .status .tour-btn span,
+  .header .status .guide-btn span,
+  .header .status .palette-btn .pb-label,
+  .header .status .palette-btn kbd {
+    display: none;
+  }
+  .header .status .tour-btn,
+  .header .status .guide-btn {
+    padding-inline: 10px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .header .status .conn-label,
+  .header .status .pill.sample[title^="Demo sandbox"] {
+    display: none;
+  }
+}
+
+@media (max-width: 1000px) {
+  .header .status .pill.saved .saved-w,
+  .header .status .pill.light .pill-text {
+    display: none;
+  }
+}
+
+/* With the ten-tab guided build the status row is wider than the free space until about 2100px (the page scrolled sideways at 1600-2000px). */
+@media (min-width: 1581px) and (max-width: 2200px) {
+  .header .status .pill.epoch {
+    display: none;
+  }
+}
+@media (min-width: 1181px) and (max-width: 2200px) {
+  .header .status .pill.mode,
+  .header .status .pill.light .pill-text,
+  .header .status .palette-btn kbd,
+  .header .status .tour-btn span {
+    display: none;
+  }
+}
+
+@media (min-width: 821px) and (max-width: 1000px) {
+  .header .status .iconbtn,
+  .header .status .palette-btn {
+    display: none;
+  }
+}
+@media (min-width: 821px) and (max-width: 845px) {
+  .header .status .tour-btn {
+    display: none;
   }
 }

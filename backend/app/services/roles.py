@@ -28,7 +28,7 @@ CAPABILITIES: List[Dict[str, Any]] = [
     {"key": "claim", "label": "Claim handoffs", "detail": "claim_handoff", "agent": "limited", "auditor": True, "human": True, "note": "Contributors can claim tasks only, not reviews or escalations."},
     {"key": "quarantine", "label": "Quarantine and restore facts", "detail": "quarantine, restore", "agent": False, "auditor": True, "human": True},
     {"key": "review", "label": "Approve or reject reviews", "detail": "review_handoff", "agent": False, "auditor": False, "human": True},
-    {"key": "manage", "label": "Manage people, teams, links, plan and tokens", "detail": "the Team page and /api/workspace", "agent": False, "auditor": False, "human": True},
+    {"key": "manage", "label": "Manage people, teams, links, plan and tokens", "detail": "the Team page, /api/workspace, and quorum_manage, quorum_connect, quorum_respond in chat", "agent": False, "auditor": False, "human": True},
 ]
 
 ORDER = ("agent", "auditor", "human")

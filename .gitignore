@@ -52,3 +52,9 @@ dist-ssr/
 Thumbs.db
 .env.production
 public/config.json
+
+# Secrets and local state written by scripts/setup.py
+.env
+.quorum/
+AI_SETUP_PROMPT.txt
+docs/demo/raw/

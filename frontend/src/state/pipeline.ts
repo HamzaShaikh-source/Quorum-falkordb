@@ -72,7 +72,11 @@ function flush() {
     if (ev.type === 'mcp_call') {
       for (const key of ['activity', 'token-stats', 'workspace']) void queryClient.invalidateQueries({ queryKey: [key] });
     }
-    if (ev.type === 'workspace_changed') void queryClient.invalidateQueries({ queryKey: ['workspace'] });
+    if (ev.type === 'workspace_changed') {
+      void queryClient.invalidateQueries({ queryKey: ['workspace'] });
+      const d = ev.data as { reason?: string; person?: string };
+      if (d.reason === 'connect_request') st.pushToast(`${d.person ?? 'Someone'} wants to connect to your hub. Open Team to answer.`, 'warn');
+    }
     const r = applyEvent(core, ev);
     core = { ...core, ...r.state };
     effects.push(...r.effects);
@@ -117,6 +121,9 @@ export async function loadGraph(expectedGen?: number): Promise<void> {
     ...snapshotToCore(st, g),
     reportRoot: st.reportRoot && g.nodes.some((n) => n.id === st.reportRoot) ? st.reportRoot : null,
     selectedId: st.selectedId && g.nodes.some((n) => n.id === st.selectedId) ? st.selectedId : null,
+    // A snapshot carries the graph, not "a step is running". Events up to its seq are dropped as already applied, so a step's
+    // `finished` event that arrives during the resync would never clear `active` and the story buttons would stay disabled.
+    scenario: { ...st.scenario, active: null },
     loaded: true,
     graphStale: false,
     loadError: null,

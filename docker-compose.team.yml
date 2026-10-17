@@ -1,0 +1,22 @@
+# Team mode: the production rules (token sign-in, FalkorDB password, no demo or guessable tokens) with the API/MCP and the
+# console reachable from other machines on your network. scripts/setup.py writes .env and runs this for you:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.team.yml up -d --build
+#
+# FalkorDB itself is never published; only the API (QUORUM_API_PORT, default 8000) and the console (QUORUM_UI_PORT, default 5173) are.
+services:
+  backend:
+    ports: !override ["${QUORUM_API_PORT:-8000}:8000"]
+    environment:
+      - QUORUM_DEFAULT_TENANT=${QUORUM_DEFAULT_TENANT:-team}
+      - QUORUM_HUB_NAME=${QUORUM_HUB_NAME:-}
+      - QUORUM_DISCOVERY=${QUORUM_DISCOVERY:-1}
+
+  frontend:
+    ports: !override ["${QUORUM_UI_PORT:-5173}:5173"]
+
+# Another Docker network may already use the default range (a VPN, a second hub on this machine). Set QUORUM_SUBNET to move it.
+networks:
+  default:
+    ipam:
+      config: !override [{subnet: "${QUORUM_SUBNET:-172.29.77.0/24}"}]

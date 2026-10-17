@@ -50,6 +50,24 @@ export const addLink = (a: string, b: string, scope: string) => api(WsView, 'POS
 export const pauseLink = (id: string, paused: boolean) => api(WsView, 'PATCH', `workspace/links/${encodeURIComponent(id)}`, { ...human, body: { paused } });
 export const removeLink = (id: string) => api(WsView, 'DELETE', `workspace/links/${encodeURIComponent(id)}`, human);
 
+export const Peers = z
+  .object({
+    hub: z.object({ hub_id: z.string(), name: z.string() }).passthrough(),
+    peers: z.array(z.object({ name: z.string(), hub_id: z.string(), url: z.string(), connected: z.boolean(), requested: z.boolean() })),
+    outgoing: z.array(z.object({ peer_name: z.string(), status: z.string() }).passthrough()),
+    connections: z.array(z.object({ peer_name: z.string(), role: z.string(), as_member: nul(z.string()), team: nul(z.string()) }).passthrough()),
+  })
+  .passthrough();
+export type Peers = z.infer<typeof Peers>;
+export const Inbox = z.object({
+  requests: z.array(z.object({ id: z.string(), person: z.string(), from_hub: z.string(), message: z.string(), status: z.string(), created_at: z.number() }).passthrough()),
+});
+export const getPeers = () => api(Peers, 'GET', 'peers', human);
+export const getInbox = () => api(Inbox, 'GET', 'connect/inbox', human);
+export const respondRequest = (id: string, approve: boolean, role: string) =>
+  api(z.object({ status: z.string() }).passthrough(), 'POST', `connect/inbox/${encodeURIComponent(id)}/respond`, { ...human, body: { approve, role } });
+export const connectTo = (peer: string, message: string) => api(z.object({ status: z.string() }).passthrough(), 'POST', 'connect/outgoing', { ...human, body: { peer, message } });
+
 export const getActivity = (memberId?: string) => api(z.array(McpCall), 'GET', 'mcp/activity', { query: { limit: 150, member_id: memberId } });
 export const getTokenStats = () => api(TokenStats, 'GET', 'token-stats');
 export const getContextPreview = (query: string, budget: number) => api(ContextPreview, 'GET', 'context/preview', { query: { query, budget } });

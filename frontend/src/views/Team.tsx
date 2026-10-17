@@ -1,4 +1,5 @@
 import { PageTag } from '../components/PageTag';
+import { Network } from '../components/Network';
 import { useMemo, useState } from 'react';
 import { Icon } from '../components/Icon';
 import { fmt } from '../context/tokens';
@@ -585,6 +586,7 @@ export function Team() {
         <p>Choose a plan, split people into teams, give each person their own token and AI, then link them so context flows between laptops without anyone pasting anything.</p>
       </header>
       <Issued ws={ws} />
+      <Network />
       <Org ws={ws} />
       <Teams ws={ws} />
       <LevelGuide ws={ws} />

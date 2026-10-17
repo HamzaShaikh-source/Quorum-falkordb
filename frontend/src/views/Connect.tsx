@@ -2,6 +2,7 @@ import { PageTag } from '../components/PageTag';
 import { useEffect, useMemo, useState } from 'react';
 import { API_MODE } from '../api/client';
 import { GettingStarted } from '../components/GettingStarted';
+import { AiPrompt } from '../components/AiPrompt';
 import { Icon } from '../components/Icon';
 import { fmt, pct } from '../context/tokens';
 import { useStore } from '../state/store';
@@ -59,11 +60,19 @@ function CopyBlock({ title, body, lang, note }: { title: string; body: string; l
   );
 }
 
+/** The address other machines use: the hub's public URL (QUORUM_PUBLIC_URL), then the workspace label, then localhost. */
+function hubMcpUrl(publicUrl?: string | null, label?: string): string {
+  const base = publicUrl || label;
+  return base && /^https?:\/\//.test(base) ? `${base.replace(/\/+$/, '')}/mcp` : DEFAULT_MCP_URL;
+}
+
 function Status() {
-  const { tools } = useHub();
+  const { tools, hub } = useHub();
+  const ws = useWs();
   const mcp = useLive((s) => s.mcp);
   const check = useLive((s) => s.checkMcp);
-  const [url, setUrl] = useState(DEFAULT_MCP_URL);
+  const [typed, setUrl] = useState<string | null>(null);
+  const url = typed ?? hubMcpUrl(hub?.public_url, ws.hub);
   return (
     <section className="card wide cn-status" aria-label="MCP server status">
       <div className={`cn-light ${TONE[mcp.state]}`} aria-hidden="true" />
@@ -110,8 +119,7 @@ function Setup() {
   const { hub } = useHub();
   const members = ws.members;
   // Laptops on other machines connect to the hub's public address (QUORUM_PUBLIC_URL), then the workspace label, then localhost.
-  const base = hub?.public_url || ws.hub;
-  const mcpUrl = base && /^https?:\/\//.test(base) ? `${base.replace(/\/+$/, '')}/mcp` : DEFAULT_MCP_URL;
+  const mcpUrl = hubMcpUrl(hub?.public_url, ws.hub);
   const [client, setClient] = useState<ClientId>('claude-code');
   const [transport, setTransport] = useState<'http' | 'stdio'>('http');
   const [memberId, setMemberId] = useState(members[0]?.id ?? '');
@@ -130,7 +138,7 @@ function Setup() {
       <ol className="cn-steps">
         <li>
           <b>1. Start the server.</b> <span className="muted">Run it once per workspace.</span>
-          <code className="cn-cmd mono">docker compose up</code>
+          <code className="cn-cmd mono">python scripts/setup.py</code>
         </li>
         <li>
           <b>2. Paste this into your client.</b> <span className="muted">Pick yours:</span>
@@ -512,6 +520,7 @@ export function Connect() {
         <p>Run one MCP server, paste a snippet into Claude, Cursor, VS Code or anything else that speaks MCP, and every agent reads and writes the same graph.</p>
       </header>
       <GettingStarted />
+      <AiPrompt />
       <Status />
       <Setup />
       {API_MODE === 'mock' ? <Feeds /> : <LiveFeed />}

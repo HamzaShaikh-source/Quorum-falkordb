@@ -6,7 +6,7 @@ up in the console. Embedding puts both on one graph and one event bus. Standalon
 """
 from typing import Optional
 
-TOOLS = (
+CORE_TOOLS = (
     "remember_fact",
     "derive",
     "retrieve_context",
@@ -24,6 +24,30 @@ TOOLS = (
     "observe",
 )
 
+# The chat layer: onboarding, status, team management and connecting hubs from inside the AI chat.
+CHAT_TOOLS = (
+    "quorum_help",
+    "quorum_start",
+    "quorum_status",
+    "quorum_manage",
+    "quorum_discover",
+    "quorum_connect",
+    "quorum_inbox",
+    "quorum_respond",
+    "quorum_connections",
+    "peer_retrieve",
+)
+
+
+def active_tools():
+    """QUORUM_TOOL_PROFILE=core lists only the 15 memory tools (fewest tokens in the client's prompt)."""
+    from app.config import settings
+
+    return CORE_TOOLS if settings.TOOL_PROFILE == "core" else CORE_TOOLS + CHAT_TOOLS
+
+
+TOOLS = CORE_TOOLS + CHAT_TOOLS
+
 
 def build_mcp_app():
     """Returns the streamable-HTTP ASGI app, or None when the `mcp` package (2.x) is not installed."""
@@ -34,7 +58,7 @@ def build_mcp_app():
     from app.services import mcp_tools
 
     server = MCPServer("quorum")
-    for name in TOOLS:
+    for name in active_tools():
         server.tool()(mcp_tools.guarded(getattr(mcp_tools, name)))
     try:
         from mcp.server.transport_security import TransportSecuritySettings

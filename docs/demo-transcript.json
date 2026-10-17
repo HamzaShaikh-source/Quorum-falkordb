@@ -1,0 +1,138 @@
+[
+  {
+    "who": "Maya's AI",
+    "tool": "quorum_help",
+    "args": {},
+    "text": "Quorum commands (you are Admin):\nquorum_help: This list: every command and what it does  [anyone]\nquorum_start: Guided setup: a few questions (team size, name, focus, capture, teammates), then it configures the workspace  [anyone / admin applies]\nquorum_status: What is remembered, what will be remembered, what is shared with whom, who is connected, tokens saved  [anyone]\nretrieve_context: Look up what the team knows about a question (compact mode costs the fewest tokens)  [anyone]\nremember_fact: Save a fact with its source; scope=team keeps it private to your team  [contributor+]\nobserve: Save the durable facts already in some text, without one call per fact  [contributor+]\nderive: Record a conclusion built on parent facts, so a bad parent can take it back  [contributor+]\nstage_action: Propose an action; the safety gate decides, risky ones go to a person  [contributor+]\nexecute_action: Run a staged action under the guard (refused if any fact behind it is quarantined)  [contributor+]\nquarantine: Pull a wrong fact and everything built on it out of circulation  [reviewer+]\nrestore: Bring it back, only where every parent is healthy again  [reviewer+]\nexplain_blast_radius: Dry run: what a quarantine would touch  [anyone]\nreview_handoff: Approve or reject a task the gate sent to a person  [admin]\nclaim_handoff: Take a task with an exclusive lease  [contributor+]\nget_map: A few hundred tokens that orient you in the shared memory  [anyone]\nget_node: One node with its parents and children  [anyone]\nfind_path: How two facts are connected (FalkorDB shortest path)  [anyone]\ndelta: What stopped being true since you last looked  [anyone]\nquorum_manage: Teams, people, permission levels, tokens and sharing links, all from chat (action=overview lists what you can do)  [admin]\nquorum_discover: Other Quorum hubs visible on this network  [anyone]\nquorum_connect: Ask to join a hub you discovered; its admin is notified and approves  [admin]\nquorum_inbox: Connection requests waiting for you  [admin]\nquorum_respond: Approve or decline a connection request, choosing the permission level  [admin]\nquorum_connections: Hubs you are connected to, requests you sent, and the MCP settings to attach them  [admin]\npeer_retrieve: Ask a connected hub a question; you see only what its admin shared with you  [admin]\nStart with quorum_start if this is a new workspace, or quorum_status to see where things stand.",
+    "notice": ""
+  },
+  {
+    "who": "Maya's AI",
+    "tool": "quorum_start",
+    "args": {},
+    "text": "Welcome to Quorum: shared memory your AIs and teammates can trust, with a one-step undo for wrong facts.\nAsk these questions one at a time, then call quorum_start again with the answers:\n1. How many people will share this memory (including you)?\n2. What should your team be called?\n3. What will you mostly use it for? (customer support/engineering/operations/research/something else)\n4. Should durable facts from your chats be saved automatically (you can review and quarantine them any time)?\n5. Look for teammates already running Quorum on this network?\nCommands: call quorum_help.",
+    "notice": ""
+  },
+  {
+    "who": "Maya's AI",
+    "tool": "quorum_start",
+    "args": {
+      "team_size": 4,
+      "team_name": "Support Desk",
+      "focus": "customer support",
+      "auto_remember": true,
+      "look_for_teammates": true
+    },
+    "text": "Set up: team 'Support Desk' with room for 4.\nFocus: customer support.\nAutomatic capture is ON: install the capture hook (scripts/quorum_observer.py) or call observe on what you write; everything captured can be reviewed and quarantined.\nTeammates on this network: Hamza's Quorum\nNext: add people with quorum_manage(action='member_add'), or connect to a visible hub with quorum_connect. quorum_status shows the state any time.",
+    "notice": ""
+  },
+  {
+    "who": "Hamza's AI",
+    "tool": "quorum_start",
+    "args": {
+      "team_size": 3,
+      "team_name": "Platform",
+      "focus": "engineering",
+      "auto_remember": false,
+      "look_for_teammates": true
+    },
+    "text": "Set up: team 'Platform' with room for 3.\nFocus: engineering.\nAutomatic capture is OFF: facts are saved only when you or an agent call remember_fact or observe.\nTeammates on this network: Maya's Quorum\nNext: add people with quorum_manage(action='member_add'), or connect to a visible hub with quorum_connect. quorum_status shows the state any time.",
+    "notice": ""
+  },
+  {
+    "who": "Maya's AI",
+    "tool": "quorum_discover",
+    "args": {},
+    "text": "Visible on this network:\n- Hamza's Quorum (http://10.182.25.101:18002)\nTo join one: quorum_connect(peer='<name>'). Their admin is notified and decides.",
+    "notice": ""
+  },
+  {
+    "who": "Maya's AI",
+    "tool": "quorum_connect",
+    "args": {
+      "peer": "Hamza's Quorum",
+      "message": "Hi, it is the support desk"
+    },
+    "text": "Request sent to Hamza's Quorum. Their admin has been notified. Call quorum_connections to see when they approve; nothing else is needed from you.",
+    "notice": ""
+  },
+  {
+    "who": "Hamza's AI",
+    "tool": "quorum_status",
+    "args": {},
+    "text": "You: Hamza, Admin. Workspace: Hamza's team.\nRemembered: 0 facts, 0 conclusions, 0 actions. Quarantined: 0. Stale: 0. Memory version 1.\nWill be remembered: facts you or your agents save (remember_fact, observe). Automatic capture is off.\nShared with: your team only (scope=team facts); facts saved without a team scope are visible to everyone in the workspace.\nNothing waiting on a person.\nTokens saved for you so far: 0 versus a typical top-8 retriever.\nPeople: 0 in 1 team(s). Connection requests waiting: 1. Connected hubs: none.",
+    "notice": "1 connection request(s) waiting for you: call quorum_inbox."
+  },
+  {
+    "who": "Hamza's AI",
+    "tool": "quorum_inbox",
+    "args": {},
+    "text": "Waiting for you:\n- cr_d7ed4b46: Maya from Maya's Quorum says \"Hi, it is the support desk\"\nAnswer with quorum_respond(request_id, decision='approve'|'decline', level='contributor'|'reviewer'|'admin').",
+    "notice": ""
+  },
+  {
+    "who": "Hamza's AI",
+    "tool": "quorum_respond",
+    "args": {
+      "request_id": "cr_d7ed4b46",
+      "decision": "approve",
+      "level": "reviewer"
+    },
+    "text": "Maya approved as Reviewer. They are notified and receive their access automatically.",
+    "notice": ""
+  },
+  {
+    "who": "Hamza's AI",
+    "tool": "quorum_status",
+    "args": {},
+    "text": "You: Hamza, Admin. Workspace: Hamza's team.\nRemembered: 0 facts, 0 conclusions, 0 actions. Quarantined: 0. Stale: 0. Memory version 1.\nWill be remembered: facts you or your agents save (remember_fact, observe). Automatic capture is off.\nShared with: your team only (scope=team facts); facts saved without a team scope are visible to everyone in the workspace.\nNothing waiting on a person.\nTokens saved for you so far: 0 versus a typical top-8 retriever.\nPeople: 1 in 1 team(s). Connection requests waiting: 0. Connected hubs: none.",
+    "notice": ""
+  },
+  {
+    "who": "Maya's AI",
+    "tool": "quorum_connections",
+    "args": {},
+    "text": "- Connected to Hamza's Quorum as Maya (Reviewer, team Platform). Ask it with peer_retrieve(peer='Hamza's Quorum', query=...).",
+    "notice": ""
+  },
+  {
+    "who": "Maya's AI",
+    "tool": "peer_retrieve",
+    "args": {
+      "peer": "Hamza's Quorum",
+      "query": "how many days do customers have to request a refund"
+    },
+    "text": "From Hamza's Quorum (1 match(es)):\n# context \u00b7 \"how many days do customers have to requ\u2026\"\nF1|Refunds are allowed within 30 days of delivery.",
+    "notice": ""
+  },
+  {
+    "who": "Maya's AI",
+    "tool": "quorum_status",
+    "args": {},
+    "text": "You: Maya, Admin. Workspace: Maya's team.\nRemembered: 0 facts, 0 conclusions, 0 actions. Quarantined: 0. Stale: 0. Memory version 1.\nWill be remembered: facts you or your agents save (remember_fact, observe), plus durable facts captured automatically from chats (capture is on).\nShared with: your team only (scope=team facts); facts saved without a team scope are visible to everyone in the workspace.\nNothing waiting on a person.\nTokens saved for you so far: 237 versus a typical top-8 retriever.\nPeople: 0 in 1 team(s). Connection requests waiting: 0. Connected hubs: Hamza's Quorum.",
+    "notice": ""
+  },
+  {
+    "who": "Maya's AI",
+    "tool": "quorum_manage",
+    "args": {
+      "action": "member_add",
+      "name": "Priya",
+      "team": "Support Desk",
+      "level": "contributor"
+    },
+    "text": "Added Priya as Contributor. Their token (shown once, treat as a password): qrm_...\nTheir AI setup: claude mcp add --transport http quorum http://10.182.25.101:18001/mcp --header \"Authorization: Bearer qrm_...\"\nOther clients: paste {\"mcpServers\": {\"quorum\": {\"url\": \"http://10.182.25.101:18001/mcp\", \"headers\": {\"Authorization\": \"Bearer qrm_...\"}}}}",
+    "notice": ""
+  },
+  {
+    "who": "Maya's AI",
+    "tool": "quorum_manage",
+    "args": {
+      "action": "member_set_level",
+      "member": "Priya",
+      "level": "reviewer"
+    },
+    "text": "Priya changed from Contributor to Reviewer. It applies on their next call.",
+    "notice": ""
+  }
+]

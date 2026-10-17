@@ -43,6 +43,20 @@ const SHORT: Record<View, string> = {
   activity: 'Logs',
 };
 
+/** On a phone the tab shows a short word. The accessible name must contain the visible text, so it follows the same breakpoint (the full name stays in the tooltip). */
+function useShortNav(): boolean {
+  const q = '(max-width: 820px)';
+  const [short, setShort] = useState(() => typeof matchMedia !== 'undefined' && matchMedia(q).matches);
+  useEffect(() => {
+    if (typeof matchMedia === 'undefined') return;
+    const mq = matchMedia(q);
+    const on = () => setShort(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return short;
+}
+
 function SavedPill() {
   const naive = useLive((s) => s.totals.naive);
   const used = useLive((s) => s.totals.used);
@@ -95,9 +109,9 @@ function InvariantLight() {
   const text = result ? (result.ok ? copy.invariants.ok : copy.invariants.bad(result.violations)) : copy.invariants.unknown;
   return (
     <div className="pop-wrap">
-      <button className={`pill light ${state}`} aria-expanded={open} data-popover-trigger="invariants" onClick={() => set({ invariantsOpen: !open })}>
+      <button className={`pill light ${state}`} aria-label={text} title={text} aria-expanded={open} data-popover-trigger="invariants" onClick={() => set({ invariantsOpen: !open })}>
         <Icon name="shield" size={13} />
-        {text}
+        <span className="pill-text">{text}</span>
       </button>
       {open && (
         <div className="popover" role="dialog" aria-label="Invariant checks" data-popover="invariants">
@@ -124,6 +138,7 @@ function InvariantLight() {
 }
 
 export function Header() {
+  const short = useShortNav();
   const story = useStore((s) => s.story);
   const shown = visibleViews(story);
   const view = useStore((s) => s.view);
@@ -144,7 +159,7 @@ export function Header() {
       </button>
       <nav aria-label={copy.header.menu} className="nav" data-count={shown.length} style={{ ["--tabs" as string]: shown.length }}>
         {VIEWS.filter((v) => shown.includes(v.id)).map((v) => (
-          <button key={v.id} className={`navbtn${view === v.id ? ' on' : ''}`} aria-current={view === v.id ? 'page' : undefined} aria-label={copy.nav[v.id]} title={copy.nav[v.id]} onFocus={(e) => e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest' })} onClick={() => set({ view: v.id })}>
+          <button key={v.id} className={`navbtn${view === v.id ? ' on' : ''}`} aria-current={view === v.id ? 'page' : undefined} aria-label={short ? (SHORT[v.id] ?? copy.nav[v.id]) : copy.nav[v.id]} title={copy.nav[v.id]} onFocus={(e) => e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest' })} onClick={() => set({ view: v.id })}>
             <Icon name={v.icon} size={16} />
             <span className="nav-tip" aria-hidden="true">{copy.nav[v.id]}</span>
             <span className="nav-label">

@@ -47,7 +47,7 @@ def _get_auth(token: str = "") -> Dict[str, Any]:
 
 
 def _summary(tool: str, bound: Dict[str, Any]) -> str:
-    for key in ("query", "id", "ref", "root_id", "key", "text", "label", "from_id"):
+    for key in ("query", "id", "ref", "root_id", "key", "text", "label", "from_id", "action", "peer", "request_id"):
         v = bound.get(key)
         if isinstance(v, str) and v:
             if tool == "find_path":
@@ -82,6 +82,18 @@ def _record(tool: str, bound: Dict[str, Any], out: Any, ms: float) -> None:
         }
     )
     event_bus.publish(info["tenant"], "mcp_call", {"call": rec})
+
+
+def _with_notice(tool: str, out: Any, bound: Dict[str, Any]) -> Any:
+    """Tell an admin, in the chat they are already in, that someone asked to connect (one short line, only while one is waiting)."""
+    if not isinstance(out, dict) or tool in ("quorum_inbox", "quorum_respond") or "notice" in out:
+        return out
+    from app.services.mcp_chat import notice_for
+
+    n = notice_for(resolve_token(effective_token(bound.get("token"))))
+    if n:
+        out["notice"] = n
+    return out
 
 
 def _header_from(ctx) -> str:
@@ -131,6 +143,7 @@ def guarded(fn):
                 return {"error": f"Rate limit reached. Retry in {wait:.1f}s.", "success": False, "rate_limited": True, "retry_after": round(wait, 1)}
             t0 = time.time()
             out = fn(*args, **kwargs)
+            out = _with_notice(fn.__name__, out, bound_args)
             try:
                 _record(fn.__name__, bound_args, out, (time.time() - t0) * 1000)
             except AuthError:

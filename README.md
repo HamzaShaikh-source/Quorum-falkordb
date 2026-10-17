@@ -9,7 +9,7 @@
 
 [![CI](https://github.com/HamzaShaikh-source/Quorum-falkordb/actions/workflows/ci.yml/badge.svg)](https://github.com/HamzaShaikh-source/Quorum-falkordb/actions/workflows/ci.yml)
 [![Backend Tests](https://img.shields.io/badge/pytest-CI%20gate%20%E2%89%A590%25%20coverage-brightgreen?style=flat-square)](backend/tests)
-[![Frontend Tests](https://img.shields.io/badge/vitest-114%20passed-brightgreen?style=flat-square)](frontend)
+[![Frontend Tests](https://img.shields.io/badge/vitest-215%20passed-brightgreen?style=flat-square)](frontend)
 [![Accessibility](https://img.shields.io/badge/axe--core-0%20violations%20(22%20screens)-brightgreen?style=flat-square)](frontend/scripts/a11y.mjs)
 [![Types](https://img.shields.io/badge/mypy%20%2B%20ruff-clean-brightgreen?style=flat-square)](mypy.ini)
 [![Benchmark](https://img.shields.io/badge/measured%20throughput-1437.1%20ops%2Fsec-blue?style=flat-square)](bench/results.json)
@@ -26,6 +26,16 @@
 Quorum is shared memory for AI agents where a wrong fact and its causal descendants can be quarantined, excluding them from healthy context. Latency depends on graph size and persistence; historical helper traversal timings are not end-to-end API timings. Run `docker compose up -d`, open http://localhost:5173, and follow the **Get started** card on the Connect page. Who it is for, the story, and what the numbers do and do not say: [`docs/IMPACT.md`](docs/IMPACT.md). Security model: [`SECURITY.md`](SECURITY.md). A real deployment (password-protected FalkorDB, TLS, tokens, sign-in): [`docs/SETUP.md`](docs/SETUP.md#production-in-one-command).
 
 A fresh install is **empty on purpose** (no sample data). The guided poisoned-webhook story is opt-in: `QUORUM_DEMO=1 docker compose up -d`.
+
+## Get started in three minutes (no console needed)
+
+```bash
+python scripts/setup.py        # Windows: double-click setup.bat   macOS/Linux: ./setup.sh
+```
+
+That starts a production-rules hub (token sign-in, FalkorDB password) on your network and prints **one prompt**. Paste it into Claude, Cursor, VS Code, Antigravity, Windsurf or any MCP-capable AI. It connects itself, lists every command and what it does (`quorum_help`), runs a five-question survey (`quorum_start`), looks for teammates on your Wi-Fi/LAN (`quorum_discover`), and shows what is remembered, what will be remembered and what is shared (`quorum_status`). Say "connect me to Maya's Quorum" and Maya's admin is notified in the chat they already use, approves at a level they choose, and you are connected with no token pasted by hand. Teams, people and permission levels are managed by asking (`quorum_manage`). Details, per-client notes and the safety model: [`docs/AI_SETUP.md`](docs/AI_SETUP.md).
+
+**Graph-native, precisely:** the quarantine cascade, the execute guard's ancestry check and the blast-radius preview run as Cypher in FalkorDB; the atomic check-and-set stays under a lock in the single API writer. Verify on a running hub with `GET /api/falkordb/proof`; read [`docs/FALKORDB.md`](docs/FALKORDB.md). Over 24 generated poisoned-fact scenarios, a flat memory let 62 of 62 at-risk actions run; the same nodes with their causal edges in FalkorDB let 0 of 62 run (`bench/ablation_graph.py`, limits stated there). For judges: [`docs/HACKATHON.md`](docs/HACKATHON.md).
 
 ## Executive Summary
 
@@ -66,7 +76,7 @@ When an autonomous agent ingests an erroneous or malicious fact, standard RAG ar
                                       ▼                            ▼
                       ┌──────────────────────────────┐   ┌───────────────────────┐
                       │   Atomic Execute Guard (L2)  │   │   Outbox Saga Worker  │
-                      │  (Single Cypher Check-&-Set) │   │ (Automated Reversals) │
+                      │  (Ancestry in FalkorDB, lock) │   │ (Automated Reversals) │
                       └──────────────┬───────────────┘   └───────────┬───────────┘
                                      │                               │
                                      ▼                               ▼
@@ -276,7 +286,7 @@ Built with ❤️ for the <b>Graph Hacks: Context for AI Agents</b> Hackathon (O
 ## Context, Connect and Team (console)
 
 - **Context** shows the memory as a mind map for people and as a compact map plus packed answer for agents, with live token numbers against a top-8 retriever, pasted notes and raw JSON. In live mode the numbers come from the backend with the same code agents call, and the page shows what was **measured with real Claude Code sessions**: 78% fewer tool-result tokens and 18% lower session cost on real-sized documents, same answers (`docs/TOKEN_SAVING.md`).
-- **Connect** shows a real MCP handshake, gives paste-ready setup for Claude Code, Claude Desktop, Cursor, VS Code, Windsurf, Antigravity and any MCP client, lists the 15 tools (read from the hub), and shows every real tool call (who, what, tokens used vs a top-8 retriever) plus per-member tool-call sessions.
+- **Connect** shows a real MCP handshake, gives paste-ready setup for Claude Code, Claude Desktop, Cursor, VS Code, Windsurf, Antigravity and any MCP client, lists the 25 tools (read from the hub), and shows every real tool call (who, what, tokens used vs a top-8 retriever) plus per-member tool-call sessions.
 - **Activity** is the audit log in plain sentences (who did what, when, what it cost), filterable, with a CSV export, for people who do not read graphs.
 - **Team** manages plan, teams, seats, members and links on the server. Each member gets their own token (shown once, stored as a hash) and presence comes from their real calls. Facts saved with `scope="team"` stay private to the team until a link shares them.
 
