@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import ablation from '../../../bench/ablation_results.json';
 import { Icon } from '../components/Icon';
 import { Measured } from '../components/Measured';
 import { buildMap, pack, savings } from '../context/packer';
@@ -45,7 +46,7 @@ export function Savings() {
   return (
     <section className="lp-section" id="savings">
       <Head
-        tag="06"
+        tag="07"
         kicker="Token savings"
         title="Send the AI a map, not the library."
         sub="Quorum keeps one organized memory. Agents read a tiny map, ask for the slice they need, cite ids, and refresh with deltas. Try it on a synthetic memory: the numbers below are computed live, not typed in."
@@ -100,13 +101,13 @@ export function Savings() {
   );
 }
 
-const SNIPPET = 'claude mcp add --transport http quorum http://localhost:8000/mcp';
+const SNIPPET = 'python scripts/setup.py';
 
 export function ConnectSection() {
   const [copied, setCopied] = useState(false);
   return (
     <section className="lp-section lp-dark" id="connect">
-      <Head dark tag="07" kicker="Connect any AI" title="One MCP server. Every laptop. Any model." sub="Add Quorum as a tool set in Claude, Cursor, VS Code, Windsurf, Antigravity or anything else that speaks MCP. Everyone reads and writes the same graph." />
+      <Head dark tag="08" kicker="Set up from your AI chat" title="One command. One prompt. Then just talk to it." sub="Run the setup, paste the prompt it prints into Claude, Cursor, VS Code, Antigravity, Windsurf or any MCP-capable AI. It connects itself, lists every command, asks a few questions, finds teammates on your network and shows what is remembered. No console needed." />
       <div className="lp-cn">
         <ul className="lp-cn-clients" aria-label="Works with">
           {CLIENTS.map((c) => (
@@ -125,16 +126,16 @@ export function ConnectSection() {
         </div>
         <ol className="lp-cn-steps">
           <li>
-            <b>Start the server</b>
-            <span>docker compose up</span>
+            <b>Run setup</b>
+            <span>Needs Docker and Python. It writes strong secrets and starts a hub on your network.</span>
           </li>
           <li>
-            <b>Paste one line</b>
-            <span>Per client, or use stdio for a single laptop</span>
+            <b>Paste the prompt</b>
+            <span>Your AI connects itself, shows every command and runs a five-question survey.</span>
           </li>
           <li>
-            <b>Watch it connect</b>
-            <span>Status, live feed and chats in the console</span>
+            <b>Say who to connect to</b>
+            <span>&ldquo;Connect me to Maya&rsquo;s Quorum.&rdquo; Her admin is told in her chat, approves, and you are in.</span>
           </li>
         </ol>
         <button className="lp-pill mint xl" onClick={() => go('app')}>
@@ -146,10 +147,64 @@ export function ConnectSection() {
   );
 }
 
+export function FalkorSection() {
+  const a = ablation.summary;
+  return (
+    <section className="lp-section" id="falkordb">
+      <Head tag="06" kicker="Graph-native" title="The graph decides what is safe to believe." sub="The quarantine cascade, the execute guard ancestry check and the blast radius run as Cypher inside FalkorDB, one statement per hop. A live endpoint compares FalkorDB with an independent walk, so the claim can be checked, not trusted." />
+      <div className="lp-stats" role="list">
+        <div role="listitem" className="lp-stat">
+          <b className="num">
+            {a.flat_leaked}/{a.actions_at_risk}
+          </b>
+          <span>at-risk actions a flat memory let run</span>
+        </div>
+        <div role="listitem" className="lp-stat">
+          <b className="num">
+            {a.quorum_leaked}/{a.actions_at_risk}
+          </b>
+          <span>with the same nodes and their edges in FalkorDB</span>
+        </div>
+        <div role="listitem" className="lp-stat">
+          <b className="num">{a.flat_tainted_conclusions_still_retrievable}</b>
+          <span>tainted conclusions still retrievable in the flat arm, versus {a.quorum_tainted_conclusions_still_retrievable}</span>
+        </div>
+        <div role="listitem" className="lp-stat">
+          <b className="num">{Math.round(a.cascade_ms_median)} ms</b>
+          <span>median cascade through FalkorDB, end to end</span>
+        </div>
+      </div>
+      <ul className="lp-team-points">
+        <li>
+          <Icon name="graph" size={18} /> Verify it on a running hub: <code className="mono">GET /api/falkordb/proof</code>
+        </li>
+        <li>
+          <Icon name="lock" size={18} /> The atomic check-and-set stays under a lock in one API writer; FalkorDB answers the ancestry question
+        </li>
+      </ul>
+      <p className="lp-note">
+        {a.scenarios} generated, seeded scenarios; &ldquo;flat&rdquo; means the same nodes with no causal edges. It shows that provenance changes the outcome, not how Quorum compares with any product. Read from bench/ablation_results.json.
+      </p>
+    </section>
+  );
+}
+
+export function DemoSection() {
+  return (
+    <section className="lp-section lp-dark" id="demo">
+      <Head dark tag="10" kicker="Watch it" title="Ninety-eight seconds, real output." sub="A poisoned fact contained in the console, a teammate asking to connect and being approved, and the chat commands, using tool output captured from two live hubs." />
+      <video className="lp-video" controls preload="none" playsInline poster="/demo/poster.jpg" aria-label="Quorum demo video">
+        <source src="/demo/quorum-demo.mp4" type="video/mp4" />
+        Your browser cannot play this video. It is in the repository at docs/demo/quorum-demo.mp4.
+      </video>
+    </section>
+  );
+}
+
 export function TeamsSection() {
   return (
     <section className="lp-section" id="teams">
-      <Head tag="08" kicker="Teams and enterprises" title="Many teams. Many laptops. One shared context." sub="Choose a plan, split people into teams, give each person a token and their own AI, then link their MCP servers. Linked members receive each other's changes as small deltas, not pasted context." />
+      <Head tag="09" kicker="Teams and enterprises" title="Many teams. Many laptops. One shared context." sub="Choose a plan, split people into teams, give each person a token and their own AI, then link their MCP servers. Linked members receive each other's changes as small deltas, not pasted context." />
       <div className="lp-plans">
         {(Object.keys(PLANS) as (keyof typeof PLANS)[]).map((k) => (
           <article key={k} className={`lp-plan${k === 'business' ? ' pick' : ''}`}>
@@ -165,10 +220,10 @@ export function TeamsSection() {
       </div>
       <ul className="lp-team-points">
         <li>
-          <Icon name="user" size={18} /> Per-person tokens with agent, auditor and human roles
+          <Icon name="user" size={18} /> Per-person tokens with Contributor, Reviewer and Admin levels, changed by asking your AI
         </li>
         <li>
-          <Icon name="link" size={18} /> Link members across laptops; pause or cut a link any time
+          <Icon name="link" size={18} /> Teammates on your network ask to connect; you approve in the chat, at the level you choose
         </li>
         <li>
           <Icon name="lock" size={18} /> Tenant isolation is enforced by the graph, not by convention

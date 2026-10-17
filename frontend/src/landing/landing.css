@@ -1575,3 +1575,11 @@ body.on-landing {
 .cr-fill.on { opacity: 0; }
 html:has(.cr-ring[data-mode='snap']) .cr-fill.on { opacity: 1; }
 @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) { .cr-fill { display: none; } }
+
+/* Demo video and the FalkorDB proof numbers */
+.lp-video { display: block; width: min(100%, 1040px); margin: 8px auto 0; border: 1.5px solid currentColor; border-radius: 16px; background: #000; aspect-ratio: 16 / 9; }
+#falkordb .lp-stat { display: grid; gap: 4px; }
+#falkordb .lp-stat b { font-size: clamp(28px, 4vw, 48px); line-height: 1.05; }
+#falkordb .lp-stat span { font-size: 14px; opacity: 0.8; }
+#falkordb .lp-team-points { margin-top: 28px; }
+#falkordb .lp-note { margin-top: 20px; opacity: 1; color: var(--text-3, #4b5563); }

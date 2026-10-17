@@ -10,9 +10,11 @@ export const landing = {
       ['defense', 'Defense'],
       ['console', 'Console'],
       ['proof', 'Proof'],
+      ['falkordb', 'FalkorDB'],
       ['savings', 'Savings'],
       ['connect', 'Connect'],
       ['teams', 'Teams'],
+      ['demo', 'Demo'],
     ] as [string, string][],
     cta: 'Open console',
     menu: 'Menu',
@@ -125,7 +127,7 @@ export const landing = {
     note: `Measured on ${bench.engine === 'falkordb' ? `FalkorDB ${bench.falkordb_version ?? ''}`.trim() : 'the in-memory model (not FalkorDB)'} by python bench/run.py and read straight from bench/results.json at build time. Numbers depend on the machine. Re-run it yourself with make proof.`,
   },
   tracks: {
-    tag: '09',
+    tag: '11',
     kicker: 'What it covers',
     title: 'Two tracks, one graph.',
     t2: {

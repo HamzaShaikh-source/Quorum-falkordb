@@ -4,6 +4,9 @@ Start here, in this order.
 
 | If you want to... | Read |
 |---|---|
+| Judge it on one page | [HACKATHON.md](HACKATHON.md) |
+| Set up and run a team from your AI chat | [AI_SETUP.md](AI_SETUP.md) |
+| See where FalkorDB decides, and verify it | [FALKORDB.md](FALKORDB.md) |
 | Run it | [SETUP.md](SETUP.md) |
 | Connect an AI assistant | [MCP.md](MCP.md) |
 | Understand who it is for and what the numbers mean | [IMPACT.md](IMPACT.md), [PROOF.md](PROOF.md) |

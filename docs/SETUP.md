@@ -2,6 +2,10 @@
 
 Quorum stores every belief, handoff and action in **FalkorDB**. It does not run without it: if FalkorDB is missing or misconfigured, the API answers `503 FALKORDB_UNAVAILABLE`, the MCP server refuses tool calls, and the console shows a locked setup screen instead of the product. There is no sample-data fallback in a normal build.
 
+## 0. The fast path
+
+`python scripts/setup.py` (or `setup.bat`, `./setup.sh`) does steps 1 to 3 for a team on one network: strong secrets in `.env`, production rules, the hub and console reachable from other machines (`docker-compose.team.yml`), the LAN beacon, and the prompt to paste into your AI. See [AI_SETUP.md](AI_SETUP.md). The rest of this page is the manual route and the production details.
+
 ## 1. Start everything (Docker)
 
 ```bash

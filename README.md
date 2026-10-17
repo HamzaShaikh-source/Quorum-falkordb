@@ -1,51 +1,110 @@
-> **Supported deployment: one API writer process with embedded MCP.** Execute guards and handoff claims run under process locks. One FalkorDB checkpoint statement stores authoritative recovery state; graph projections are independent, replayable writes. Separate API workers/standalone MCP writers are unsupported. Historical helper benchmarks below are not production API latency guarantees. See [audit remediation notes](docs/AUDIT_REMEDIATION.md).
-
-# Quorum: Graph-Native Correctable Memory & Coordination for Multi-Agent Systems
-
 <div align="center">
 
-**Git revert for AI agent beliefs.**  
-*Quorum quarantines a poisoned fact and its causal descendants. Healthy context excludes them until authorized restoration.*
+# Quorum
+
+**Git revert for AI agent beliefs.**
+Shared memory for AI agents and teammates, built on FalkorDB. When a fact turns out to be wrong, one step quarantines it and everything built on it, blocks any action that depends on it, and compensates the ones that already ran.
 
 [![CI](https://github.com/HamzaShaikh-source/Quorum-falkordb/actions/workflows/ci.yml/badge.svg)](https://github.com/HamzaShaikh-source/Quorum-falkordb/actions/workflows/ci.yml)
-[![Backend Tests](https://img.shields.io/badge/pytest-CI%20gate%20%E2%89%A590%25%20coverage-brightgreen?style=flat-square)](backend/tests)
-[![Frontend Tests](https://img.shields.io/badge/vitest-215%20passed-brightgreen?style=flat-square)](frontend)
-[![Accessibility](https://img.shields.io/badge/axe--core-0%20violations%20(22%20screens)-brightgreen?style=flat-square)](frontend/scripts/a11y.mjs)
+[![Backend](https://img.shields.io/badge/backend%20tests-439%20passed-brightgreen?style=flat-square)](backend/tests)
+[![Frontend](https://img.shields.io/badge/frontend%20tests-215%20passed-brightgreen?style=flat-square)](frontend)
+[![Accessibility](https://img.shields.io/badge/axe--core-0%20violations-brightgreen?style=flat-square)](frontend/scripts/a11y.mjs)
 [![Types](https://img.shields.io/badge/mypy%20%2B%20ruff-clean-brightgreen?style=flat-square)](mypy.ini)
-[![Benchmark](https://img.shields.io/badge/measured%20throughput-1437.1%20ops%2Fsec-blue?style=flat-square)](bench/results.json)
-[![Containment](https://img.shields.io/badge/measured%20containment-4.33ms-blue?style=flat-square)](docs/PROOF.md)
-[![Leakage](https://img.shields.io/badge/historical%20dataset%20leakage-0.0%25-brightgreen?style=flat-square)](bench/results.json)
-[![Hackathon](https://img.shields.io/badge/Graph%20Hacks-Oct%2015--18%2C%202026-orange?style=flat-square)](docs/QUORUM_BRIEF.md)
+[![FalkorDB](https://img.shields.io/badge/graph%20work-Cypher%20in%20FalkorDB-red?style=flat-square)](docs/FALKORDB.md)
+[![Graph Hacks](https://img.shields.io/badge/Graph%20Hacks-Oct%202026-orange?style=flat-square)](docs/HACKATHON.md)
+
+[**Watch the 98-second demo**](docs/demo/quorum-demo.mp4) · [For judges](docs/HACKATHON.md) · [Set up from your AI](docs/AI_SETUP.md) · [Where FalkorDB decides](docs/FALKORDB.md)
 
 </div>
 
 ---
 
-## In one minute
+## Why
 
-Quorum is shared memory for AI agents where a wrong fact and its causal descendants can be quarantined, excluding them from healthy context. Latency depends on graph size and persistence; historical helper traversal timings are not end-to-end API timings. Run `docker compose up -d`, open http://localhost:5173, and follow the **Get started** card on the Connect page. Who it is for, the story, and what the numbers do and do not say: [`docs/IMPACT.md`](docs/IMPACT.md). Security model: [`SECURITY.md`](SECURITY.md). A real deployment (password-protected FalkorDB, TLS, tokens, sign-in): [`docs/SETUP.md`](docs/SETUP.md#production-in-one-command).
+Agents that share memory share its mistakes. A partner feed claims refunds last 90 days; an agent files it as a fact; another derives "eligible for a refund" from it; a third sends the refund and drafts an email. Deleting the original fact removes none of that. Only the graph still knows what depended on what.
 
-A fresh install is **empty on purpose** (no sample data). The guided poisoned-webhook story is opt-in: `QUORUM_DEMO=1 docker compose up -d`.
+Quorum stores every belief, conclusion and action in a causal graph in FalkorDB. One correction then:
+
+1. **quarantines** the wrong fact and every conclusion, decision and action built on it (a Cypher traversal inside FalkorDB, with hop depth),
+2. **blocks** any pending action whose ancestry is no longer healthy,
+3. **compensates** actions that already ran, through an outbox with idempotency keys, and drafts a correction notice for anything that cannot be undone,
+4. keeps the quarantined facts out of every later retrieval until an authorised person restores them.
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screens/04-wave.png" alt="The quarantine wave: a wrong fact and everything built on it turn red by hop depth"><br><sub>A wrong fact and everything built on it, quarantined by hop depth.</sub></td>
+<td width="50%"><img src="docs/screens/chat-first/team.png" alt="Team page: connection request waiting for approval, hubs visible on the network"><br><sub>A teammate asks to connect; you approve at a permission level you choose.</sub></td>
+</tr>
+</table>
 
 ## Get started in three minutes (no console needed)
 
+You need Docker (running) and Python 3.
+
 ```bash
-python scripts/setup.py        # Windows: double-click setup.bat   macOS/Linux: ./setup.sh
+python scripts/setup.py        # Windows: double-click setup.bat    macOS/Linux: ./setup.sh
 ```
 
-That starts a production-rules hub (token sign-in, FalkorDB password) on your network and prints **one prompt**. Paste it into Claude, Cursor, VS Code, Antigravity, Windsurf or any MCP-capable AI. It connects itself, lists every command and what it does (`quorum_help`), runs a five-question survey (`quorum_start`), looks for teammates on your Wi-Fi/LAN (`quorum_discover`), and shows what is remembered, what will be remembered and what is shared (`quorum_status`). Say "connect me to Maya's Quorum" and Maya's admin is notified in the chat they already use, approves at a level they choose, and you are connected with no token pasted by hand. Teams, people and permission levels are managed by asking (`quorum_manage`). Details, per-client notes and the safety model: [`docs/AI_SETUP.md`](docs/AI_SETUP.md).
+It writes `.env` with strong random secrets, starts FalkorDB, the hub and the console with production rules (token sign-in, FalkorDB password), starts the LAN beacon, and prints **one prompt** (also copied to your clipboard). Paste it into Claude, Cursor, VS Code, Antigravity, Windsurf or any MCP-capable AI. Your AI then:
 
-**Graph-native, precisely:** the quarantine cascade, the execute guard's ancestry check and the blast-radius preview run as Cypher in FalkorDB; the atomic check-and-set stays under a lock in the single API writer. Verify on a running hub with `GET /api/falkordb/proof`; read [`docs/FALKORDB.md`](docs/FALKORDB.md). Over 24 generated poisoned-fact scenarios, a flat memory let 62 of 62 at-risk actions run; the same nodes with their causal edges in FalkorDB let 0 of 62 run (`bench/ablation_graph.py`, limits stated there). For judges: [`docs/HACKATHON.md`](docs/HACKATHON.md).
+| Step | Command it runs | What you get |
+| --- | --- | --- |
+| Connects itself to your hub | (MCP over HTTP with a bearer header) | No config files to edit by hand |
+| Shows every command | `quorum_help` | Each command and what it does, in plain words |
+| Asks five questions | `quorum_start` | Team size, name, what you use it for, auto-capture on or off, look for teammates |
+| Looks for teammates | `quorum_discover` | Other Quorum hubs on your Wi-Fi or LAN, by name |
+| Shows where things stand | `quorum_status` | What is remembered, what will be remembered, what is shared with whom |
 
-## Executive Summary
+Then everything happens in the chat:
 
-When an autonomous agent ingests an erroneous or malicious fact, standard RAG architectures (flat vector stores and naïve graph search) permanently contaminate downstream memory. As agents derive conclusions, execute external actions, and coordinate across handoffs, the poisoned context cascades silently.
+- **"Connect me to Maya's Quorum."** (`quorum_connect`) Maya's admin sees a notice in the chat they already use, approves at a permission level they choose (`quorum_inbox`, `quorum_respond`), and you are connected with no token pasted by hand. On networks that block discovery, give the address instead.
+- **"What do they know about refunds?"** (`peer_retrieve`) You read their shared memory within the level they granted.
+- **"Add Priya to Support as a contributor", "make her a reviewer", "pause the link between Priya and Quinn"** (`quorum_manage`) Teams, people, permission levels, tokens and sharing links, applied on the target's next call.
 
-**Quorum** solves this by storing all agent beliefs, derived conclusions, and staged actions inside a **causal Directed Acyclic Graph (DAG) on FalkorDB**. Every thought and action traces its provenance back to verifiable sources. When a root belief is invalidated, Quorum traverses downstream edges, excludes quarantined beliefs from retrieval, guards pending executions in its single API process, and persists quarantine state with compensation intent in one FalkorDB statement. A lifecycle worker recovers delivery using expiring leases and stable idempotency keys; latency depends on graph size and persistence costs.
+Per-client notes, the safety model and the full command table: [`docs/AI_SETUP.md`](docs/AI_SETUP.md). Just want to look around first? `QUORUM_DEMO=1 docker compose up -d`, then open http://localhost:5173 for the guided poisoned-fact story.
+
+## Graph-native, precisely
+
+The decisions that matter run as Cypher inside FalkorDB:
+
+| Decision | How |
+| --- | --- |
+| Which beliefs, actions and conclusions are built on a wrong fact, and how many hops away | `MATCH (a)-[:LEADS_TO\|SUPPORTS\|FROM_SOURCE]->(b) WHERE a.id IN $frontier RETURN DISTINCT b.id`, one statement per hop, then a Cypher status flip |
+| Is every ancestor of this action healthy? | The same traversal over incoming edges |
+| Blast-radius preview | The same traversal, read only |
+| Provenance between two facts | `shortestPath(...)` |
+| Semantic retrieval | FalkorDB vector index (`db.idx.vector.queryNodes`) |
+| Durable recovery state | One `MERGE` checkpoint statement plus replayable node and edge projections |
+
+What stays in the API process, honestly: the atomic check-and-set (a lock in the single writer; FalkorDB answers the ancestry question) and the keyword half of the ranking blend. Verify the rest on a running hub:
+
+```bash
+curl -H "Authorization: Bearer $QUORUM_ADMIN_TOKEN" http://localhost:8000/api/falkordb/proof
+```
+
+It runs the traversal in FalkorDB and in the API process, compares the two, and reports which engine answered every traversal since start-up. The same check is in the test suite on random graphs with shared parents and diamonds.
+
+**Does the graph change the outcome?** `bench/ablation_graph.py` runs 24 generated poisoned-fact scenarios through two arms with the same nodes and the same correction. Flat memory (no causal edges) let **62 of 62** at-risk actions run and left **170** tainted conclusions retrievable. The same nodes with their edges in FalkorDB let **0 of 62** run and left **0**. Median cascade through FalkorDB, end to end: 71 ms. The scenarios are generated and "flat" means "no edges": it shows provenance changes the outcome, not how Quorum compares with any product. Details: [`docs/FALKORDB.md`](docs/FALKORDB.md).
+
+## Measured
+
+| What | Result | How to reproduce |
+| --- | --- | --- |
+| Backend tests | 439 pass, against a real FalkorDB in CI | `python -m pytest backend/tests` |
+| Console, live | 59 of 59 checks, with an MCP client acting as an agent | `cd frontend && npm run qa:live` |
+| Two real hubs, real MCP protocol | 18 of 18: discover, connect, notify, approve, read, manage, cascade in FalkorDB | `python scripts/e2e_connect.py` ([`docs/AI_SETUP.md`](docs/AI_SETUP.md)) |
+| Accessibility | axe-core, 0 serious or critical violations on every screen, desktop and phone | `cd frontend && npm run qa:a11y` |
+| Poison leakage vs baseline models, depth 1 / 2 / 3 | 0% vs 100% | `python bench/run.py` |
+
+Every number is produced by a script in this repository; the harness and its limits are described in [`docs/PROOF.md`](docs/PROOF.md).
 
 ---
 
-## System Architecture & Defense Topology
+## Deployment boundary
+
+**One API writer process with embedded MCP per FalkorDB.** Execute guards and handoff claims run under process locks. One FalkorDB checkpoint statement stores authoritative recovery state; graph projections are independent, replayable writes. Separate API workers or standalone MCP writers are unsupported. Historical helper benchmarks below are not production API latency guarantees. See [audit remediation notes](docs/AUDIT_REMEDIATION.md) and [`SECURITY.md`](SECURITY.md).
+
+## How it works: architecture and the four layers of defense
 
 ```
                   ┌────────────────────────────────────────┐
@@ -94,7 +153,7 @@ When an autonomous agent ingests an erroneous or malicious fact, standard RAG ar
 
 ---
 
-## The Four Layers of Defense
+### The four layers
 
 Quorum enforces four deterministic, non-LLM safety layers:
 
@@ -121,7 +180,7 @@ Quorum enforces four deterministic, non-LLM safety layers:
 
 ---
 
-## Live Performance & Benchmark Metrics (PROOF PACK)
+## Benchmark harness (proof pack)
 
 All metrics are dynamically measured and generated by `python bench/run.py` into [`docs/PROOF.md`](docs/PROOF.md) and [`bench/results.json`](bench/results.json).
 
@@ -162,7 +221,7 @@ Measured on FalkorDB 8.10.2, on one developer laptop, by the harness above. The 
 |---|---|---|---|
 | **Frontend Console & Landing** | `3000` / `5173` | HTTP (React + Vite + Cytoscape) | Dual interface: Landing page (`#/`) and Incident Command Room (`#/app`) |
 | **Backend REST & SSE** | `8000` | HTTP / Server-Sent Events | FastAPI core causal API, event streaming, scenario driver |
-| **MCP Server** (embedded in the single backend writer; stdio through the bridge) | `8000` (`/mcp`) | Streamable HTTP (`/mcp`) & Stdio | Model Context Protocol server exposing 15 agent, token-saving, and auditor tools |
+| **MCP Server** (embedded in the single backend writer; stdio through the bridge) | `8000` (`/mcp`) | Streamable HTTP (`/mcp`) & Stdio | Model Context Protocol server exposing 25 tools: 15 memory, token-saving and auditor tools plus 10 chat tools for setup, teams and connecting hubs |
 | **Mock Helpdesk API** | `8002` | HTTP / JSON | External ticketing and refund API with atomic Tombstone protection |
 | **FalkorDB Graph Engine** | `6379` | Redis / Cypher | Graph database engine with vector indexing and per-tenant Redis ACLs |
 | **FalkorDB Web Browser** | `8080` | HTTP | Interactive FalkorDB graph visualizer |
@@ -189,6 +248,13 @@ Measured on FalkorDB 8.10.2, on one developer laptop, by the harness above. The 
 
 ---
 
+### The console beyond the graph
+
+- **Team** manages plan, teams, seats, members and links on the server, plus **Connect with teammates**: hubs visible on your network, requests waiting for your approval (with a permission level), and connections. Each member gets their own token (shown once, stored as a hash); presence comes from their real calls. Facts saved with `scope="team"` stay private to the team until a link shares them.
+- **Connect** shows a real MCP handshake, paste-ready setup for Claude Code, Claude Desktop, Cursor, VS Code, Windsurf, Antigravity and any MCP client, a **paste-into-your-AI prompt**, the 25 tools read from the hub, and every real tool call (who, what, tokens used against a top-8 retriever).
+- **Context** shows the memory as a mind map for people and as a compact map plus packed answer for agents, with live token numbers measured by the backend.
+- **Activity** is the audit log in plain sentences (who did what, when, what it cost), filterable, with a CSV export.
+
 ## Track Focus Breakdown & Verification
 
 Quorum is architected to address all three hackathon tracks natively:
@@ -198,15 +264,15 @@ Quorum is architected to address all three hackathon tracks natively:
 |---|---|---|---|
 | **T01-1: Multi-Hop Causal Reasoning** | Deep DAG traversal over `[:LEADS_TO\|SUPPORTS*]` to trace roots, leaf facts, and dependent conclusions. | `backend/app/graph/queries.py` (`get_leaf_facts`, `explain_blast_radius`) | `pytest backend/tests/test_auditor_qa.py` & `docs/PROOF.md` |
 | **T01-2: Graph Queries as Agent Tools** | Native Cypher algorithms and graph queries exposed directly to agents (`find_path`, `get_node`, `delta`). | `backend/app/services/mcp_tools.py`, `backend/app/services/context_pack.py` | `pytest backend/tests/test_mcp_hardening.py` & `docs/MCP.md` |
-| **T01-3: Tool Selection Through MCP** | 15-tool Model Context Protocol server over Streamable HTTP (`/mcp`) & stdio for Claude, Cursor, and Antigravity. | `backend/app/mcp_embed.py`, `mcp/server.py`, `mcp/bridge.py` | `GET /mcp` handshake & Connect tab in Console |
+| **T01-3: Tool Selection Through MCP** | 25-tool Model Context Protocol server (15 memory and auditor tools, 10 chat tools) over Streamable HTTP (`/mcp`) & stdio for Claude, Cursor, and Antigravity. | `backend/app/mcp_embed.py`, `mcp/server.py`, `mcp/bridge.py` | `GET /mcp` handshake & Connect tab in Console |
 | **T01-4: Actions Based on Graph Evidence** | Quorum Gate (Layer 1) & Atomic Execute Guard (Layer 2) enforce graph-backed policy verification before execution. | `backend/app/services/gate.py`, `backend/app/services/executor.py` | `pytest backend/tests/test_safety_engine.py` & `docs/screens/07-ledger.png` |
-| **T01-5: Explainable Agent Decisions** | Live Cytoscape causal DAG, prompt diff strikethrough, parameterised Cypher drawer, and Plain-English Activity feed. | `frontend/src/graph/GraphCanvas.tsx`, `frontend/src/views/Console.tsx` | Interactive Console (`#/app`) & `docs/screens/01-landing.png` |
+| **T01-5: Explainable Agent Decisions** | Live Cytoscape causal DAG, prompt diff strikethrough, parameterised Cypher drawer, and Plain-English Activity feed. | `frontend/src/graph/GraphCanvas.tsx`, `frontend/src/views/Console.tsx` | Interactive Console (`#/app`) & `docs/screens/04-wave.png` |
 
 ### Track 02: Agent Memory and Coordination (~50% Effort)
 | Focus | Description | Implementation | Where to Verify |
 |---|---|---|---|
-| **T02-1: Episodic, Semantic & Procedural Memory** | Multi-type memory: Messages, Facts, Conclusions, and Laplace-smoothed procedure ranking (`(successes+1)/(uses+2)`). | `backend/app/services/procedural.py`, `graph/queries.py` | `pytest backend/tests/test_safety_engine.py` & `docs/screens/10-memory.png` |
-| **T02-2: Persistent Conversation History** | Private raw graphs per agent (`tenant_<id>:agent_<n>:raw`), kill-and-resume 2-query flow, deterministic session summaries. | `backend/app/services/store.py`, `backend/app/routes/meta.py` | `pytest backend/tests/test_api_contract.py` & `docs/screens/10-memory.png` |
+| **T02-1: Episodic, Semantic & Procedural Memory** | Multi-type memory: Messages, Facts, Conclusions, and Laplace-smoothed procedure ranking (`(successes+1)/(uses+2)`). | `backend/app/routes/procedures.py`, `graph/queries.py` | `pytest backend/tests/test_safety_engine.py` & `docs/screens/10-memory.png` |
+| **T02-2: Persistent Conversation History** | Private raw graphs per agent (`tenant_<id>:agent_<n>:raw`), kill-and-resume 2-query flow, deterministic session summaries. | `backend/app/graph/queries.py`, `backend/app/routes/meta.py` | `pytest backend/tests/test_api_contract.py` & `docs/screens/10-memory.png` |
 | **T02-3: Shared State & Handoffs** | Atomic handoffs with lease timeouts, role-based claims (`TASK` for agents, `REVIEW` for humans). Exactly one winner. | `backend/app/routes/handoffs.py`, `graph/queries.py` | `python bench/run.py` (Suite 2: 100/100 claims) & `docs/screens/07-ledger.png` |
 | **T02-4: High Concurrency** | 30 concurrent agent threads with zero orphan invariants under heavy read/write load. | FalkorDB query pool, atomic store | `python bench/run.py` (Suite 1: 1437.1 ops/sec on FalkorDB) & `docs/screens/13-benchmark.png` |
 | **T02-5: Per-Tenant Memory Isolation** | Per-tenant Redis ACL users (`~tenant_<id>:*`); forbidden cross-tenant reads return 403. | `scripts/users.acl`, `tests/test_tenant_isolation.py` | `GET /tenants/denied-demo` & `docs/screens/12-tenants.png` |
@@ -222,7 +288,7 @@ Quorum is architected to address all three hackathon tracks natively:
 
 ---
 
-## Quickstart & Reproduction Guide
+## Other ways to run it, and how to test it
 
 > **FalkorDB is required.** Quorum stores every belief, handoff and action in FalkorDB. Without it the API answers `503 FALKORDB_UNAVAILABLE`, the MCP server refuses tool calls and the console shows a locked setup screen with the steps to fix it. There is no sample-data fallback in a normal build. Full guide: [`docs/SETUP.md`](docs/SETUP.md).
 
@@ -283,11 +349,17 @@ See [`docs/LIVE_TESTING.md`](docs/LIVE_TESTING.md).
 Built with ❤️ for the <b>Graph Hacks: Context for AI Agents</b> Hackathon (Oct 2026).
 </div>
 
-## Context, Connect and Team (console)
+## Documentation
 
-- **Context** shows the memory as a mind map for people and as a compact map plus packed answer for agents, with live token numbers against a top-8 retriever, pasted notes and raw JSON. In live mode the numbers come from the backend with the same code agents call, and the page shows what was **measured with real Claude Code sessions**: 78% fewer tool-result tokens and 18% lower session cost on real-sized documents, same answers (`docs/TOKEN_SAVING.md`).
-- **Connect** shows a real MCP handshake, gives paste-ready setup for Claude Code, Claude Desktop, Cursor, VS Code, Windsurf, Antigravity and any MCP client, lists the 25 tools (read from the hub), and shows every real tool call (who, what, tokens used vs a top-8 retriever) plus per-member tool-call sessions.
-- **Activity** is the audit log in plain sentences (who did what, when, what it cost), filterable, with a CSV export, for people who do not read graphs.
-- **Team** manages plan, teams, seats, members and links on the server. Each member gets their own token (shown once, stored as a hash) and presence comes from their real calls. Facts saved with `scope="team"` stay private to the team until a link shares them.
+| Start here | Then |
+| --- | --- |
+| [`docs/HACKATHON.md`](docs/HACKATHON.md) criteria and evidence on one page | [`docs/AI_SETUP.md`](docs/AI_SETUP.md) set up and run a team from your AI chat |
+| [`docs/FALKORDB.md`](docs/FALKORDB.md) where FalkorDB decides, and how to verify it | [`docs/MCP.md`](docs/MCP.md) clients, header auth, rate limits, the chat layer, the stdio bridge |
+| [`docs/SETUP.md`](docs/SETUP.md) production deployment, TLS | [`docs/TOKEN_SAVING.md`](docs/TOKEN_SAVING.md) how the token numbers are measured |
+| [`SECURITY.md`](SECURITY.md) what is protected and what is not | [`docs/README.md`](docs/README.md) the full index |
 
-Documentation index: [`docs/README.md`](docs/README.md). Details: [`docs/MCP.md`](docs/MCP.md) (clients, header auth, rate limits, the stdio bridge, passive capture, semantic ranking, HTTPS), [`docs/TOKEN_SAVING.md`](docs/TOKEN_SAVING.md), [`docs/CONTRACT_PROPOSALS.md`](docs/CONTRACT_PROPOSALS.md) (what the backend now provides and what is still open).
+<div align="center">
+
+Built for the <b>Graph Hacks: Context for AI Agents</b> hackathon (Oct 2026).
+
+</div>
