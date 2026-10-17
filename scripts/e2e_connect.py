@@ -58,6 +58,7 @@ async def main(a):
     import uuid
 
     pname = f"Priya {uuid.uuid4().hex[:4]}"
+    sfx = uuid.uuid4().hex[:5]
     async with client(a.a, a.a_token) as A, client(a.b, a.b_token) as B:
         LABELS[id(A)], LABELS[id(B)] = "Maya's AI", "Hamza's AI"
         names = {t.name for t in (await A.list_tools()).tools}
@@ -112,6 +113,7 @@ async def main(a):
         stat = await call(A, "quorum_status")
         check("quorum_status explains remembered, will-be-remembered and shared", all(w in stat["text"] for w in ("Remembered", "Will be remembered", "Shared with")), stat["counts"])
 
+        await call(A, "quorum_manage", action="team_seats", team="Support Desk", seats=50)  # reruns on the same hub keep adding people
         added = await call(A, "quorum_manage", action="member_add", name=pname, team="Support Desk", level="contributor")
         check("A creates a person and a token in chat", added.get("success") and added["token"].startswith("qrm_"), added["text"].splitlines()[0])
         async with client(a.a, added["token"]) as P:
@@ -121,25 +123,30 @@ async def main(a):
         check("A changes a person's permission level in chat", lv.get("success"), lv["text"])
 
         # a real chain on hub B, quarantined: the cascade must run in FalkorDB and agree with the independent walk
-        root = await call(B, "remember_fact", key="promo_window", value="90 days", text="A partner feed says refunds are allowed for 90 days.", id="e2e_root")
-        c1 = await call(B, "derive", text="So order 1042 is eligible for a refund.", parent_ids=["e2e_root"], id="e2e_c1")
-        c2 = await call(B, "derive", text="So we should refund order 1042 today.", parent_ids=["e2e_c1"], id="e2e_c2", is_decision=True)
+        root = await call(B, "remember_fact", key="promo_window", value="90 days", text=f"A partner feed (ref {sfx}) says refunds are allowed for 90 days.", id=f"e2e_root_{sfx}")
+        c1 = await call(B, "derive", text="So order 1042 is eligible for a refund.", parent_ids=[f"e2e_root_{sfx}"], id=f"e2e_c1_{sfx}")
+        c2 = await call(B, "derive", text="So we should refund order 1042 today.", parent_ids=[f"e2e_c1_{sfx}"], id=f"e2e_c2_{sfx}", is_decision=True)
         check("hub B holds a three-step causal chain", root.get("success", True) and c1.get("success", True) and c2.get("success", True), [root.get("fact_id"), c1.get("id") or c1.get("conclusion_id"), c2.get("id") or c2.get("conclusion_id")])
-        q = await call(B, "quarantine", root_id="e2e_root", reason="wrong policy")
+        t_mid = int(time.time() * 1000)
+        time.sleep(0.3)
+        q = await call(B, "quarantine", root_id=f"e2e_root_{sfx}", reason="wrong policy")
         check("quarantining the root takes everything built on it", q.get("success") and q.get("affected_count") == 3, q.get("affected_count"))
         # coordination and time: a collision warning, a leaver report, and what was believed before the quarantine
-        n1 = await call(B, "announce_work", target="order 1042", intent="refund review")
+        n1 = await call(B, "announce_work", target=f"order {sfx}", intent="refund review")
         check("announce_work: the first agent is clear", n1.get("clear") is True, n1.get("text"))
+        await call(B, "quorum_manage", action="team_seats", team="Platform", seats=50)  # reruns on the same hub keep adding people
         ename = f"Eve {uuid.uuid4().hex[:4]}"
         async with client(a.b, (await call(B, "quorum_manage", action="member_add", name=ename, team="Platform", level="contributor"))["token"]) as E:
-            n2 = await call(E, "announce_work", target="Order 1042", intent="refund")
+            n2 = await call(E, "announce_work", target=f"Order {sfx}", intent="refund")
             check("announce_work: a second agent is warned about the same order", n2.get("clear") is False and "refund review" in n2["text"], n2.get("text"))
-        rec = await call(B, "recall_as_of", query="refund window", minutes_ago=0.5)
-        check("recall_as_of answers from the past and says what happened since", rec.get("success") and rec["outcome"] in ("ANSWERED", "NOT_IN_MEMORY"), rec.get("text", "")[:80])
+        rec = await call(B, "recall_as_of", query=f"partner feed ref {sfx} refunds 90 days", as_of=t_mid)
+        check("recall_as_of returns what was believed before the quarantine, and says it was quarantined since", rec.get("outcome") == "ANSWERED" and any(f["now"] == "quarantined since" for f in rec["facts"]), rec.get("text", "")[:110])
+        now_ans = await call(B, "retrieve_context", query=f"partner feed ref {sfx} refunds 90 days")
+        check("retrieval today no longer returns the quarantined fact or anything built on it", sfx not in json.dumps(now_ans), now_ans.get("outcome"))
         lv = await call(B, "quorum_manage", action="leaver_report", member=ename)
         check("leaver_report says what leaves with a person", lv.get("success") and f"If {ename} leaves" in lv["text"], lv.get("text", "")[:90])
 
-        proof = httpx.get(a.b.rstrip("/") + "/api/falkordb/proof", params={"root": "e2e_root"}, headers={"Authorization": f"Bearer {a.b_token}"}).json()
+        proof = httpx.get(a.b.rstrip("/") + "/api/falkordb/proof", params={"root": f"e2e_root_{sfx}"}, headers={"Authorization": f"Bearer {a.b_token}"}).json()
         cmp = proof.get("comparison") or {}
         check("FalkorDB's traversal equals the independent in-process walk", cmp.get("identical") is True and (cmp.get("falkordb") or {}).get("descendants") == 2, cmp)
         check("the cascade ran in FalkorDB, not the fallback", proof["last_cascade_engine"] == "falkordb" and proof["traversals_answered_by"]["falkordb"] > 0 and proof["traversals_answered_by"]["process"] == 0, proof["traversals_answered_by"])

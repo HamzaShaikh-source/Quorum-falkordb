@@ -4,7 +4,7 @@
 
 When an agent learns something wrong, the wrong fact spreads: conclusions are built on it, actions are staged on it, other agents read it. Quorum stores every belief, conclusion and action in a causal graph in FalkorDB, so one correction quarantines the wrong fact and everything built on it, blocks any action that depends on it, and compensates the ones that already ran.
 
-## Watch it (95 seconds)
+## Watch it (under two minutes)
 
 [`docs/demo/quorum-demo.mp4`](demo/quorum-demo.mp4): the poisoned-fact story in the console, a teammate asking to connect and being approved, the paste-one-prompt setup, and the chat commands, using real tool output from two live hubs. Regenerate it: `frontend/scripts/record-demo.mjs`.
 

@@ -212,7 +212,7 @@ export function FalkorSection() {
 export function DemoSection() {
   return (
     <section className="lp-section lp-dark" id="demo">
-      <Head dark tag="10" kicker="Watch it" title="Ninety-eight seconds, real output." sub="A poisoned fact contained in the console, a teammate asking to connect and being approved, and the chat commands, using tool output captured from two live hubs." />
+      <Head dark tag="10" kicker="Watch it" title="Under two minutes, real output." sub="A poisoned fact contained in the console, a teammate asking to connect and being approved, and the chat commands, using tool output captured from two live hubs." />
       <video className="lp-video" controls preload="none" playsInline poster="/demo/poster.jpg" aria-label="Quorum demo video">
         <source src="/demo/quorum-demo.mp4" type="video/mp4" />
         Your browser cannot play this video. It is in the repository at docs/demo/quorum-demo.mp4.

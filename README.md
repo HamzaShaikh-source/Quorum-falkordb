@@ -6,14 +6,14 @@
 Shared memory for AI agents and teammates, built on FalkorDB. When a fact turns out to be wrong, one step quarantines it and everything built on it, blocks any action that depends on it, and compensates the ones that already ran.
 
 [![CI](https://github.com/HamzaShaikh-source/Quorum-falkordb/actions/workflows/ci.yml/badge.svg)](https://github.com/HamzaShaikh-source/Quorum-falkordb/actions/workflows/ci.yml)
-[![Backend](https://img.shields.io/badge/backend%20tests-439%20passed-brightgreen?style=flat-square)](backend/tests)
+[![Backend](https://img.shields.io/badge/backend%20tests-483%20passed-brightgreen?style=flat-square)](backend/tests)
 [![Frontend](https://img.shields.io/badge/frontend%20tests-215%20passed-brightgreen?style=flat-square)](frontend)
 [![Accessibility](https://img.shields.io/badge/axe--core-0%20violations-brightgreen?style=flat-square)](frontend/scripts/a11y.mjs)
 [![Types](https://img.shields.io/badge/mypy%20%2B%20ruff-clean-brightgreen?style=flat-square)](mypy.ini)
 [![FalkorDB](https://img.shields.io/badge/graph%20work-Cypher%20in%20FalkorDB-red?style=flat-square)](docs/FALKORDB.md)
 [![Graph Hacks](https://img.shields.io/badge/Graph%20Hacks-Oct%202026-orange?style=flat-square)](docs/HACKATHON.md)
 
-[**Watch the 98-second demo**](docs/demo/quorum-demo.mp4) · [For judges](docs/HACKATHON.md) · [Set up from your AI](docs/AI_SETUP.md) · [Where FalkorDB decides](docs/FALKORDB.md)
+[**Watch the under-two-minute demo**](docs/demo/quorum-demo.mp4) · [For judges](docs/HACKATHON.md) · [Set up from your AI](docs/AI_SETUP.md) · [Where FalkorDB decides](docs/FALKORDB.md)
 
 </div>
 
@@ -94,7 +94,7 @@ It runs the traversal in FalkorDB and in the API process, compares the two, and 
 | **Cascade on a real graph** | This project's own import graph (70 modules, 300 edges, ripple up to 53 modules): ripple recall and precision **100%** against an independent `ast` oracle | `python bench/real_graph_ripple.py` |
 | **Red team of the write path** | 31 attacks (forged origin, credentials, oversize and malformed fields, injection text, id collisions, cross-tenant and cross-team reads, privilege escalation, hostile peers, secret guessing): all refused or inert. Five got through at first and are fixed | `pytest backend/tests/test_redteam.py` |
 | Flat memory vs causal edges, 24 generated scenarios | 62 of 62 at-risk actions ran vs 0 of 62 | `python bench/ablation_graph.py` |
-| Backend tests | 480+ pass, against a real FalkorDB in CI | `python -m pytest backend/tests` |
+| Backend tests | 483 pass, against a real FalkorDB in CI | `python -m pytest backend/tests` |
 | Console, live | 59 of 59 checks, with an MCP client acting as an agent | `cd frontend && npm run qa:live` |
 | Two real hubs, real MCP protocol | discover, connect, notify, approve, read, manage, cascade in FalkorDB | `python scripts/e2e_connect.py` ([`docs/AI_SETUP.md`](docs/AI_SETUP.md)) |
 | Accessibility | axe-core, 0 serious or critical violations on every screen, desktop and phone | `cd frontend && npm run qa:a11y` |
