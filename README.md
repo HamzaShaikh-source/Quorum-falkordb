@@ -98,6 +98,31 @@ RETURN s.saga_id, a.target_system, s.compensation_payload, a.idempotency_key
 
 ---
 
+## 🛠️ What Your AI Gets (Model Context Protocol / MCP)
+
+When an AI agent connects to Quorum via the Model Context Protocol (MCP), it receives a suite of epistemic memory and coordination tools:
+
+| Tool | Description |
+| :--- | :--- |
+| `remember_fact` | Saves an atomic, verifiable fact with causal source provenance into FalkorDB. |
+| `derive` | Derives a higher-level conclusion or belief supported by existing active facts. |
+| `retrieve_context` | Retrieves active, non-quarantined context subgraphs for safe prompt construction. |
+| `stage_action` | Proposes a stateful action to the Quorum Gate along with cited fact IDs. |
+| `execute_action` | Executes a previously approved action with idempotency and saga registration. |
+| `claim_handoff` | Coordinates multi-agent handoffs with shared epistemic state across agents. |
+| `quarantine` | Quarantines a fact or belief and triggers a cascading red-wave invalidation. |
+| `restore` | Restores a quarantined fact and reactivates healthy downstream descendants. |
+| `supersede` | Replaces an outdated fact with a newer version and marks the ancestor as stale. |
+| `get_containment_report` | Calculates the blast radius and affected downstream decisions of a quarantined fact. |
+| `get_provenance` | Traces the complete backward causal lineage of any decision back to its root sources. |
+| `get_prompt_diff` | Computes context deltas to inspect and strip invalidated beliefs from prompts. |
+| `quorum_guide` | In-chat guide and client agreement reference for agent coordination. |
+| `audit_trail` | Queries chronological audit events, gate rejections, and operator overrides. |
+| `list_beliefs` | Lists active beliefs and their supporting fact counts for a tenant. |
+| `get_node` | Inspects detailed graph properties, timestamps, and validity states of any node. |
+
+---
+
 ## 🏆 4. Empirical Evaluation & Benchmark Results
 
 Tested across a paired synthetic & real-agent benchmark against standard vector/RAG memory architectures (see [`docs/PROOF.md`](docs/PROOF.md)):
@@ -105,7 +130,7 @@ Tested across a paired synthetic & real-agent benchmark against standard vector/
 - **Preventing Unsafe Actions After Correction:** 28/28 (100%) prevented in Quorum vs. 0/28 (0%) in standard vector memory.
 - **Topological Invalidation Speed:** < 4.2ms median cascade latency across 10-hop subgraphs on FalkorDB.
 - **Concurrent Writer Durability:** Group-commit shared sync ensures zero lost updates under high concurrency.
-- **Test Suite:** 667 backend unit & integration tests, 218 frontend tests passing (100% green).
+- **Test Suite:** 669 backend unit & integration tests, 218 frontend tests passing (100% green).
 
 ---
 
