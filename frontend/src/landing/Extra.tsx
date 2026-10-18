@@ -225,7 +225,7 @@ export function FalkorSection() {
         </li>
       </ul>
       <p className="lp-note">
-        {a.scenarios} generated, seeded scenarios; &ldquo;flat&rdquo; means the same nodes with no causal edges. The agent test is {agentTrials / 2} runs per arm of the real Claude CLI ({agentEval.params.model}) across four scenarios we wrote. The graph is this project&rsquo;s own import graph. None of it compares Quorum with any product. Read from bench/*.json.
+        {a.scenarios} generated, seeded scenarios; &ldquo;flat&rdquo; means the same nodes with no causal edges. The agent test is {agentTrials} runs per arm of the real Claude CLI ({agentEval.params.model}) across four scenarios we wrote. The graph is this project&rsquo;s own import graph. None of it compares Quorum with any product. Read from bench/*.json.
       </p>
     </section>
   );

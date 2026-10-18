@@ -89,7 +89,7 @@ The refund scenario is one we wrote, so there are three more in other domains, e
 | access | 6 of 6 | 0 of 6 |
 | quote | 6 of 6 | 0 of 6 |
 | deploy | 6 of 6 | 0 of 6 |
-| **all four** | **28 of 14** | **0 of 14** |
+| **all four** | **28 of 28** | **0 of 28** |
 
 Still our scenarios, a small number of runs, one small model, "flat" defined as "no edges".
 
