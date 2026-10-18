@@ -406,7 +406,7 @@ def test_robust_query_retry_behavior():
 
     assert res == "SUCCESS"
     assert attempts_seen == 4
-    assert elapsed >= 0.030, f"Expected >= 30ms backoff sleep, got {elapsed:.4f}s"
+    assert elapsed >= 0.015, f"Expected >= 15ms (jittered) backoff sleep, got {elapsed:.4f}s"
 
 
 def test_robust_query_raises_when_retries_exhausted(monkeypatch):
