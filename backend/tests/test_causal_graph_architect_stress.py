@@ -334,7 +334,10 @@ def test_corrupted_partial_node_attributes():
     assert len(loaded.action.payload) == 5000
 
 
-def test_robust_query_retry_loop():
+def test_robust_query_retry_loop(monkeypatch):
+    import graph.queries as gq
+
+    monkeypatch.setattr(gq, "RETRY_BUDGET_S", 0.3)
     class MockGraph:
         def __init__(self):
             self.attempts = 0
@@ -350,7 +353,7 @@ def test_robust_query_retry_loop():
     assert res == "SUCCESS"
     assert mock_g.attempts == 4
 
-    # Test failure exceeding 5 attempts
+    # Persistent back-pressure: retried until the time budget is spent, then raised
     class FailingMockGraph:
         def __init__(self):
             self.attempts = 0
@@ -363,7 +366,7 @@ def test_robust_query_retry_loop():
     with pytest.raises(Exception) as exc:
         _robust_query(fail_g, "MATCH (n) RETURN n")
     assert "Max pending queries exceeded" in str(exc.value)
-    assert fail_g.attempts == 6
+    assert fail_g.attempts > 3
 
     # Test immediate failure for unrelated errors
     class OtherErrorGraph:

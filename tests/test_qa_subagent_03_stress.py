@@ -409,9 +409,12 @@ def test_robust_query_retry_behavior():
     assert elapsed >= 0.030, f"Expected >= 30ms backoff sleep, got {elapsed:.4f}s"
 
 
-def test_robust_query_raises_when_retries_exhausted():
-    """Verify _robust_query raises after 5 failed attempts."""
+def test_robust_query_raises_when_retries_exhausted(monkeypatch):
+    """Verify _robust_query keeps retrying back-pressure for its time budget, then raises."""
+    import graph.queries as gq
     from graph.queries import _robust_query
+
+    monkeypatch.setattr(gq, "RETRY_BUDGET_S", 0.3)
 
     attempts_seen = 0
 
@@ -425,7 +428,7 @@ def test_robust_query_raises_when_retries_exhausted():
         _robust_query(FailingGraph(), "RETURN 1")
 
     assert "Max pending queries exceeded" in str(exc_info.value)
-    assert attempts_seen == 6
+    assert attempts_seen > 3
 
 
 # =========================================================================
