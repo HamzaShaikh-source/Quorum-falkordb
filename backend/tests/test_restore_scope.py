@@ -3,7 +3,6 @@ Regression test: restore_node must be strictly scoped to the target node
 and its downstream causal descendants. Unrelated quarantined nodes elsewhere
 in the graph must strictly remain quarantined.
 """
-import pytest
 from app.graph.queries import GraphStore
 from app.models.common import EdgeType, NodeKind, Status
 from app.models.graph import GraphEdge, GraphNode
