@@ -47,6 +47,7 @@ class GraphStore:
         self.edges: List[GraphEdge] = []
         self.epoch: int = 1
         self.query_log: List[CypherLogEntry] = []
+        self._query_log_lock = threading.Lock()
         # Handoffs belong to the tenant's graph, like everything else.
         self.handoffs: List[Handoff] = []
         # One lock order for graph, workspace authorization, persistence and handoff claims.
@@ -64,6 +65,7 @@ class GraphStore:
         self._commit_cv = threading.Condition()
         self._req_gen = 0
         self._done_gen = 0
+        self._sync_target = 0
         self._running = False
         # Expiring "I am working on X" notes (announce_work). Not facts, not persisted.
         self.work: List[Dict[str, Any]] = []
@@ -109,7 +111,7 @@ class GraphStore:
                     break
                 cv.wait(timeout=60)
             self._running = True
-            target = self._req_gen
+            self._sync_target = self._req_gen
         try:
             n = self.persister.sync(request_id)
         except BaseException:
@@ -118,7 +120,7 @@ class GraphStore:
                 cv.notify_all()
             raise
         with cv:
-            self._done_gen = target
+            self._done_gen = max(self._done_gen, getattr(self, "_sync_target", mine))
             self._running = False
             cv.notify_all()
         return n
@@ -138,7 +140,7 @@ class GraphStore:
             timing_boundary=timing_boundary if real else "in_process",
             outcome=outcome,
         )
-        with self._lock:
+        with self._query_log_lock:
             self.query_log.append(entry)
             if len(self.query_log) > 200:
                 self.query_log.pop(0)

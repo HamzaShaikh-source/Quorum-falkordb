@@ -15,6 +15,7 @@ The console distinguishes real statements from in-process operations.
 import hashlib
 import json
 import re
+import threading
 import time
 from typing import Any, Dict, List, Optional
 
@@ -46,6 +47,7 @@ class Persister:
         self.calls: Dict[int, str] = {}
         self.agents: Dict[str, str] = {}
         self.emb: Dict[str, str] = {}  # node id -> digest of the text its stored vector was computed from
+        self._sync_lock = threading.Lock()
 
     @property
     def graph(self):
@@ -193,25 +195,6 @@ class Persister:
         """
         store = self.store
         with store._lock:
-            state = json.dumps({
-                "version": 1,
-                "nodes": [n.model_dump_json() for n in store.nodes.values()],
-                "edges": [e.model_dump_json() for e in store.edges],
-                "handoffs": [h.model_dump_json() for h in store.handoffs],
-                "epoch": store.epoch, "workspace": store.workspace,
-                "calls": store.calls, "agent_state": store.agent_state,
-            }, sort_keys=True)
-            changed = self.checkpoint != _h(state)
-            if changed:
-                self._q("save_recovery_checkpoint", "MERGE (s:QCheckpoint {id:'state'}) SET s.json = $json",
-                        {"json": state}, request_id)
-                self.checkpoint = _h(state)
-            return self._sync_diff(request_id) + int(changed)
-
-    def _sync_diff(self, request_id: Optional[str] = None) -> int:
-        """Writes everything that changed since the last sync. Returns the number of statements run."""
-        store = self.store
-        with store._lock:
             cur_nodes = {n.id: n.model_dump_json() for n in store.nodes.values()}
             cur_edges = {e.id: e.model_dump_json() for e in store.edges}
             cur_hands = {h.id: h.model_dump_json() for h in store.handoffs}
@@ -221,6 +204,55 @@ class Persister:
             cur_agents = {k: json.dumps({"ids": list(v.get("ids", [])), "query": v.get("query", ""), "epoch": v.get("epoch", 0)}, sort_keys=True) for k, v in store.agent_state.items()}
             nodes_by_id = dict(store.nodes)
             edges_by_id = {e.id: e for e in store.edges}
+            hands_by_id = {h.id: h for h in store.handoffs}
+
+            state = json.dumps({
+                "version": 1,
+                "nodes": list(cur_nodes.values()),
+                "edges": list(cur_edges.values()),
+                "handoffs": list(cur_hands.values()),
+                "epoch": epoch,
+                "workspace": store.workspace,
+                "calls": store.calls,
+                "agent_state": store.agent_state,
+            }, sort_keys=True)
+            changed = self.checkpoint != _h(state)
+
+            cv = getattr(store, "_commit_cv", None)
+            if cv is not None:
+                with cv:
+                    if hasattr(store, "_sync_target"):
+                        store._sync_target = max(store._sync_target, store._req_gen)
+                    else:
+                        store._sync_target = store._req_gen
+
+        with self._sync_lock:
+            if changed:
+                self._q("save_recovery_checkpoint", "MERGE (s:QCheckpoint {id:'state'}) SET s.json = $json",
+                        {"json": state}, request_id)
+                self.checkpoint = _h(state)
+            return self._sync_diff(
+                request_id,
+                snapshot=(cur_nodes, cur_edges, cur_hands, epoch, cur_ws, cur_calls, cur_agents, nodes_by_id, edges_by_id, hands_by_id),
+            ) + int(changed)
+
+    def _sync_diff(self, request_id: Optional[str] = None, snapshot: Optional[tuple] = None) -> int:
+        """Writes everything that changed since the last sync. Returns the number of statements run."""
+        store = self.store
+        if snapshot is not None:
+            cur_nodes, cur_edges, cur_hands, epoch, cur_ws, cur_calls, cur_agents, nodes_by_id, edges_by_id, hands_by_id = snapshot
+        else:
+            with store._lock:
+                cur_nodes = {n.id: n.model_dump_json() for n in store.nodes.values()}
+                cur_edges = {e.id: e.model_dump_json() for e in store.edges}
+                cur_hands = {h.id: h.model_dump_json() for h in store.handoffs}
+                epoch = store.epoch
+                cur_ws = json.dumps(store.workspace, sort_keys=True)
+                cur_calls = {c["id"]: json.dumps(c, sort_keys=True) for c in store.calls}
+                cur_agents = {k: json.dumps({"ids": list(v.get("ids", [])), "query": v.get("query", ""), "epoch": v.get("epoch", 0)}, sort_keys=True) for k, v in store.agent_state.items()}
+                nodes_by_id = dict(store.nodes)
+                edges_by_id = {e.id: e for e in store.edges}
+                hands_by_id = {h.id: h for h in store.handoffs}
 
         up_nodes = [i for i, js in cur_nodes.items() if self.nodes.get(i) != _h(js)]
         del_nodes = [i for i in self.nodes if i not in cur_nodes]
@@ -297,8 +329,7 @@ class Persister:
             n_stmts += 1
 
         if up_hands:
-            hs = {h.id: h for h in store.handoffs}
-            rows = [{"id": i, "kind": hs[i].kind.value, "status": hs[i].status.value, "json": cur_hands[i]} for i in up_hands if i in hs]
+            rows = [{"id": i, "kind": hands_by_id[i].kind.value, "status": hands_by_id[i].status.value, "json": cur_hands[i]} for i in up_hands if i in hands_by_id]
             self._q(
                 "upsert_handoffs",
                 "UNWIND $rows AS row MERGE (h:QHandoff {id: row.id}) SET h.kind = row.kind, h.status = row.status, h.json = row.json",
