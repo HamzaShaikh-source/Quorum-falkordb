@@ -9,6 +9,9 @@ All notable changes to Quorum. Format follows [Keep a Changelog](https://keepach
 - **A "How to use Quorum" panel in the console** (Connect page), read from the same `guide.json`, so the console, the chat tool, `GET /api/guide` and `docs/USER_GUIDE.md` cannot disagree (a test fails if the generated Markdown is stale).
 - The AI setup prompt (console and `scripts/setup.py`) now ends with the install step and the guide pointer.
 
+### Fixed
+- **FalkorDB back-pressure is waited out, not failed.** "Max pending queries exceeded" used to be retried for about 150 ms at some call sites only, so 1000-thread stress tests failed on a busy CI runner. Every query on the legacy graph module now retries with jittered backoff for up to five seconds; any other error still raises at once.
+
 ## [1.4.0] - 2026-10-18
 
 ### Added
