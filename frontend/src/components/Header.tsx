@@ -149,12 +149,15 @@ function ActiveSessionPill() {
          localStorage.getItem('quorum:token'))
       : null) ?? 'token_human';
 
-  // Determine role label
+  // Determine role label & icon
   let roleLabel = 'Admin';
+  let roleIcon = '👑';
   if (currentRole === 'auditor' || token.includes('auditor')) {
     roleLabel = 'Auditor';
+    roleIcon = '🛡️';
   } else if (currentRole === 'agent' || token.includes('agent')) {
-    roleLabel = 'Agent';
+    roleLabel = 'Worker Agent';
+    roleIcon = '🤖';
   }
 
   const handleRoleChange = async (targetToken: string) => {
@@ -177,9 +180,13 @@ function ActiveSessionPill() {
   };
 
   return (
-    <div className="session-pill-wrap" title="Active evaluator session. Switch roles instantly to test RBAC without re-authenticating.">
+    <div className="session-pill-wrap" title="Evaluator Sandbox Session — Click to switch role">
       <label className="session-pill-label">
-        <span className="session-pill-text">🟢 Demo Sandbox ({roleLabel}: {token})</span>
+        <span className="session-pill-text">
+          <span className="role-main">{roleIcon} {roleLabel}</span>
+          <span className="role-sandbox"> (Sandbox)</span>
+        </span>
+        <span className="session-caret" aria-hidden="true">▾</span>
         <select
           className="session-pill-select"
           aria-label="Switch evaluator role"
@@ -228,7 +235,7 @@ export function Header() {
           </button>
         ))}
       </nav>
-      <div className="status">
+      <div className="header-right status">
         <label className="tenant" title={demoCredentials() ? 'You are signed in with demo sandbox credentials. Nothing here is a real company.' : 'The company whose memory you are looking at'}>
           <span className="sr">{copy.header.tenant}</span>
           <span className="tenant-dot" aria-hidden="true" />
