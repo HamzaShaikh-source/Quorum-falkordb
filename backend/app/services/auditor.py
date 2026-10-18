@@ -156,7 +156,7 @@ class AuditorService:
                     node.action.correction_notice = notice
                     node.correction_notice = notice
 
-                    # Store on an :Alert:MemoryNode in GraphStore
+                    # Store on an :Alert:QNode in GraphStore
                     alert_id = f"alert_retraction_{node.id}"
                     alert_node = GraphNode(
                         id=alert_id,

@@ -346,8 +346,8 @@ class GraphStore:
         with self._lock:
             start = time.time()
             cypher = (
-                "MATCH (a:Action {id:$id}) WHERE a.status='HEALTHY' AND a.executed=false AND a.gate='PASSED' "
-                "OPTIONAL MATCH (x:MemoryNode)-[:LEADS_TO|SUPPORTS*]->(a) WHERE coalesce(x.status,'MISSING') <> 'HEALTHY' "
+                "MATCH (a:QNode {id:$id}) WHERE a.status='HEALTHY' AND a.executed=false AND a.gate='PASSED' "
+                "OPTIONAL MATCH (x:QNode)-[:LEADS_TO|SUPPORTS*]->(a) WHERE coalesce(x.status,'MISSING') <> 'HEALTHY' "
                 "WITH a, count(DISTINCT x) AS bad WHERE bad = 0 "
                 "SET a.executed = true, a.executed_at = timestamp(), a.confirmed = false RETURN a.id"
             )
@@ -467,12 +467,18 @@ class GraphStore:
             root.released_at = now_ms
             restored.append(root.id)
 
-            # 2. Iterative propagation until fixed point
+            # Scoped resolution:
+            # Collect only the restored root and nodes causally downstream of it
+            descendants = {d.id for d in self.get_descendants(root_id, edge_types=causal_edge_types)}
+            candidate_nodes = {root_id}.union(descendants)
+
+            # 2. Iterative propagation until fixed point (scoped strictly to candidate_nodes)
             changed = True
             while changed:
                 changed = False
-                for node in self.nodes.values():
-                    if node.status != Status.QUARANTINED or node.id in restored:
+                for node_id in candidate_nodes:
+                    node = self.nodes.get(node_id)
+                    if not node or node.status != Status.QUARANTINED or node.id in restored:
                         continue
 
                     # NEVER restore executed actions
@@ -488,7 +494,7 @@ class GraphStore:
                         changed = True
 
             self.bump_epoch(request_id)
-            self.log_query("restore_node", "MATCH (r) ... RESTORE IF ALL PARENTS HEALTHY", (time.time() - start) * 1000, len(restored), request_id)
+            self.log_query("restore_node", "MATCH (r:QNode {id:$id})-[rel:LEADS_TO|SUPPORTS|FROM_SOURCE*0..]->(d:QNode) RESTORE IF ALL PARENTS HEALTHY", (time.time() - start) * 1000, len(restored), request_id)
             return restored
 
     def get_as_of(self, t: int) -> List[GraphNode]:
