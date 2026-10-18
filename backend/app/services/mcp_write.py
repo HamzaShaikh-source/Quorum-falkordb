@@ -55,11 +55,14 @@ def remember_fact(
     quote: Optional[str] = None,
     origin: Optional[str] = None,
     scope: str = "commons",
+    copied_from: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Stores a Fact. scope="commons" (default) is readable by everyone in the tenant; scope="team" only by your team and teams linked to it."""
     auth = _get_auth(token)
     store = get_graph_store(auth["tenant"])
     refusal = validate_fields(id=id, key=key, value=value, text=text, quote=quote, origin=origin)
+    if not refusal and copied_from is not None:
+        refusal = validate_fields(id=copied_from)
     if refusal:
         return {"error": refusal, "success": False}
     fact_id = id or f"fact_{uuid.uuid4().hex[:6]}"
@@ -87,6 +90,7 @@ def remember_fact(
         quote=quote,
         # the origin always names the caller; a label the caller adds is appended, never substituted
         origin=(f"agent:{auth.get('agent_id', 'unknown')}" + (f":{origin}" if origin else ""))[:80],
+        copied_from=copied_from,
         scope_team=scope_team,
         valid_from=int(time.time() * 1000),
         asserted_by=AssertedBy(

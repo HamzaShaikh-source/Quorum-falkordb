@@ -30,10 +30,54 @@ def _related(a: str, b: str) -> bool:
     return a.startswith(b.rstrip("/") + "/") or b.startswith(a.rstrip("/") + "/")
 
 
+CAUSAL = ("LEADS_TO", "SUPPORTS", "FROM_SOURCE")
+GRAPH_HOPS = 3
+
+
+def _graph_neighbors(store, tgt: str, hops: int = GRAPH_HOPS):
+    """
+    When the target is a node in the memory graph, the nodes within `hops` causal steps of it: {lower-case id: (relation, hops)}.
+    This is what makes a collision warning understand dependency, not only names: revising a fact is a conflict with someone deriving
+    from it, or from something it was derived from, even though no name matches. Runs as a FalkorDB traversal when available.
+    """
+    ids = {i.lower(): i for i in store.nodes}
+    nid = ids.get(tgt)
+    if nid is None:
+        return {}
+    down = store.closure_in_falkordb(nid, CAUSAL, "out")
+    if down is None:
+        down = store._process_closure(nid, CAUSAL)
+    up = store.closure_in_falkordb(nid, CAUSAL, "in")
+    if up is None:
+        rev: Dict[str, List[str]] = {}
+        for e in store.edges:
+            if e.type.value in CAUSAL:
+                rev.setdefault(e.target, []).append(e.source)
+        up, frontier, depth = {}, [nid], 0
+        while frontier and depth < hops:
+            depth += 1
+            nxt = []
+            for cur in frontier:
+                for p in rev.get(cur, []):
+                    if p != nid and p not in up:
+                        up[p] = depth
+                        nxt.append(p)
+            frontier = nxt
+    out = {}
+    for i, d in down.items():
+        if d <= hops:
+            out[i.lower()] = ("downstream", d)
+    for i, d in up.items():
+        if d <= hops:
+            out.setdefault(i.lower(), ("upstream", d))
+    return out
+
+
 def announce_work(target: str, intent: str = "", token: str = "", minutes: int = 30, done: bool = False) -> Dict[str, Any]:
     """
-    Say what you are about to work on (a file, an order, a ticket). Returns who else announced the same thing, or something inside or
-    around it, in the last `minutes` (default 30), so you can pick something else or coordinate. done=true removes your note.
+    Say what you are about to work on (a file, an order, a ticket, or a fact id). Returns who else announced the same thing, something
+    inside or around it, or (when the target is a fact id) work on a fact within 3 causal hops of it, upstream or downstream, in the
+    last `minutes` (default 30), so you can pick something else or coordinate. done=true removes your note.
     Notes expire by themselves and are not stored as facts.
     """
     auth = _get_auth(token)
@@ -52,16 +96,29 @@ def announce_work(target: str, intent: str = "", token: str = "", minutes: int =
             notes[:] = [n for n in notes if not (n["who"] == me and _related(n["target"], tgt) and n["target"] == tgt)]
             return {"success": True, "released": target, "text": f"Released {target}.", "tokens": 8}
         others = [n for n in notes if n["who"] != me and _related(n["target"], tgt)]
+        graph = {}
+        rest = [n for n in notes if n["who"] != me and n not in others]
+        if rest and any(n["target"] in {i.lower() for i in store.nodes} for n in rest):
+            graph = _graph_neighbors(store, tgt)
+        for n in rest:
+            if n["target"] in graph:
+                n["_rel"] = graph[n["target"]]
+                others.append(n)
         notes[:] = [n for n in notes if not (n["who"] == me and n["target"] == tgt)]
         notes.append({"who": me, "name": name, "target": tgt, "raw": target.strip()[:200], "intent": (intent or "").strip()[:200], "ts": now, "ttl": ttl})
         del notes[: max(0, len(notes) - MAX_NOTES_PER_TENANT)]
-    conflicts = [
-        {"agent": n["name"], "target": n["raw"], "intent": n["intent"], "minutes_ago": round((now - n["ts"]) / 60, 1), "same_target": n["target"] == tgt}
-        for n in sorted(others, key=lambda x: -x["ts"])
-    ]
+    conflicts = []
+    for n in sorted(others, key=lambda x: -x["ts"]):
+        c = {"agent": n["name"], "target": n["raw"], "intent": n["intent"], "minutes_ago": round((now - n["ts"]) / 60, 1), "same_target": n["target"] == tgt}
+        if "_rel" in n:
+            c["relation"], c["hops"] = n["_rel"]
+        conflicts.append(c)
+    for n in others:
+        n.pop("_rel", None)
     if conflicts:
         c = conflicts[0]
-        text = f"Heads up: {c['agent']} announced {'the same work' if c['same_target'] else c['target']} {c['minutes_ago']} min ago" + (f" ({c['intent']})" if c["intent"] else "") + ". Coordinate or pick something else."
+        what = "the same work" if c["same_target"] else (f"{c['target']}, {c['hops']} hop(s) {c['relation']} of yours" if "relation" in c else c["target"])
+        text = f"Heads up: {c['agent']} announced {what} {c['minutes_ago']} min ago" + (f" ({c['intent']})" if c["intent"] else "") + ". Coordinate or pick something else."
     else:
         text = f"Clear: nobody else is on {target} right now."
     return {"success": True, "clear": not conflicts, "conflicts": conflicts, "text": text, "tokens": estimate_tokens(text)}

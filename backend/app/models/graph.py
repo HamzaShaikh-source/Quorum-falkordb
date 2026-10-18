@@ -78,6 +78,8 @@ class GraphNode(BaseModel):
     source_ref: Optional[str] = None
     quote: Optional[str] = None
     origin: Optional[str] = None
+    # Declared lineage: the fact this one was copied or restated from. Corroboration never counts a fact together with its own ancestry.
+    copied_from: Optional[str] = None
     asserted_by: Optional[AssertedBy] = None
     source: Optional[SourceInfo] = None
     owner_team: Optional[str] = None

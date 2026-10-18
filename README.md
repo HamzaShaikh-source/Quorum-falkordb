@@ -61,7 +61,7 @@ Then everything happens in the chat:
 - **"What do they know about refunds?"** (`peer_retrieve`) You read their shared memory within the level they granted.
 - **"Add Priya to Support as a contributor", "make her a reviewer", "pause the link between Priya and Quinn"** (`quorum_manage`) Teams, people, permission levels, tokens and sharing links, applied on the target's next call.
 
-Per-client notes, the safety model and the full command table: [`docs/AI_SETUP.md`](docs/AI_SETUP.md). Just want to look around first? `QUORUM_DEMO=1 docker compose up -d`, then open http://localhost:5173 for the guided poisoned-fact story.
+Per-client notes, the safety model and the full command table: [`docs/AI_SETUP.md`](docs/AI_SETUP.md). Just want to look around first? **Judge mode** needs no setup and touches nothing else on your machine: `python scripts/judge.py` (or `judge.bat` / `./judge.sh`) starts the demo stack on free ports, opens the console and plays the poisoned-fact story by itself; `python scripts/judge.py --stop` removes it. The same story, by hand: `QUORUM_DEMO=1 docker compose up -d`, then http://localhost:5173/?play=1.
 
 ## Graph-native, precisely
 
@@ -95,6 +95,7 @@ It runs the traversal in FalkorDB and in the API process, compares the two, and 
 | **Red team of the write path** | 31 attacks (forged origin, credentials, oversize and malformed fields, injection text, id collisions, cross-tenant and cross-team reads, privilege escalation, hostile peers, secret guessing): all refused or inert. Five got through at first and are fixed | `pytest backend/tests/test_redteam.py` |
 | **A real corpus** | 437 installed Python packages (1,326 facts citing their own METADATA): plain search never refuses a question about a package that does not exist (0.0%), Quorum refuses 100.0%; on "which packages are affected if this is wrong?" plain search names the exact set 10.0% of the time, Quorum 100.0%; ripple recall and precision 100% (widest: typing-extensions -> 385 nodes) | `python bench/real_corpus_eval.py` |
 | **100 concurrent agents over HTTP** | 750 mixed requests in 23.5 s, 0 errors, every acknowledged write present; 20 races of 100 agents on one execute guard: exactly one winner every time. Throughput on this laptop (Docker for Windows): 31.9 ops/s mixed, 132.9 ops/s reads. Modest, and stated plainly | `python bench/hub_load.py` |
+| **Copied claims** | 18 poisoned claims echoed by a trusted writer through six ways of copying, 12 genuine claims with independent support: a gate that only compares origin labels trusted 18 of 18 poisoned claims; the lineage-aware gate trusts 3 (only the reworded copy with no trace, the stated boundary) and still trusts 12 of 12 genuine ones | `python bench/corroboration_eval.py` |
 | Flat memory vs causal edges, 24 generated scenarios | 62 of 62 at-risk actions ran vs 0 of 62 | `python bench/ablation_graph.py` |
 | Backend tests | 490+ pass, against a real FalkorDB in CI | `python -m pytest backend/tests` |
 | Console, live | 59 of 59 checks, with an MCP client acting as an agent | `cd frontend && npm run qa:live` |
@@ -106,7 +107,7 @@ Every number is produced by a script in this repository; their limits are stated
 
 ## More than memory: coordination, time and people
 
-- **Collision warnings.** `announce_work` (and a Claude Code hook, `scripts/quorum_conflict_hook.py`) tells an agent when another agent announced the same file, order or ticket, or something inside or around it, in the last half hour. Notes expire by themselves and never become facts.
+- **Collision warnings.** `announce_work` (and a Claude Code hook, `scripts/quorum_conflict_hook.py`) tells an agent when another agent announced the same file, order or ticket, or something inside or around it, in the last half hour. When the target is a fact in the graph it understands dependency too: work on a fact within three causal hops upstream or downstream of yours (a FalkorDB traversal) is a conflict even when no name matches. Notes expire by themselves and never become facts.
 - **Time.** `recall_as_of` answers "what did we believe then?" from bitemporal data, and says what happened to each fact since (still believed, replaced, quarantined). The console's time-travel slider reads the same data.
 - **What leaves with a person.** `quorum_manage action=leaver_report` (and a **What leaves** button on the Team page) lists the facts only that person recorded, how much is built on each (a FalkorDB traversal), the tasks they hold and the teammates who already read their material.
 - **A write gate that says what it did.** Every write returns `ACCEPT`, `SUPERSEDE`, `REJECT` or `REVIEW` with a plain receipt, and credentials, control characters, oversize fields and forged origins are refused before anything is stored. Retrieval says `NOT_IN_MEMORY` instead of guessing.

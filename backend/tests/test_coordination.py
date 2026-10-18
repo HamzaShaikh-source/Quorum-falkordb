@@ -190,3 +190,40 @@ def test_an_idempotent_retry_of_remember_fact_still_succeeds_with_the_same_answe
     assert (first["outcome"], first["receipt"]) == (retry["outcome"], retry["receipt"])
     different = t.remember_fact("refund_window", "99", "Refunds are allowed within 99 days of delivery, honest.", a, id="same_id")
     assert different["success"] is False, "a different payload under the same id is still refused"
+
+
+# ---------- dependency-aware collision warnings ----------
+def _chain(tenant, tok):
+    t.remember_fact("refund_window", "30", "Refunds are allowed within 30 days of delivery.", tok, id="policy")
+    assert t.derive("So order 1042 is eligible.", ["policy"], tok, id="elig")["success"]
+    assert t.derive("So refund order 1042 today.", ["elig"], tok, id="decide")["success"]
+    t.remember_fact("sla", "4h", "Priority tickets get a first reply within 4 hours.", tok, id="sla_fact")
+
+
+def test_work_on_a_fact_conflicts_with_work_on_its_descendants_and_ancestors(tenant):
+    a, _, team = member(tenant, "Ann")
+    b, _, _ = member(tenant, "Bob", team=team)
+    c, _, _ = member(tenant, "Cy", team=team)
+    _chain(tenant, a)
+    t.announce_work("decide", "drafting the refund decision", b)
+    near = t.announce_work("policy", "revising the refund window", a)  # two hops upstream of the decision
+    assert near["clear"] is False
+    hit = near["conflicts"][0]
+    assert hit["relation"] == "downstream" and hit["hops"] == 2 and "2 hop(s) downstream" in near["text"]
+    up = t.announce_work("decide", "again", c)  # Bob is on the same node; Ann is on its ancestor
+    assert any(x.get("relation") == "upstream" and x["hops"] == 2 for x in up["conflicts"])
+    assert t.announce_work("sla_fact", "unrelated", c)["clear"] is True or all("relation" not in x for x in t.announce_work("sla_fact", "", c)["conflicts"])
+
+
+def test_dependency_warnings_stop_at_three_hops_and_ignore_unrelated_nodes(tenant):
+    a, _, team = member(tenant, "Ann")
+    b, _, _ = member(tenant, "Bob", team=team)
+    t.remember_fact("k", "1", "Root fact about shipping speed in days.", a, id="n0")
+    prev = "n0"
+    for i in range(1, 6):
+        assert t.derive(f"Conclusion number {i} about shipping.", [prev], a, id=f"n{i}")["success"]
+        prev = f"n{i}"
+    t.announce_work("n5", "far away", b)
+    assert t.announce_work("n0", "root", a)["clear"] is True, "five hops away is outside the three-hop neighbourhood"
+    t.announce_work("n3", "near", b)
+    assert t.announce_work("n0", "root", a)["clear"] is False

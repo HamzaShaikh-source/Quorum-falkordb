@@ -1,0 +1,233 @@
+{
+  "params": {
+    "seed": 7,
+    "script": "bench/corroboration_eval.py"
+  },
+  "summary": {
+    "poisoned": {
+      "scenarios": 18,
+      "label_only_trusted": 18,
+      "lineage_trusted": 3
+    },
+    "genuine": {
+      "scenarios": 12,
+      "label_only_trusted": 12,
+      "lineage_trusted": 12
+    },
+    "by_copy_method": {
+      "verbatim": {
+        "scenarios": 3,
+        "label_only_trusted": 3,
+        "lineage_trusted": 0
+      },
+      "same_source_node": {
+        "scenarios": 3,
+        "label_only_trusted": 3,
+        "lineage_trusted": 0
+      },
+      "same_source_host": {
+        "scenarios": 3,
+        "label_only_trusted": 3,
+        "lineage_trusted": 0
+      },
+      "declared_copy_chain": {
+        "scenarios": 3,
+        "label_only_trusted": 3,
+        "lineage_trusted": 0
+      },
+      "lightly_reworded": {
+        "scenarios": 3,
+        "label_only_trusted": 3,
+        "lineage_trusted": 0
+      },
+      "reworded_no_trace": {
+        "scenarios": 3,
+        "label_only_trusted": 3,
+        "lineage_trusted": 3
+      }
+    }
+  },
+  "rows": [
+    {
+      "kind": "genuine",
+      "method": "independent",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "poisoned",
+      "method": "reworded_no_trace",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "poisoned",
+      "method": "declared_copy_chain",
+      "label_only_passes": true,
+      "lineage_passes": false
+    },
+    {
+      "kind": "genuine",
+      "method": "independent",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "poisoned",
+      "method": "same_source_node",
+      "label_only_passes": true,
+      "lineage_passes": false
+    },
+    {
+      "kind": "genuine",
+      "method": "independent",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "poisoned",
+      "method": "declared_copy_chain",
+      "label_only_passes": true,
+      "lineage_passes": false
+    },
+    {
+      "kind": "poisoned",
+      "method": "verbatim",
+      "label_only_passes": true,
+      "lineage_passes": false
+    },
+    {
+      "kind": "poisoned",
+      "method": "same_source_node",
+      "label_only_passes": true,
+      "lineage_passes": false
+    },
+    {
+      "kind": "poisoned",
+      "method": "same_source_host",
+      "label_only_passes": true,
+      "lineage_passes": false
+    },
+    {
+      "kind": "genuine",
+      "method": "independent",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "genuine",
+      "method": "independent",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "genuine",
+      "method": "independent",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "poisoned",
+      "method": "same_source_host",
+      "label_only_passes": true,
+      "lineage_passes": false
+    },
+    {
+      "kind": "genuine",
+      "method": "independent",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "genuine",
+      "method": "independent",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "genuine",
+      "method": "independent",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "poisoned",
+      "method": "verbatim",
+      "label_only_passes": true,
+      "lineage_passes": false
+    },
+    {
+      "kind": "poisoned",
+      "method": "lightly_reworded",
+      "label_only_passes": true,
+      "lineage_passes": false
+    },
+    {
+      "kind": "genuine",
+      "method": "independent",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "genuine",
+      "method": "independent",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "poisoned",
+      "method": "reworded_no_trace",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "poisoned",
+      "method": "declared_copy_chain",
+      "label_only_passes": true,
+      "lineage_passes": false
+    },
+    {
+      "kind": "poisoned",
+      "method": "reworded_no_trace",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "poisoned",
+      "method": "same_source_host",
+      "label_only_passes": true,
+      "lineage_passes": false
+    },
+    {
+      "kind": "poisoned",
+      "method": "same_source_node",
+      "label_only_passes": true,
+      "lineage_passes": false
+    },
+    {
+      "kind": "genuine",
+      "method": "independent",
+      "label_only_passes": true,
+      "lineage_passes": true
+    },
+    {
+      "kind": "poisoned",
+      "method": "verbatim",
+      "label_only_passes": true,
+      "lineage_passes": false
+    },
+    {
+      "kind": "poisoned",
+      "method": "lightly_reworded",
+      "label_only_passes": true,
+      "lineage_passes": false
+    },
+    {
+      "kind": "poisoned",
+      "method": "lightly_reworded",
+      "label_only_passes": true,
+      "lineage_passes": false
+    }
+  ],
+  "limits": "Synthetic, seeded scenarios written by us; claims are supplied directly rather than extracted; a reworded copy with no trace is invisible to the gate by construction and is reported, not hidden."
+}

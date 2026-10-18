@@ -20,6 +20,16 @@ import './styles/tour.css';
 import { App } from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
+// A deep link for judges and demos: /?play=1 opens the console and plays the guided story by itself.
+try {
+  if (new URLSearchParams(location.search).get('play') === '1') {
+    sessionStorage.setItem('quorum:autoplay', '1');
+    if (!location.hash.startsWith('#/app')) location.hash = '#/app';
+  }
+} catch {
+  /* storage can be unavailable: the link then just opens the console */
+}
+
 createRoot(document.getElementById('root') as HTMLElement).render(
   <StrictMode>
     <ErrorBoundary>

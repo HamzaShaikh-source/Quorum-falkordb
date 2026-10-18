@@ -41,10 +41,10 @@ An admin changes a person's level on the **Team** page (the Permission level col
 
 | Tool | Who | What it does |
 | --- | --- | --- |
-| `announce_work` | Contributor and up | Say what you are about to work on (a file, an order, a ticket). Returns who else announced it, or something inside or around it, in the last `minutes` (default 30). `done=true` releases your note. Notes expire and are not facts. The same call is `POST /api/work/announce`, which `scripts/quorum_conflict_hook.py` (a Claude Code `PreToolUse` hook) uses to warn before an edit. |
+| `announce_work` | Contributor and up | Say what you are about to work on (a file, an order, a ticket). Returns who else announced it, or something inside or around it, in the last `minutes` (default 30). If the target is a fact id it also returns work on any fact within three causal hops, upstream or downstream (`relation`, `hops` in each conflict). `done=true` releases your note. Notes expire and are not facts. The same call is `POST /api/work/announce`, which `scripts/quorum_conflict_hook.py` (a Claude Code `PreToolUse` hook) uses to warn before an edit. |
 | `recall_as_of` | anyone | What the team believed at `as_of` (milliseconds) or `minutes_ago`; each fact says whether it is still believed, replaced or quarantined since. Scope rules apply as for `retrieve_context`. |
 
-Every `remember_fact` result carries `outcome` (`ACCEPT`, `SUPERSEDE`, `REJECT`, `REVIEW`) and a plain `receipt`; every retrieval carries `outcome` (`ANSWERED` or `NOT_IN_MEMORY`). Writes are refused when a field looks like a credential, contains control characters, is oversize, or when an id is malformed; the origin always names the caller.
+`remember_fact` takes an optional `copied_from` (the id of a fact you are restating): the quorum gate never counts a fact together with its own ancestry as two witnesses. Every `remember_fact` result carries `outcome` (`ACCEPT`, `SUPERSEDE`, `REJECT`, `REVIEW`) and a plain `receipt`; every retrieval carries `outcome` (`ANSWERED` or `NOT_IN_MEMORY`). Writes are refused when a field looks like a credential, contains control characters, is oversize, or when an id is malformed; the origin always names the caller.
 
 ## The chat layer: set up and run a team without the console
 

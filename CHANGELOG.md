@@ -2,6 +2,17 @@
 
 All notable changes to Quorum. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.4.0] - 2026-10-18
+
+### Added
+- **Judge mode** (`python scripts/judge.py`, `judge.bat`, `judge.sh`): the guided demo in one command on free ports, as its own Docker project; opens `/?play=1`, which plays the story by itself. `--stop` removes everything.
+- **A test of copied claims** (`bench/corroboration_eval.py`): 18 poisoned claims echoed six ways, 12 genuine. Origin-label-only corroboration trusted 18 of 18 poisoned claims; the lineage-aware gate trusts 3 (the reworded copy with no trace) and 12 of 12 genuine ones.
+- `remember_fact(copied_from=...)`: declared lineage, followed through chains.
+- **Dependency-aware collision warnings:** `announce_work` on a fact id also reports work on facts within three causal hops, upstream or downstream (a FalkorDB traversal).
+
+### Fixed
+- **Copied claims no longer count as corroboration.** The quorum gate judged independence only by whether `origin` labels differed, so a root-tier writer repeating a statement under another label corroborated it. Independence now requires a different asserter, no shared declared ancestry, a different source node and host, a different claimed source and different wording. Boundary stated in `docs/HACKATHON.md`.
+
 ## [1.3.0] - 2026-10-18
 
 ### Added

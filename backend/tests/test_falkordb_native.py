@@ -226,3 +226,17 @@ def test_committing_while_holding_the_store_lock_never_deadlocks_against_a_group
     queries.forget_stores()
     reloaded = queries.get_graph_store(falkor)
     assert all(f"h{i}" in reloaded.nodes for i in range(25))
+
+
+def test_dependency_aware_collision_warnings_use_the_falkordb_traversal(falkor):
+    from app.services import mcp_tools as t
+
+    ta, tb = f"token_{falkor}_human", f"token_{falkor}_auditor"
+    t.remember_fact("refund_window", "30", "Refunds are allowed within 30 days of delivery.", ta, id="policy")
+    assert t.derive("So order 1042 is eligible.", ["policy"], ta, id="elig")["success"]
+    assert t.derive("So refund order 1042 today.", ["elig"], ta, id="decide")["success"]
+    t.announce_work("decide", "drafting the decision", tb)
+    before = dict(queries.GRAPH_STATS)
+    out = t.announce_work("policy", "revising the window", ta)
+    assert out["clear"] is False and out["conflicts"][0]["relation"] == "downstream" and out["conflicts"][0]["hops"] == 2
+    assert queries.GRAPH_STATS["falkordb"] > before["falkordb"], "the neighbourhood was computed by FalkorDB"

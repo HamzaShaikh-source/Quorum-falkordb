@@ -43,6 +43,11 @@
           "name": "scope",
           "required": false,
           "default": "commons"
+        },
+        {
+          "name": "copied_from",
+          "required": false,
+          "default": null
         }
       ],
       "who": "agent",
