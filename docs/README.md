@@ -4,14 +4,16 @@ Start here, in this order.
 
 | If you want to... | Read |
 |---|---|
-| Judge it on one page | [HACKATHON.md](HACKATHON.md) |
+| Judge it on one page | [HACKATHON.md](HACKATHON.md), [TRACKS.md](TRACKS.md) |
+| Learn to use it, topic by topic | [USER_GUIDE.md](USER_GUIDE.md), [FAQ.md](FAQ.md) |
+| See how it is built, in diagrams | [ARCHITECTURE.md](ARCHITECTURE.md), [CONSOLE.md](CONSOLE.md) |
 | Set up and run a team from your AI chat | [AI_SETUP.md](AI_SETUP.md) |
 | See where FalkorDB decides, and verify it | [FALKORDB.md](FALKORDB.md) |
 | Run it | [SETUP.md](SETUP.md) |
 | Connect an AI assistant | [MCP.md](MCP.md) |
-| Understand who it is for and what the numbers mean | [IMPACT.md](IMPACT.md), [PROOF.md](PROOF.md) |
+| Understand who it is for and what the numbers mean | [IMPACT.md](IMPACT.md), [PROOF.md](PROOF.md), [TOKEN_SAVING.md](TOKEN_SAVING.md) |
 | Know the security model | [../SECURITY.md](../SECURITY.md), [AUDIT_REMEDIATION.md](AUDIT_REMEDIATION.md) |
-| Build against the API | [CONTRACT.md](CONTRACT.md), [SCHEMA_NOTES.md](SCHEMA_NOTES.md), [INTEGRATION.md](INTEGRATION.md) |
+| Build against the API | [CONTRACT.md](CONTRACT.md), [SCHEMA_NOTES.md](SCHEMA_NOTES.md), [INTEGRATION.md](INTEGRATION.md), [CONTRACT_PROPOSALS.md](CONTRACT_PROPOSALS.md) |
 | See the design and spec | [QUORUM_BRIEF.md](QUORUM_BRIEF.md), [QUORUM_SPEC.md](QUORUM_SPEC.md), [FRONTEND_DESIGN.md](FRONTEND_DESIGN.md), [LANDING_DESIGN.md](LANDING_DESIGN.md) |
 | Present or test it | [DEMO_SCRIPT.md](DEMO_SCRIPT.md), [LIVE_TESTING.md](LIVE_TESTING.md) |
 

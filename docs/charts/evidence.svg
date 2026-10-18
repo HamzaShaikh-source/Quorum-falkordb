@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 648" width="860" height="648" role="img" aria-labelledby="t d">
+<title id="t">Evidence: what changes when memory knows what depends on what</title><desc id="d">A wrong action ran 28 of 28 times without causal edges and 0 of 28 with them; 62 of 62 versus 0 of 62 in generated scenarios.</desc>
+<rect width="860" height="648" rx="14" fill="#f3f5f2"/>
+<rect x="1" y="1" width="858" height="646" rx="13" fill="none" stroke="#14181a" stroke-width="1.5"/>
+<text x="28" y="40" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#14181a" text-anchor="start">What changes when memory knows what depends on what</text>
+<text x="28" y="62" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#5c6a66" text-anchor="start">Every bar is read from a result file in bench/. Same facts, same correction in both arms.</text>
+<text x="28" y="96" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#14181a" text-anchor="start">A real agent (claude -p, haiku), four scenarios</text>
+<text x="28" y="115" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">Wrong action ran, out of 28 runs per arm</text>
+<text x="28" y="144" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#14181a" text-anchor="start">Memory without causal edges</text>
+<rect x="358" y="128" width="384" height="22" rx="4" fill="#d6ddd9" opacity="0.55"/>
+<rect x="358" y="128" width="384.0" height="22" rx="4" fill="#d6453d"/>
+<text x="752" y="144" font-family="ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700" fill="#14181a" text-anchor="start">28 / 28</text>
+<text x="28" y="178" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#14181a" text-anchor="start">Quorum, same memory and correction</text>
+<rect x="358" y="162" width="384" height="22" rx="4" fill="#d6ddd9" opacity="0.55"/>
+<text x="752" y="178" font-family="ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700" fill="#14181a" text-anchor="start">0 / 28</text>
+<text x="28" y="210" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#14181a" text-anchor="start">24 generated poisoned-fact scenarios</text>
+<text x="28" y="229" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">At-risk actions that still ran, out of 62</text>
+<text x="28" y="258" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#14181a" text-anchor="start">Flat memory (no edges)</text>
+<rect x="358" y="242" width="384" height="22" rx="4" fill="#d6ddd9" opacity="0.55"/>
+<rect x="358" y="242" width="384.0" height="22" rx="4" fill="#d6453d"/>
+<text x="752" y="258" font-family="ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700" fill="#14181a" text-anchor="start">62 / 62</text>
+<text x="28" y="292" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#14181a" text-anchor="start">Same nodes, edges in FalkorDB</text>
+<rect x="358" y="276" width="384" height="22" rx="4" fill="#d6ddd9" opacity="0.55"/>
+<text x="752" y="292" font-family="ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700" fill="#14181a" text-anchor="start">0 / 62</text>
+<text x="28" y="324" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#14181a" text-anchor="start">A real corpus: 437 installed Python packages, 120 generated questions</text>
+<text x="28" y="343" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">Percent, higher is better</text>
+<text x="28" y="372" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#14181a" text-anchor="start">Refuses a package that does not exist: plain search</text>
+<rect x="358" y="356" width="384" height="22" rx="4" fill="#d6ddd9" opacity="0.55"/>
+<text x="752" y="372" font-family="ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700" fill="#14181a" text-anchor="start">0%</text>
+<text x="28" y="406" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#14181a" text-anchor="start">Refuses a package that does not exist: Quorum</text>
+<rect x="358" y="390" width="384" height="22" rx="4" fill="#d6ddd9" opacity="0.55"/>
+<rect x="358" y="390" width="384.0" height="22" rx="4" fill="#17b890"/>
+<text x="752" y="406" font-family="ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700" fill="#14181a" text-anchor="start">100%</text>
+<text x="28" y="440" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#14181a" text-anchor="start">Names exactly what is affected: plain search</text>
+<rect x="358" y="424" width="384" height="22" rx="4" fill="#d6ddd9" opacity="0.55"/>
+<rect x="358" y="424" width="38.4" height="22" rx="4" fill="#9aa5a1"/>
+<text x="752" y="440" font-family="ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700" fill="#14181a" text-anchor="start">10%</text>
+<text x="28" y="474" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#14181a" text-anchor="start">Names exactly what is affected: Quorum</text>
+<rect x="358" y="458" width="384" height="22" rx="4" fill="#d6ddd9" opacity="0.55"/>
+<rect x="358" y="458" width="384.0" height="22" rx="4" fill="#17b890"/>
+<text x="752" y="474" font-family="ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700" fill="#14181a" text-anchor="start">100%</text>
+<text x="28" y="506" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#14181a" text-anchor="start">Copied claims: a trusted writer echoes a wrong fact</text>
+<text x="28" y="525" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">Poisoned claims trusted, out of 18 (the 3 are the reworded copy with no trace: the stated boundary)</text>
+<text x="28" y="554" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#14181a" text-anchor="start">Compare origin labels only</text>
+<rect x="358" y="538" width="384" height="22" rx="4" fill="#d6ddd9" opacity="0.55"/>
+<rect x="358" y="538" width="384.0" height="22" rx="4" fill="#d6453d"/>
+<text x="752" y="554" font-family="ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700" fill="#14181a" text-anchor="start">18 / 18</text>
+<text x="28" y="588" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#14181a" text-anchor="start">Lineage-aware gate</text>
+<rect x="358" y="572" width="384" height="22" rx="4" fill="#d6ddd9" opacity="0.55"/>
+<rect x="358" y="572" width="64.0" height="22" rx="4" fill="#17b890"/>
+<text x="752" y="588" font-family="ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="700" fill="#14181a" text-anchor="start">3 / 18</text>
+<text x="28" y="624" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">Limits: scenarios we wrote, one small model, generated questions, one machine. See docs/HACKATHON.md.</text>
+</svg>

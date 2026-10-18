@@ -61,4 +61,4 @@ An admin is told about waiting requests in the chat itself: any tool result carr
 
 ## Fewer tokens in your prompt
 
-Measured from a live hub (characters / 4) before the two coordination tools were added: the 15 memory tools cost your client about 2,000 tokens of tool descriptions and the first 10 chat tools about 1,300 (`quorum_guide` adds a little more); the two coordination tools (`announce_work`, `recall_as_of`) add a few hundred more (not re-measured). Set `QUORUM_TOOL_PROFILE=core` to list only the 17 memory and coordination tools once setup is done and drop the 1,300.
+Measured from the tool schemas the hub serves (JSON characters / 4, so approximate): the 17 memory and coordination tools cost your client about 3,300 tokens of tool descriptions, and all 28 about 5,300. Set `QUORUM_TOOL_PROFILE=core` to list only the 17 once setup is done and drop the roughly 2,000 tokens of the chat layer.

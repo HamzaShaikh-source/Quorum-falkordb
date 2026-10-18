@@ -2,6 +2,15 @@
 
 All notable changes to Quorum. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.5.1] - 2026-10-18
+
+### Changed
+- **README rewritten** for a first-time reader: the problem, one-command judge mode, setup from the AI chat, what you can say, how it works, the evidence (with its limits), the 28 tools grouped by job, security and honest limits, verification commands, a documentation map.
+- **Charts drawn from the result files** (`scripts/gen_charts.py` writes `docs/charts/evidence.svg` and `cascade.svg`), so every bar is a number a script produced.
+- **New docs:** `ARCHITECTURE.md` (system, a correction step by step, the graph, how a write is judged, the four safety layers; five Mermaid diagrams), `FAQ.md`, `CONSOLE.md`, `TRACKS.md` (moved out of the README).
+- Token cost of the tool descriptions re-measured from the served schemas: about 3,300 for the 17 core tools, about 5,300 for all 28.
+- `backend/tests/test_docs.py` keeps the docs honest: every relative link and image resolves, every doc is in the index, the README names every tool and the right count, and the charts match the committed results.
+
 ## [1.5.0] - 2026-10-18
 
 ### Added
