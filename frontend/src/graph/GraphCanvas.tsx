@@ -262,10 +262,12 @@ export function GraphCanvas({ active }: { active: boolean }) {
         <div className="rails" aria-hidden="true">
           {copy.rails.map((r, i) => (
             <div key={r} className="rail" ref={(el) => (rails.current[i] = el)}>
-              <span className="rail-label">
-                {r}
-                <b className="num">{counts[i]}</b>
-              </span>
+              {nodeCount > 0 && (
+                <span className="rail-label">
+                  {r}
+                  <b className="num">{counts[i]}</b>
+                </span>
+              )}
             </div>
           ))}
         </div>
@@ -361,11 +363,11 @@ export function GraphCanvas({ active }: { active: boolean }) {
         </div>
 
         {loaded && nodeCount === 0 && (story ? <p className="canvas-empty">{copy.canvas.empty}</p> : (
-          <div className="canvas-empty-art">
-            <EmptyGraphArt size={190} />
-            <b>Nothing in memory yet</b>
-            <p>When a connected AI saves a fact, it shows up here as a box, and arrows show what was built from what.</p>
-            <button className="btn primary" onClick={() => set({ view: 'connect' })}>Connect an AI</button>
+          <div className="canvas-empty-art absolute inset-0 z-10 flex flex-col items-center justify-center p-4 pointer-events-auto">
+            <EmptyGraphArt size={110} />
+            <b className="empty-title">Nothing in memory yet</b>
+            <p className="empty-desc">When a connected AI saves a fact, it shows up here as a box, and arrows show what was built from what.</p>
+            <button className="btn primary mt-1" onClick={() => set({ view: 'connect' })}>Connect an AI</button>
           </div>
         ))}
         {listView && <ListView />}

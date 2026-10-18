@@ -1134,24 +1134,24 @@ button,
 }
 .canvas-empty-art {
   position: absolute;
-  top: 140px;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: grid;
-  place-content: center;
-  place-content: safe center;
-  justify-items: center;
-  gap: 10px;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  pointer-events: auto;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  background: rgb(10 16 23 / 50%);
   text-align: center;
-  pointer-events: none;
-  padding: 24px 24px 32px;
   box-sizing: border-box;
-  z-index: 2;
 }
-.canvas-empty-art p { margin: 0; max-width: 34ch; color: var(--text-2); }
-.canvas-empty-art b { font-size: 18px; color: var(--text); }
-.canvas-empty-art .btn { pointer-events: auto; }
+.canvas-empty-art .ch-art { margin-bottom: 8px; max-height: 80px; width: auto; }
+.canvas-empty-art b, .canvas-empty-art .empty-title { font-size: 15px; font-weight: 600; color: var(--text); margin: 0 0 4px; }
+.canvas-empty-art p, .canvas-empty-art .empty-desc { font-size: 12px; line-height: 1.4; color: var(--text-2); max-width: 320px; margin: 0 0 12px; text-align: center; }
+.canvas-empty-art .btn { margin-top: 4px; pointer-events: auto; }
 .past-bar {
   position: absolute;
   top: 56px;
