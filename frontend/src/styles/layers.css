@@ -44,6 +44,15 @@
 .rail-label {
   top: 104px;
 }
+.canvas-empty-art {
+  top: 140px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.has-mini .canvas-empty-art {
+  bottom: 140px;
+}
 .overlay {
   position: absolute;
   inset: 0;

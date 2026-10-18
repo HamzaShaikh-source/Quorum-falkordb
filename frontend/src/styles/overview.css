@@ -45,7 +45,7 @@
 .ch-bars { margin: 0; }
 .ch-axis { display: flex; justify-content: space-between; font: 11px var(--f-mono, monospace); color: var(--text-3); margin-top: 4px; }
 .ch-art { flex: none; }
-.canvas-empty-art { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; text-align: center; pointer-events: none; padding: 24px; }
+.canvas-empty-art { position: absolute; top: 140px; bottom: 0; left: 0; right: 0; display: grid; place-content: center; place-content: safe center; justify-items: center; gap: 10px; text-align: center; pointer-events: none; padding: 24px 24px 32px; box-sizing: border-box; z-index: 2; }
 .canvas-empty-art p { margin: 0; max-width: 34ch; color: var(--text-2); }
 .canvas-empty-art b { font-size: 18px; color: var(--text); }
 .canvas-empty-art .btn { pointer-events: auto; }
