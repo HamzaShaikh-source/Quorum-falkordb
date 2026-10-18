@@ -3,6 +3,7 @@
 [![Track 02](https://img.shields.io/badge/Track%2002-Agent%20Memory%20%26%20Coordination-blueviolet?style=for-the-badge)](https://www.wemakedevs.org/hackathons/falkordb)
 [![Track 03](https://img.shields.io/badge/Track%2003-Company%20Brain-blue?style=for-the-badge)](https://www.wemakedevs.org/hackathons/falkordb)
 [![Graph](https://img.shields.io/badge/Graph-FalkorDB-crimson?style=for-the-badge)](https://falkordb.com/)
+[![MCP tools](https://img.shields.io/badge/MCP%20tools-28-14181a?style=for-the-badge)](docs/MCP.md)
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-34.100.151.44:5173-success?style=for-the-badge)](http://34.100.151.44:5173/)
 [![YouTube](https://img.shields.io/badge/YouTube-Demo%20Video-red?style=for-the-badge&logo=youtube)](https://youtu.be/lrZKJ4tmo-o)
 
@@ -13,7 +14,7 @@
 ## ⚡ Quick Links for Evaluators
 - 🌐 **Live Demo Sandbox:** [http://34.100.151.44:5173/](http://34.100.151.44:5173/) *(Instant 1-Click Access — pre-authenticated as Admin)*
 - 🎬 **Demo Video:** [Watch on YouTube (2 Minutes)](https://youtu.be/lrZKJ4tmo-o)
-- 🔌 **Live Backend API & MCP Server:** `http://34.100.151.44:8000` (FastAPI docs at `/docs`, embedded MCP at `/mcp`)
+- 🔌 **Live Backend API & MCP Server:** `http://34.100.151.44:8000` (FastAPI docs at `/docs`, embedded MCP at `/mcp` with 28 MCP tools)
 - 📊 **Empirical Proof & Benchmark Suite:** [`docs/PROOF.md`](docs/PROOF.md)
 
 ---
@@ -44,13 +45,13 @@ graph TD
 
 | Node Label | Purpose | Key Properties |
 | :--- | :--- | :--- |
-| `(:Source)` | Ingestion origin & audit anchor | `source_id`, `uri`, `tenant_id`, `verified_at` |
-| `(:Event)` | Temporal context or policy update | `event_id`, `type`, `occurred_at` |
-| `(:Fact)` | Discrete atomic belief unit | `fact_id`, `claim`, `validity_state` (valid, quarantined, invalid), `confidence` |
-| `(:Belief)` | Synthesized agent context | `belief_id`, `tenant_id`, `strength`, `stale` |
-| `(:Decision)` | Agent reasoning trace citing facts | `decision_id`, `agent_id`, `cited_fact_ids`, `rationale` |
-| `(:Action)` | Stateful external side-effect | `action_id`, `target_system`, `status`, `idempotency_key` |
-| `(:OutboxSaga)` | Deterministic compensation hook | `saga_id`, `action_id`, `compensation_endpoint`, `state` |
+| `(:Source)` | Ingestion origin & audit anchor | source_id, uri, tenant_id, verified_at |
+| `(:Event)` | Temporal context or policy update | event_id, type, occurred_at |
+| `(:Fact)` | Discrete atomic belief unit | fact_id, claim, validity_state (valid, quarantined, invalid), confidence |
+| `(:Belief)` | Synthesized agent context | belief_id, tenant_id, strength, stale |
+| `(:Decision)` | Agent reasoning trace citing facts | decision_id, agent_id, cited_fact_ids, rationale |
+| `(:Action)` | Stateful external side-effect | action_id, target_system, status, idempotency_key |
+| `(:OutboxSaga)` | Deterministic compensation hook | saga_id, action_id, compensation_endpoint, state |
 
 ---
 
@@ -98,28 +99,40 @@ RETURN s.saga_id, a.target_system, s.compensation_payload, a.idempotency_key
 
 ---
 
-## 🛠️ What Your AI Gets (Model Context Protocol / MCP)
+## What your AI gets
 
-When an AI agent connects to Quorum via the Model Context Protocol (MCP), it receives a suite of epistemic memory and coordination tools:
+When an AI agent connects to Quorum via MCP, it receives access to the full epistemic governance toolset across 28 MCP tools:
 
 | Tool | Description |
 | :--- | :--- |
-| `remember_fact` | Saves an atomic, verifiable fact with causal source provenance into FalkorDB. |
-| `derive` | Derives a higher-level conclusion or belief supported by existing active facts. |
-| `retrieve_context` | Retrieves active, non-quarantined context subgraphs for safe prompt construction. |
-| `stage_action` | Proposes a stateful action to the Quorum Gate along with cited fact IDs. |
-| `execute_action` | Executes a previously approved action with idempotency and saga registration. |
+| `announce_work` | Broadcasts active task intent to peer agents to prevent conflicting actions. |
 | `claim_handoff` | Coordinates multi-agent handoffs with shared epistemic state across agents. |
-| `quarantine` | Quarantines a fact or belief and triggers a cascading red-wave invalidation. |
-| `restore` | Restores a quarantined fact and reactivates healthy downstream descendants. |
-| `supersede` | Replaces an outdated fact with a newer version and marks the ancestor as stale. |
-| `get_containment_report` | Calculates the blast radius and affected downstream decisions of a quarantined fact. |
-| `get_provenance` | Traces the complete backward causal lineage of any decision back to its root sources. |
-| `get_prompt_diff` | Computes context deltas to inspect and strip invalidated beliefs from prompts. |
-| `quorum_guide` | In-chat guide and client agreement reference for agent coordination. |
-| `audit_trail` | Queries chronological audit events, gate rejections, and operator overrides. |
-| `list_beliefs` | Lists active beliefs and their supporting fact counts for a tenant. |
+| `delta` | Computes graph mutations and invalidated nodes between two timestamps. |
+| `derive` | Derives a conclusion or belief supported by active facts. |
+| `execute_action` | Executes a previously approved action with idempotency and saga registration. |
+| `explain_blast_radius` | Calculates downstream impact and affected decisions for a belief. |
+| `find_path` | Finds causal provenance paths between facts and actions. |
+| `get_map` | Retrieves the local causal subgraph map for a given entity or root. |
 | `get_node` | Inspects detailed graph properties, timestamps, and validity states of any node. |
+| `observe` | Records an external system state or sensor observation. |
+| `peer_retrieve` | Securely queries shared memory from an authorized peer Quorum instance. |
+| `quarantine` | Quarantines a fact or belief and triggers a cascading red-wave invalidation. |
+| `quorum_connect` | Establishes authorized peering connection with an external Quorum instance. |
+| `quorum_connections` | Lists currently active and authorized peer hub connections. |
+| `quorum_discover` | Discovers peer Quorum instances available across the local network. |
+| `quorum_guide` | Interactive guide and client agreement reference for agent coordination. |
+| `quorum_help` | Returns capability manifest and usage guidelines for connected agents. |
+| `quorum_inbox` | Checks pending inter-hub connection requests and permission handoffs. |
+| `quorum_manage` | Manages team member tokens, permission roles, and workspace seats. |
+| `quorum_respond` | Approves or declines incoming inter-hub connection requests. |
+| `quorum_start` | Initializes team workspace settings and onboarding configurations. |
+| `quorum_status` | Reports active graph statistics, quarantine counts, and connection health. |
+| `recall_as_of` | Performs time-travel belief retrieval as of a historical timestamp. |
+| `remember_fact` | Saves an atomic fact with causal source provenance into FalkorDB. |
+| `restore` | Restores a quarantined fact and reactivates healthy downstream descendants. |
+| `retrieve_context` | Retrieves active, non-quarantined context subgraphs for safe prompt construction. |
+| `review_handoff` | Inspects pending handoffs and verifies approval preconditions. |
+| `stage_action` | Proposes a stateful action to the Quorum Gate along with cited fact IDs. |
 
 ---
 
