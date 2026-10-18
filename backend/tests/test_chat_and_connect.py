@@ -209,7 +209,7 @@ def test_status_says_what_is_remembered_what_will_be_and_what_is_shared(hubs):
 def test_tool_profile_core_lists_only_the_memory_tools(monkeypatch):
     from app.mcp_embed import COORD_TOOLS, CORE_TOOLS, TOOLS, active_tools
 
-    assert len(CORE_TOOLS) == 15 and len(TOOLS) == 27
+    assert len(CORE_TOOLS) == 15 and len(TOOLS) == 28
     monkeypatch.setattr(settings, "TOOL_PROFILE", "core")
     assert active_tools() == CORE_TOOLS + COORD_TOOLS and len(active_tools()) == 17
     monkeypatch.setattr(settings, "TOOL_PROFILE", "full")

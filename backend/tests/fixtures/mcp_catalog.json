@@ -498,6 +498,30 @@
       "saves": "One short list instead of reading documentation"
     },
     {
+      "name": "quorum_guide",
+      "summary": "The full use guide by topic, and the install plan that teaches this AI how to use Quorum",
+      "args": [
+        {
+          "name": "topic",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "client",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "token",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "who": "any",
+      "writes": false,
+      "saves": "The manual is in the chat, so nobody opens a browser tab"
+    },
+    {
       "name": "quorum_start",
       "summary": "Guided setup: team size, name, focus, capture, teammates",
       "args": [

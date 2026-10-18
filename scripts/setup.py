@@ -216,6 +216,8 @@ You are setting up Quorum, my shared memory for AI agents and teammates. Do thes
 3. Call quorum_start. Ask me its questions one at a time (team size, team name, what we use it for, whether to save facts from chats automatically, whether to look for teammates), then call quorum_start again with my answers.
 4. Call quorum_discover and tell me who else on my network is running Quorum. If I name someone, call quorum_connect for them. When anyone asks to join me, tell me and ask whether to approve (quorum_inbox, quorum_respond) and at what level.
 5. Call quorum_status and explain what is remembered, what will be remembered, and what is shared with whom.
+6. Call quorum_guide with topic=install and your client name (claude-code, cursor, vscode, windsurf, antigravity, claude-desktop, chatgpt), and write the working agreement it returns into the file it names, so every future session follows it. Never write my token into that file.
+7. Tell me in three lines how to use Quorum from here, and that quorum_guide explains any topic (start, remember, ask, derive, correct, team, connect, coordinate, time, people, console, troubleshoot) whenever I ask.
 
 From now on: before answering anything about our work, call retrieve_context with format=compact; save durable facts with remember_fact (or observe); if a fact turns out wrong, quarantine it instead of deleting. I manage teams and permission levels by asking you (quorum_manage), not in a console.
 """

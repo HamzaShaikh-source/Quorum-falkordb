@@ -30,6 +30,7 @@ from app.services.mcp_guard import AuthError, _get_auth, effective_token, guarde
 # name -> (who can call it, one line for people). quorum_help prints this table; a test keeps it equal to the registered tools.
 COMMANDS: Dict[str, tuple] = {
     "quorum_help": ("anyone", "This list: every command and what it does"),
+    "quorum_guide": ("anyone", "The full use guide, in the chat: topics from first setup to troubleshooting, and the install plan that teaches this AI how to use Quorum"),
     "quorum_start": ("anyone / admin applies", "Guided setup: a few questions (team size, name, focus, capture, teammates), then it configures the workspace"),
     "quorum_status": ("anyone", "What is remembered, what will be remembered, what is shared with whom, who is connected, tokens saved"),
     "retrieve_context": ("anyone", "Look up what the team knows about a question (compact mode costs the fewest tokens)"),
@@ -112,6 +113,31 @@ def quorum_help(token: str = "") -> Dict[str, Any]:
     lines = [f"{name}: {desc}  [{who}]" for name, (who, desc) in COMMANDS.items()]
     text = "Quorum commands (you are " + roles.level_name(auth["role"]) + "):\n" + "\n".join(lines) + "\nStart with quorum_start if this is a new workspace, or quorum_status to see where things stand."
     return {"text": text, "commands": [{"name": n, "who": w, "does": d} for n, (w, d) in COMMANDS.items()], "your_level": roles.level_name(auth["role"]), "tokens": estimate_tokens(text)}
+
+
+def quorum_guide(topic: str = "", client: str = "", token: str = "") -> Dict[str, Any]:
+    """
+    The full use guide, so nobody needs the console or the docs. No arguments: the list of topics. topic='<id>': that topic's steps.
+    topic='install' with client='claude-code'|'cursor'|'vscode'|'windsurf'|'antigravity'|'claude-desktop'|'chatgpt'|'other': the exact
+    text and file to add so this AI follows the working agreement (and the hooks, for Claude Code).
+    """
+    from app.services import guide
+
+    _get_auth(token)
+    t = (topic or "").strip().lower()
+    if not t or t == "index":
+        text = guide.render_index()
+        return {"text": text, "topics": guide.topic_ids(), "tokens": estimate_tokens(text)}
+    if t == "install":
+        plan = guide.install_plan(client)
+        return {"text": plan["text"], "client": plan["client"], "file": plan["file"], "tokens": estimate_tokens(plan["text"])}
+    if t == "all":
+        text = "\n\n".join(guide.render_topic(i) or "" for i in guide.topic_ids() if i != "install")
+        return {"text": text, "tokens": estimate_tokens(text)}
+    body = guide.render_topic(t)
+    if body is None:
+        return {"error": f"No topic '{topic}'. Topics: {', '.join(guide.topic_ids())}.", "success": False}
+    return {"text": body, "topic": t, "tokens": estimate_tokens(body)}
 
 
 def quorum_start(
@@ -502,6 +528,6 @@ def notice_for(auth: Optional[Dict[str, Any]]) -> Optional[str]:
 
 
 __all__ = [
-    "COMMANDS", "SURVEY", "quorum_help", "quorum_start", "quorum_status", "quorum_manage", "quorum_discover", "quorum_connect", "quorum_inbox",
+    "COMMANDS", "SURVEY", "quorum_help", "quorum_guide", "quorum_start", "quorum_status", "quorum_manage", "quorum_discover", "quorum_connect", "quorum_inbox",
     "quorum_respond", "quorum_connections", "peer_retrieve", "notice_for", "effective_token", "guarded", "AuthError",
 ]

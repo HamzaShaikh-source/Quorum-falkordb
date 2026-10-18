@@ -10,6 +10,12 @@ describe('the AI setup prompt', () => {
     expect(order.every((i) => i > 0)).toBe(true);
     expect(order.slice(0, 3)).toEqual([...order.slice(0, 3)].sort((a, b) => a - b));
   });
+  it('ends with the use-guide install step, and every topic it lists exists in guide.json', async () => {
+    const p = aiPrompt('http://h');
+    expect(p).toContain('quorum_guide with topic=install');
+    const guide = (await import('../../../backend/app/services/guide.json')).default;
+    for (const t of guide.topics) expect(p).toContain(t.id);
+  });
   it('uses a visible placeholder, never a real-looking token, when none is given', () => {
     expect(aiPrompt('http://h')).toContain('<YOUR TOKEN>');
   });

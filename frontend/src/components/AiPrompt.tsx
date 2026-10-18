@@ -19,6 +19,8 @@ export function aiPrompt(origin: string, token = '<YOUR TOKEN>'): string {
     '3. Call quorum_start and ask me its questions one at a time, then call it again with my answers.',
     '4. Call quorum_discover and tell me who else on my network runs Quorum. If I name someone, call quorum_connect. When anyone asks to join me, tell me and ask whether to approve (quorum_inbox, quorum_respond).',
     '5. Call quorum_status and explain what is remembered, what will be remembered and what is shared with whom.',
+    '6. Call quorum_guide with topic=install and your client name (claude-code, cursor, vscode, windsurf, antigravity, claude-desktop, chatgpt), and write the working agreement it returns into the file it names, so every future session follows it. Never write my token into that file.',
+    '7. Tell me in three lines how to use Quorum from here, and that quorum_guide explains any topic (start, remember, ask, derive, correct, team, connect, coordinate, time, people, console, troubleshoot) whenever I ask.',
     '',
     'From now on: call retrieve_context with format=compact before answering about our work, save durable facts with remember_fact or observe, and quarantine a wrong fact instead of deleting it. I manage teams and permission levels by asking you (quorum_manage).',
   ].join('\n');

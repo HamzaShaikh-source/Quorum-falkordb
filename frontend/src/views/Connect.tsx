@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { API_MODE } from '../api/client';
 import { GettingStarted } from '../components/GettingStarted';
 import { AiPrompt } from '../components/AiPrompt';
+import { UseGuide } from '../components/UseGuide';
 import { Icon } from '../components/Icon';
 import { fmt, pct } from '../context/tokens';
 import { useStore } from '../state/store';
@@ -521,6 +522,7 @@ export function Connect() {
       </header>
       <GettingStarted />
       <AiPrompt />
+      <UseGuide />
       <Status />
       <Setup />
       {API_MODE === 'mock' ? <Feeds /> : <LiveFeed />}

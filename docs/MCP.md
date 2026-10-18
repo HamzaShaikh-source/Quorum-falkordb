@@ -48,11 +48,12 @@ An admin changes a person's level on the **Team** page (the Permission level col
 
 ## The chat layer: set up and run a team without the console
 
-Ten more tools sit beside the 17 memory and coordination tools (27 in all; `QUORUM_TOOL_PROFILE=core` lists only the 17). Each returns a short `text` the AI can show as is, plus the data behind it. Full walkthrough: [`AI_SETUP.md`](AI_SETUP.md).
+Eleven more tools sit beside the 17 memory and coordination tools (28 in all; `QUORUM_TOOL_PROFILE=core` lists only the 17). Each returns a short `text` the AI can show as is, plus the data behind it. Full walkthrough: [`AI_SETUP.md`](AI_SETUP.md).
 
 | Tool | Who | What it does |
 | --- | --- | --- |
 | `quorum_help` | anyone | Every command and what it does. |
+| `quorum_guide` | anyone | The full use guide in the chat. No arguments: the topics. `topic=<id>`: its steps. `topic=install client=<your AI>`: the exact file and text to add so this AI follows the working agreement (plus the capture and collision hooks for Claude Code). The same data is `GET /api/guide`, the console's **How to use Quorum** panel and `docs/USER_GUIDE.md`. |
 | `quorum_start` | anyone to read, Admin to apply | No arguments: the five survey questions. With answers: names the team, sets seats, records the capture preference, looks for teammates. |
 | `quorum_status` | anyone | What is remembered, what will be remembered, who it is shared with, who is connected, tokens saved. |
 | `quorum_manage` | Admin (overview: Reviewer too) | `team_create`, `team_seats`, `team_remove`, `member_add`, `member_set_level`, `member_move`, `member_new_token`, `member_remove`, `leaver_report`, `link`, `pause_link`, `resume_link`, `unlink`. A new token is shown once. |

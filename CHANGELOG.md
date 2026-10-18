@@ -2,6 +2,13 @@
 
 All notable changes to Quorum. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.5.0] - 2026-10-18
+
+### Added
+- **A use guide inside the chat.** `quorum_guide` (the 28th tool) returns the whole guide one topic at a time: start, remember, ask, derive, correct, team, connect, coordinate, time, people, console, troubleshoot. `quorum_guide(topic='install', client=...)` returns the exact text and file that teach a given AI the working agreement (Claude Code, Cursor, VS Code, Windsurf, Antigravity, Claude Desktop, ChatGPT), plus the optional hooks for Claude Code. It never includes a token.
+- **A "How to use Quorum" panel in the console** (Connect page), read from the same `guide.json`, so the console, the chat tool, `GET /api/guide` and `docs/USER_GUIDE.md` cannot disagree (a test fails if the generated Markdown is stale).
+- The AI setup prompt (console and `scripts/setup.py`) now ends with the install step and the guide pointer.
+
 ## [1.4.0] - 2026-10-18
 
 ### Added

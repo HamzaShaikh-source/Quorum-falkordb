@@ -33,6 +33,7 @@ COORD_TOOLS = (
 # The chat layer: onboarding, status, team management and connecting hubs from inside the AI chat.
 CHAT_TOOLS = (
     "quorum_help",
+    "quorum_guide",
     "quorum_start",
     "quorum_status",
     "quorum_manage",

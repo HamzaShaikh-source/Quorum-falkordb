@@ -285,7 +285,7 @@ def test_observed_facts_are_retrievable(tenant):
 def test_catalog_is_built_from_the_tools(tenant):
     r = client.get("/api/mcp/catalog", headers=H(tenant)).json()
     names = [x["name"] for x in r["tools"]]
-    assert "observe" in names and "retrieve_context" in names and len(names) == len(set(names)) == 27
+    assert "observe" in names and "retrieve_context" in names and len(names) == len(set(names)) == 28
     rc = next(x for x in r["tools"] if x["name"] == "retrieve_context")
     assert [a["name"] for a in rc["args"]][:2] == ["query", "token"] and rc["args"][0]["required"] and not rc["args"][1]["required"]
     assert "ctx" not in str(r["tools"])

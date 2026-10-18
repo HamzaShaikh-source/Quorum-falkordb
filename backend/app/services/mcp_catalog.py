@@ -24,6 +24,7 @@ META: Dict[str, tuple] = {
     "announce_work": ("agent", True, "Two agents never redo or break each other's work", "Say what you are about to work on; get a warning if someone else is on it or near it"),
     "recall_as_of": ("any", False, "Answers about the past without re-reading history", "What the team believed at an earlier time, and what happened to those facts since"),
     "quorum_help": ("any", False, "One short list instead of reading documentation", "Every command and what it does"),
+    "quorum_guide": ("any", False, "The manual is in the chat, so nobody opens a browser tab", "The full use guide by topic, and the install plan that teaches this AI how to use Quorum"),
     "quorum_start": ("any", True, "Setup happens in the chat, not in a console", "Guided setup: team size, name, focus, capture, teammates"),
     "quorum_status": ("any", False, "A few lines instead of a dashboard", "What is remembered, what will be, what is shared with whom"),
     "quorum_manage": ("human", True, "Team changes without leaving the chat", "Teams, people, permission levels, tokens and sharing links"),

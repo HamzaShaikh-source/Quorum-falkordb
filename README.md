@@ -13,7 +13,7 @@ Shared memory for AI agents and teammates, built on FalkorDB. When a fact turns 
 [![FalkorDB](https://img.shields.io/badge/graph%20work-Cypher%20in%20FalkorDB-red?style=flat-square)](docs/FALKORDB.md)
 [![Graph Hacks](https://img.shields.io/badge/Graph%20Hacks-Oct%202026-orange?style=flat-square)](docs/HACKATHON.md)
 
-[**Watch the under-two-minute demo**](docs/demo/quorum-demo.mp4) · [For judges](docs/HACKATHON.md) · [Set up from your AI](docs/AI_SETUP.md) · [Where FalkorDB decides](docs/FALKORDB.md)
+[**Watch the under-two-minute demo**](docs/demo/quorum-demo.mp4) · [For judges](docs/HACKATHON.md) · [Set up from your AI](docs/AI_SETUP.md) · [Use guide](docs/USER_GUIDE.md) · [Where FalkorDB decides](docs/FALKORDB.md)
 
 </div>
 
@@ -233,7 +233,7 @@ Measured on FalkorDB 8.10.2, on one developer laptop, by the harness above. The 
 |---|---|---|---|
 | **Frontend Console & Landing** | `3000` / `5173` | HTTP (React + Vite + Cytoscape) | Dual interface: Landing page (`#/`) and Incident Command Room (`#/app`) |
 | **Backend REST & SSE** | `8000` | HTTP / Server-Sent Events | FastAPI core causal API, event streaming, scenario driver |
-| **MCP Server** (embedded in the single backend writer; stdio through the bridge) | `8000` (`/mcp`) | Streamable HTTP (`/mcp`) & Stdio | Model Context Protocol server exposing 27 tools: 15 memory, token-saving and auditor tools, 2 coordination tools and 10 chat tools for setup, teams and connecting hubs |
+| **MCP Server** (embedded in the single backend writer; stdio through the bridge) | `8000` (`/mcp`) | Streamable HTTP (`/mcp`) & Stdio | Model Context Protocol server exposing 28 tools: 15 memory, token-saving and auditor tools, 2 coordination tools and 11 chat tools for setup, teams and connecting hubs |
 | **Mock Helpdesk API** | `8002` | HTTP / JSON | External ticketing and refund API with atomic Tombstone protection |
 | **FalkorDB Graph Engine** | `6379` | Redis / Cypher | Graph database engine with vector indexing and per-tenant Redis ACLs |
 | **FalkorDB Web Browser** | `8080` | HTTP | Interactive FalkorDB graph visualizer |
@@ -263,7 +263,7 @@ Measured on FalkorDB 8.10.2, on one developer laptop, by the harness above. The 
 ### The console beyond the graph
 
 - **Team** manages plan, teams, seats, members and links on the server, plus **Connect with teammates**: hubs visible on your network, requests waiting for your approval (with a permission level), and connections. Each member gets their own token (shown once, stored as a hash); presence comes from their real calls. Facts saved with `scope="team"` stay private to the team until a link shares them.
-- **Connect** shows a real MCP handshake, paste-ready setup for Claude Code, Claude Desktop, Cursor, VS Code, Windsurf, Antigravity and any MCP client, a **paste-into-your-AI prompt**, the 27 tools read from the hub, and every real tool call (who, what, tokens used against a top-8 retriever).
+- **Connect** shows a real MCP handshake, paste-ready setup for Claude Code, Claude Desktop, Cursor, VS Code, Windsurf, Antigravity and any MCP client, a **paste-into-your-AI prompt**, the 28 tools read from the hub, and every real tool call (who, what, tokens used against a top-8 retriever).
 - **Context** shows the memory as a mind map for people and as a compact map plus packed answer for agents, with live token numbers measured by the backend.
 - **Activity** is the audit log in plain sentences (who did what, when, what it cost), filterable, with a CSV export.
 
@@ -276,7 +276,7 @@ Quorum is architected to address all three hackathon tracks natively:
 |---|---|---|---|
 | **T01-1: Multi-Hop Causal Reasoning** | Deep DAG traversal over `[:LEADS_TO\|SUPPORTS*]` to trace roots, leaf facts, and dependent conclusions. | `backend/app/graph/queries.py` (`get_leaf_facts`, `explain_blast_radius`) | `pytest backend/tests/test_auditor_qa.py` & `docs/PROOF.md` |
 | **T01-2: Graph Queries as Agent Tools** | Native Cypher algorithms and graph queries exposed directly to agents (`find_path`, `get_node`, `delta`). | `backend/app/services/mcp_tools.py`, `backend/app/services/context_pack.py` | `pytest backend/tests/test_mcp_hardening.py` & `docs/MCP.md` |
-| **T01-3: Tool Selection Through MCP** | 27-tool Model Context Protocol server (15 memory and auditor tools, 2 coordination tools, 10 chat tools) over Streamable HTTP (`/mcp`) & stdio for Claude, Cursor, and Antigravity. | `backend/app/mcp_embed.py`, `mcp/server.py`, `mcp/bridge.py` | `GET /mcp` handshake & Connect tab in Console |
+| **T01-3: Tool Selection Through MCP** | 28-tool Model Context Protocol server (15 memory and auditor tools, 2 coordination tools, 11 chat tools) over Streamable HTTP (`/mcp`) & stdio for Claude, Cursor, and Antigravity. | `backend/app/mcp_embed.py`, `mcp/server.py`, `mcp/bridge.py` | `GET /mcp` handshake & Connect tab in Console |
 | **T01-4: Actions Based on Graph Evidence** | Quorum Gate (Layer 1) & Atomic Execute Guard (Layer 2) enforce graph-backed policy verification before execution. | `backend/app/services/gate.py`, `backend/app/services/executor.py` | `pytest backend/tests/test_safety_engine.py` & `docs/screens/07-ledger.png` |
 | **T01-5: Explainable Agent Decisions** | Live Cytoscape causal DAG, prompt diff strikethrough, parameterised Cypher drawer, and Plain-English Activity feed. | `frontend/src/graph/GraphCanvas.tsx`, `frontend/src/views/Console.tsx` | Interactive Console (`#/app`) & `docs/screens/04-wave.png` |
 

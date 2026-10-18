@@ -387,7 +387,7 @@ await page.evaluate(() => document.activeElement instanceof HTMLElement && docum
 await page.keyboard.press('7');
 await page.locator('.cn').waitFor({ timeout: 3000 }).catch(() => {});
 check('Connect page reports MCP status honestly in sample mode', (await text('.cn-status')).includes('Sample data (simulated)'));
-check('Connect page lists the real MCP tools', (await page.locator('.cn-table tbody tr').count()) === 27);
+check('Connect page lists the real MCP tools', (await page.locator('.cn-table tbody tr').count()) === 28);
 check('Connect shows a getting-started checklist that ticks itself from real state', (await page.locator('.gs-steps li').count()) === 4 && (await page.locator('.gs-steps li.done').count()) >= 1 && (await page.locator('.gs-bar[role=progressbar]').count()) === 1);
 check('exactly one step is marked as the next one to do', (await page.locator('.gs-steps li.next').count()) === 1);
 check('Connect page lists the observe tool', (await page.locator('.cn-table tbody th', { hasText: /^observe$/ }).count()) === 1);

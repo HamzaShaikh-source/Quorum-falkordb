@@ -62,7 +62,7 @@ async def main(a):
     async with client(a.a, a.a_token) as A, client(a.b, a.b_token) as B:
         LABELS[id(A)], LABELS[id(B)] = "Maya's AI", "Hamza's AI"
         names = {t.name for t in (await A.list_tools()).tools}
-        check("hub A lists the memory tools and the chat layer", len(names) == 27 and {"quorum_help", "quorum_start", "quorum_connect", "retrieve_context"} <= names, len(names))
+        check("hub A lists the memory tools and the chat layer", len(names) == 28 and {"quorum_help", "quorum_start", "quorum_connect", "retrieve_context"} <= names, len(names))
 
         h = await call(A, "quorum_help")
         check("quorum_help shows every command and what it does", all(n in h["text"] for n in ("quorum_connect", "quorum_manage", "retrieve_context")), h["tokens"])

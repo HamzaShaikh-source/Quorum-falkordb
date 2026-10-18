@@ -9,7 +9,7 @@ describe('built-in tool list', () => {
   it('has the tools the hub serves, including observe, with the token hidden from the argument list', () => {
     const names = MCP_TOOLS.map((t) => t.name);
     expect(names).toContain('observe');
-    expect(names).toHaveLength(27);
+    expect(names).toHaveLength(28);
     expect(names).toEqual(expect.arrayContaining(["quorum_help", "quorum_start", "quorum_connect", "peer_retrieve"]));
     expect(MCP_TOOLS.every((t) => !/\btoken\b/.test(t.args))).toBe(true);
     expect(MCP_TOOLS.find((t) => t.name === 'retrieve_context')!.args).toBe('query, k=5, format="full", budget_tokens?');
