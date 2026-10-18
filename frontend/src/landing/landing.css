@@ -1547,7 +1547,8 @@ body.on-landing {
 .lp-cn-clients li { border: 1.5px solid #3ddbb0; color: #fff; border-radius: 99px; padding: 6px 14px; font-weight: 600; font-size: 14px; }
 .lp-cn-code { display: flex; gap: 12px; align-items: center; background: #0a1017; border: 1.5px solid #2a3846; border-radius: 16px; padding: 14px 16px; flex-wrap: wrap; }
 .lp-cn-code code { color: #3ddbb0; flex: 1 1 300px; word-break: break-all; font-size: 14px; }
-.lp-cn-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; counter-reset: s; }
+.lp-cn-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; counter-reset: s; }
+@media (max-width: 1100px) { .lp-cn-steps { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 760px) { .lp-cn-steps { grid-template-columns: 1fr; } }
 .lp-cn-steps li { counter-increment: s; border-top: 3px solid #3ddbb0; padding-top: 10px; display: grid; gap: 4px; color: #cfd8d4; }
 .lp-cn-steps li b { color: #fff; font-size: 17px; }

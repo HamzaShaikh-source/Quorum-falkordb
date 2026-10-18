@@ -113,7 +113,7 @@ export function ConnectSection() {
   const [copied, setCopied] = useState(false);
   return (
     <section className="lp-section lp-dark" id="connect">
-      <Head dark tag="08" kicker="Set up from your AI chat" title="One command. One prompt. Then just talk to it." sub="Run the setup, paste the prompt it prints into Claude, Cursor, VS Code, Antigravity, Windsurf or any MCP-capable AI. It connects itself, lists every command, asks a few questions, finds teammates on your network and shows what is remembered. No console needed." />
+      <Head dark tag="08" kicker="Set up from your AI chat" title="One command. One prompt. Then just talk to it." sub="Run the setup, paste the prompt it prints into Claude, Cursor, VS Code, Antigravity, Windsurf or any MCP-capable AI. It connects itself, lists every command, asks a few questions, finds teammates on your network and shows what is remembered. A built-in guide answers how-to questions in the same chat. No console needed." />
       <div className="lp-cn">
         <ul className="lp-cn-clients" aria-label="Works with">
           {CLIENTS.map((c) => (
@@ -137,11 +137,15 @@ export function ConnectSection() {
           </li>
           <li>
             <b>Paste the prompt</b>
-            <span>Your AI connects itself, shows every command and runs a five-question survey.</span>
+            <span>Your AI connects itself, shows every command, runs a five-question survey and teaches itself the working rules.</span>
           </li>
           <li>
             <b>Say who to connect to</b>
             <span>&ldquo;Connect me to Maya&rsquo;s Quorum.&rdquo; Her admin is told in her chat, approves, and you are in.</span>
+          </li>
+          <li>
+            <b>Ask how, any time</b>
+            <span>&ldquo;How do I fix a wrong fact?&rdquo; The chat tool quorum_guide answers from the same guide as the console.</span>
           </li>
         </ol>
         <button className="lp-pill mint xl" onClick={() => go('app')}>
