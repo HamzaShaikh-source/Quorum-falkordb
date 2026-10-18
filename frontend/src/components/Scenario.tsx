@@ -82,7 +82,7 @@ export function ScenarioControls() {
             ? copy.scenario.failed(String(scenario.detail))
             : ' '}
       </p>
-      <button className={`autopilot${autopilot ? ' on' : ''}`} onClick={() => (autopilot ? stopAutopilot() : void startAutopilot())} title={copy.scenario.autopilotHint}>
+      <button id="tour-autopilot-btn" className={`autopilot${autopilot ? ' on' : ''}`} onClick={() => (autopilot ? stopAutopilot() : void startAutopilot())} title={copy.scenario.autopilotHint}>
         <Icon name={autopilot ? 'pause' : 'play'} size={15} />
         {autopilot ? copy.scenario.autopilotStop : copy.scenario.autopilot}
         <span className="autopilot-hint">{autopilot ? 'Hands off, it is running the story' : '90 second walkthrough'}</span>

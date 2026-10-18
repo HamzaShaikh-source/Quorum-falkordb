@@ -84,7 +84,7 @@ export function Containment() {
 
   if (!root || !nodes[root]) {
     return (
-      <section className="card containment containment-trigger" aria-label={copy.containment.title}>
+      <section id="tour-containment-report" className="card containment containment-trigger" aria-label={copy.containment.title}>
         <header className="card-h">
           <h2>{copy.containment.title}</h2>
         </header>
@@ -107,7 +107,7 @@ export function Containment() {
   const total = segs.reduce((a, s) => a + s.value, 0);
 
   return (
-    <section className="card containment containment-trigger" aria-label={copy.containment.title} aria-live="polite">
+    <section id="tour-containment-report" className="card containment containment-trigger" aria-label={copy.containment.title} aria-live="polite">
       <header className="card-h">
         <h2>{copy.containment.title}</h2>
         <div className="card-actions">

@@ -143,9 +143,10 @@ export function Ledger() {
   const tasks = (handoffs.data ?? []).filter((h) => h.kind === 'TASK');
 
   return (
-    <div className="ledger action-ledger">
+    <div id="tour-action-ledger" className="ledger action-ledger">
       {activeNotice ? (
         <div
+          id="tour-damage-control"
           className="damage-control-banner damage-control-badge"
           style={{
             gridColumn: '1 / -1',
@@ -186,6 +187,7 @@ export function Ledger() {
         </div>
       ) : (
         <div
+          id="tour-damage-control"
           className="damage-control-banner damage-control-badge idle"
           style={{
             gridColumn: '1 / -1',

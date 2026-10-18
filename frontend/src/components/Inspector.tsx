@@ -238,6 +238,7 @@ export function Inspector() {
       <header className="card-h">
         <h2>{copy.inspector.title}</h2>
         <button
+          id="tour-cypher-toggle"
           className="btn quiet small cypher-drawer-toggle"
           title="Inspect FalkorDB Cypher queries"
           aria-label="Inspect Cypher queries"

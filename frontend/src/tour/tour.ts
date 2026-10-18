@@ -28,7 +28,7 @@ export function isTourSeen(): boolean {
 
 const TOUR_STEPS: DriveStep[] = [
   {
-    element: '#cy',
+    element: '#tour-causal-canvas',
     onHighlightStarted: () => {
       useStore.getState().set({ view: 'console', tab: 'graph' });
     },
@@ -41,20 +41,20 @@ const TOUR_STEPS: DriveStep[] = [
     },
   },
   {
-    element: '.autopilot-controls',
+    element: '#tour-autopilot-btn',
     onHighlightStarted: () => {
       useStore.getState().set({ view: 'console', tab: 'graph' });
     },
     popover: {
       title: '1-Click Incident Runner',
       description:
-        'Run the live 6-step scenario: inject a poisoned webhook, watch the Auditor detect the contradiction, and observe the rollback.',
+        'Run the live 6-step scenario: Inject a poisoned webhook, watch the Auditor detect the contradiction, and observe the rollback.',
       side: 'right',
-      align: 'start',
+      align: 'center',
     },
   },
   {
-    element: '.containment-trigger',
+    element: '#tour-containment-report',
     onHighlightStarted: () => {
       useStore.getState().set({ view: 'console', tab: 'graph' });
     },
@@ -73,7 +73,7 @@ const TOUR_STEPS: DriveStep[] = [
     },
   },
   {
-    element: '.action-ledger',
+    element: '#tour-action-ledger',
     onHighlightStarted: (el, _step, opts) => {
       useStore.getState().set({ view: 'console', tab: 'ledger' });
       if (!el || el.id === 'driver-dummy-element') {
@@ -105,10 +105,10 @@ const TOUR_STEPS: DriveStep[] = [
     },
   },
   {
-    element: '.damage-control-badge',
+    element: '#tour-damage-control',
     onHighlightStarted: (el, _step, opts) => {
       useStore.getState().set({ view: 'console', tab: 'ledger' });
-      if (!el || el.id === 'driver-dummy-element' || !document.querySelector('.damage-control-badge')) {
+      if (!el || el.id === 'driver-dummy-element' || !document.querySelector('#tour-damage-control')) {
         setTimeout(() => {
           if (opts?.driver?.getActiveIndex?.() === 4) {
             opts.driver.drive(4);
@@ -137,7 +137,7 @@ const TOUR_STEPS: DriveStep[] = [
     },
   },
   {
-    element: '.as-of-slider',
+    element: '#tour-as-of-slider',
     onHighlightStarted: (el, _step, opts) => {
       useStore.getState().set({ view: 'console', tab: 'graph' });
       if (!el || el.id === 'driver-dummy-element') {
@@ -163,7 +163,7 @@ const TOUR_STEPS: DriveStep[] = [
     },
   },
   {
-    element: '.cypher-drawer-toggle',
+    element: '#tour-cypher-toggle',
     onHighlightStarted: () => {
       const st = useStore.getState();
       if (!st.selectedId) {
@@ -189,11 +189,12 @@ const TOUR_STEPS: DriveStep[] = [
 
 export function createTourDriver(): Driver {
   const driverInstance: Driver = driver({
-    animate: !(typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches),
+    animate: true,
+    smoothScroll: true,
+    allowClose: true,
     overlayColor: 'rgba(17, 24, 39, 0.5)',
     stagePadding: 8,
     stageRadius: 8,
-    allowClose: true,
     showProgress: true,
     progressText: 'Step {{current}} of {{total}}',
     nextBtnText: 'Next',

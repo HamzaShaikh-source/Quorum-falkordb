@@ -97,7 +97,7 @@ export function Timeline() {
   const diff = compareBase ? diffGraphs(compareBase.nodes, graph.nodes) : null;
 
   return (
-    <section className="timeline as-of-slider" ref={root} aria-label={copy.timeline.title}>
+    <section id="tour-as-of-slider" className="timeline as-of-slider" ref={root} aria-label={copy.timeline.title}>
       <h2 className="sr">{copy.timeline.title}</h2>
       <div className="tl-controls">
         <button className="btn" disabled={empty} onClick={togglePlay}>

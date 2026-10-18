@@ -17,6 +17,7 @@
 .driver-active-element {
   position: relative !important;
   z-index: 1000000001 !important;
+  background: transparent !important;
   border: 2px solid #111827 !important;
   outline: none !important;
   box-shadow: 0 0 0 4px rgba(17, 24, 39, 0.15) !important;
