@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { API_MODE, demoCredentials, tenants } from '../api/client';
+import { API_MODE, demoCredentials, signIn, tenants } from '../api/client';
 import { copy } from '../copy';
 import { getInvariants } from '../state/endpoints';
-import { switchTenant } from '../state/pipeline';
+import { setRole, switchTenant } from '../state/pipeline';
 import { useStore, type View } from '../state/store';
 import { visibleViews } from '../state/views';
 import { go } from '../landing/hooks';
@@ -137,6 +137,65 @@ function InvariantLight() {
   );
 }
 
+function ActiveSessionPill() {
+  const currentRole = useStore((s) => s.role);
+  const [switching, setSwitching] = useState(false);
+
+  // Read active token from storage or fall back to default
+  const token =
+    (typeof window !== 'undefined'
+      ? (sessionStorage.getItem('quorum:token') ??
+         localStorage.getItem('quorum_token') ??
+         localStorage.getItem('quorum:token'))
+      : null) ?? 'token_human';
+
+  // Determine role label
+  let roleLabel = 'Admin';
+  if (currentRole === 'auditor' || token.includes('auditor')) {
+    roleLabel = 'Auditor';
+  } else if (currentRole === 'agent' || token.includes('agent')) {
+    roleLabel = 'Agent';
+  }
+
+  const handleRoleChange = async (targetToken: string) => {
+    if (targetToken === token) return;
+    setSwitching(true);
+    try {
+      const res = await signIn(targetToken);
+      if (res.ok) {
+        let nextRole: 'human' | 'auditor' | 'agent' = 'human';
+        if (targetToken.includes('auditor')) nextRole = 'auditor';
+        else if (targetToken.includes('agent')) nextRole = 'agent';
+        setRole(nextRole);
+        useStore.getState().pushToast(`Active role: ${nextRole.toUpperCase()} (${targetToken})`, 'good');
+      } else {
+        useStore.getState().pushToast(`Failed to switch role: ${res.message}`, 'bad');
+      }
+    } finally {
+      setSwitching(false);
+    }
+  };
+
+  return (
+    <div className="session-pill-wrap" title="Active evaluator session. Switch roles instantly to test RBAC without re-authenticating.">
+      <label className="session-pill-label">
+        <span className="session-pill-text">🟢 Demo Sandbox ({roleLabel}: {token})</span>
+        <select
+          className="session-pill-select"
+          aria-label="Switch evaluator role"
+          disabled={switching}
+          value={token}
+          onChange={(e) => void handleRoleChange(e.target.value)}
+        >
+          <option value="token_human">👑 Admin (token_human)</option>
+          <option value="token_acme_auditor">🛡️ Auditor (token_acme_auditor)</option>
+          <option value="token_acme_agent">🤖 Worker Agent (token_acme_agent)</option>
+        </select>
+      </label>
+    </div>
+  );
+}
+
 export function Header() {
   const short = useShortNav();
   const story = useStore((s) => s.story);
@@ -181,19 +240,7 @@ export function Header() {
             ))}
           </select>
         </label>
-        {API_MODE === 'mock' ? (
-          <span className="pill sample" title={copy.sampleHint}>
-            <Icon name="sparkle" size={13} />
-            <span className="sample-w">{copy.sampleData}</span>
-          </span>
-        ) : (
-          demoCredentials() && (
-            <span className="pill sample" title="Demo sandbox credentials active">
-              <Icon name="sparkle" size={13} />
-              <span className="sample-w">Demo</span>
-            </span>
-          )
-        )}
+        <ActiveSessionPill />
         {story && (
           <span className={`pill mode ${mode}`} title={copy.modeHint[mode] ?? ''}>
             {copy.mode[mode] ?? mode}

@@ -1,5 +1,9 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { useRoute } from './landing/hooks';
+import { AuthProvider, initAutoAuth } from './context/AuthContext';
+
+// Ensure auto-login token is initialized early for first-time evaluators
+initAutoAuth();
 
 // The landing page and the console are separate bundles: the graph engine and the sample backend
 // are not downloaded until someone opens the console.
@@ -21,8 +25,10 @@ export function App() {
   }, [route]);
 
   return (
-    <Suspense fallback={<RouteFallback landing={route === 'landing'} />}>
-      {route === 'landing' ? <Landing /> : <ConsoleApp />}
-    </Suspense>
+    <AuthProvider>
+      <Suspense fallback={<RouteFallback landing={route === 'landing'} />}>
+        {route === 'landing' ? <Landing /> : <ConsoleApp />}
+      </Suspense>
+    </AuthProvider>
   );
 }

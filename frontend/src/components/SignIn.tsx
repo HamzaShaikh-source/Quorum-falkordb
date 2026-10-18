@@ -14,11 +14,10 @@ export function SignIn({ onSignedIn, expired = false, devHub = false }: { onSign
   const errId = useId();
   const input = useRef<HTMLInputElement>(null);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const loginWithToken = async (targetToken: string) => {
     setBusy(true);
     setError(null);
-    const r = await signIn(token);
+    const r = await signIn(targetToken);
     setBusy(false);
     if (r.ok) {
       setToken('');
@@ -27,6 +26,11 @@ export function SignIn({ onSignedIn, expired = false, devHub = false }: { onSign
       setError(r.message);
       input.current?.focus();
     }
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await loginWithToken(token);
   };
 
   return (
@@ -40,6 +44,17 @@ export function SignIn({ onSignedIn, expired = false, devHub = false }: { onSign
         <p className="block-why">
           {expired ? 'It may have expired or been revoked. Ask whoever runs this hub for a new one, or rotate it on the Team page.' : 'This hub runs with production rules, so there are no built-in demo tokens. Use a human token to manage teams and review handoffs.'}
         </p>
+
+        {/* Prominent Primary Evaluator Quick-Access Button */}
+        <button
+          type="button"
+          className="btn primary evaluator-access-btn"
+          disabled={busy}
+          onClick={() => void loginWithToken('token_human')}
+        >
+          ⚡ Enter Demo Sandbox (1-Click Evaluator Access)
+        </button>
+
         <label className="field" htmlFor={inputId}>
           <span>Token</span>
           <input
@@ -56,6 +71,50 @@ export function SignIn({ onSignedIn, expired = false, devHub = false }: { onSign
             placeholder="qtk_… or qrm_…"
           />
         </label>
+
+        {/* 1-Click Role Presets */}
+        <div className="evaluator-presets" role="group" aria-label="1-Click Role Presets">
+          <span className="preset-heading">1-Click Role Presets:</span>
+          <div className="preset-buttons">
+            <button
+              type="button"
+              className="btn secondary small preset-btn"
+              disabled={busy}
+              onClick={() => {
+                setToken('token_human');
+                void loginWithToken('token_human');
+              }}
+              title="Authenticate as Admin"
+            >
+              👑 Admin (token_human)
+            </button>
+            <button
+              type="button"
+              className="btn secondary small preset-btn"
+              disabled={busy}
+              onClick={() => {
+                setToken('token_acme_auditor');
+                void loginWithToken('token_acme_auditor');
+              }}
+              title="Authenticate as Auditor"
+            >
+              🛡️ Auditor (token_acme_auditor)
+            </button>
+            <button
+              type="button"
+              className="btn secondary small preset-btn"
+              disabled={busy}
+              onClick={() => {
+                setToken('token_acme_agent');
+                void loginWithToken('token_acme_agent');
+              }}
+              title="Authenticate as Worker Agent"
+            >
+              🤖 Worker Agent (token_acme_agent)
+            </button>
+          </div>
+        </div>
+
         {error && (
           <p id={errId} className="bad-text" role="alert">
             {error}

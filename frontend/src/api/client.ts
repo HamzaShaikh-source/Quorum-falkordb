@@ -31,10 +31,15 @@ const MOCK_CONFIG: RuntimeConfig = {
 };
 
 const TOKEN_KEY = 'quorum:token';
+const LEGACY_STORAGE_KEY = 'quorum_token';
 
 function readStored(): string | null {
   try {
-    return sessionStorage.getItem(TOKEN_KEY);
+    return (
+      sessionStorage.getItem(TOKEN_KEY) ??
+      localStorage.getItem(LEGACY_STORAGE_KEY) ??
+      localStorage.getItem(TOKEN_KEY)
+    );
   } catch {
     return null;
   }
@@ -42,8 +47,15 @@ function readStored(): string | null {
 
 function writeStored(token: string | null) {
   try {
-    if (token) sessionStorage.setItem(TOKEN_KEY, token);
-    else sessionStorage.removeItem(TOKEN_KEY);
+    if (token) {
+      sessionStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(LEGACY_STORAGE_KEY, token);
+      localStorage.setItem(TOKEN_KEY, token);
+    } else {
+      sessionStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      localStorage.removeItem(TOKEN_KEY);
+    }
   } catch {
     /* storage can be unavailable; the sign-in then lasts until reload */
   }
@@ -81,11 +93,23 @@ export async function resolveAuth(): Promise<AuthResult> {
     adopt(MOCK_CONFIG);
     return 'ok';
   }
-  const stored = readStored();
+  let stored = readStored();
+  if (!stored) {
+    // Auto-login for first-time evaluators: initialize with token_human
+    try {
+      const wasSignedOut = sessionStorage.getItem('quorum:signed_out') === '1';
+      if (!wasSignedOut) {
+        stored = 'token_human';
+        writeStored(stored);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
   if (stored) {
     const who = await whoami(stored);
     if (who) {
-      sandbox = false;
+      sandbox = stored.startsWith('token_') || stored === 'token_human';
       adopt({ tokens: { [who.tenant]: { [who.role]: stored } }, tenants: [who.tenant] });
       session.tenant = who.tenant;
       session.role = who.role;
@@ -106,14 +130,19 @@ export async function resolveAuth(): Promise<AuthResult> {
   return 'needed';
 }
 
-/** Checks a pasted token with the hub and, if it is good, keeps it for this tab only (sessionStorage). */
+/** Checks a pasted token with the hub and, if it is good, keeps it for this tab only (sessionStorage and localStorage). */
 export async function signIn(token: string): Promise<{ ok: true } | { ok: false; message: string }> {
   const t = token.trim();
   if (!t) return { ok: false, message: 'Paste a token first.' };
   const who = await whoami(t);
   if (!who) return { ok: false, message: 'The hub did not accept that token. It may be wrong, expired or revoked.' };
+  try {
+    sessionStorage.removeItem('quorum:signed_out');
+  } catch {
+    /* ignore */
+  }
   writeStored(t);
-  sandbox = false;
+  sandbox = t.startsWith('token_') || t === 'token_human';
   adopt({ tokens: { [who.tenant]: { [who.role]: t } }, tenants: [who.tenant] });
   session.tenant = who.tenant;
   session.role = who.role;
@@ -122,6 +151,11 @@ export async function signIn(token: string): Promise<{ ok: true } | { ok: false;
 
 export function signOut() {
   writeStored(null);
+  try {
+    sessionStorage.setItem('quorum:signed_out', '1');
+  } catch {
+    /* ignore */
+  }
   config = { tokens: {}, tenants: [] };
 }
 

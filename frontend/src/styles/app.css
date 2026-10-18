@@ -2492,3 +2492,111 @@ kbd {
     display: none;
   }
 }
+
+/* Evaluator Quick-Access & Role Presets */
+.evaluator-access-btn {
+  width: 100%;
+  padding: 12px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--text, #0b1218);
+  color: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--text-2);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.evaluator-access-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--text-2);
+}
+.evaluator-access-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 var(--text-2);
+}
+.evaluator-presets {
+  margin: 10px 0 14px;
+}
+.preset-heading {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.preset-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.preset-btn {
+  font-size: 12px;
+  padding: 6px 12px;
+  border: 1.5px solid var(--text);
+  border-radius: 8px;
+  background: #f7f9fa;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.preset-btn:hover {
+  background: #eef2f5;
+  border-color: var(--text);
+}
+
+/* Top Navigation Session Pill & Dropdown */
+.session-pill-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.session-pill-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-3, #151f28);
+  border: 1px solid var(--line-2, #243442);
+  border-radius: var(--r-pill, 9999px);
+  padding: 3px 10px;
+  font-size: var(--t12, 12px);
+  font-weight: 500;
+  color: var(--text, #eee);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.session-pill-label:hover {
+  border-color: var(--ok, #10b981);
+  background: var(--bg-2, #1b2834);
+}
+.session-pill-text {
+  white-space: nowrap;
+}
+.session-pill-select {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: var(--text, #eee);
+  font-size: var(--t12, 12px);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 4px;
+  outline: none;
+}
+.session-pill-select:focus-visible {
+  outline: 2px solid var(--accent, #6366f1);
+  border-radius: 4px;
+}
+@media (max-width: 900px) {
+  .session-pill-text {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
