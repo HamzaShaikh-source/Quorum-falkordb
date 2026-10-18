@@ -7,6 +7,7 @@ Logs every query execution to an in-memory query log for the UI 'Show Cypher' dr
 """
 
 import os
+import random
 import time
 import json
 import logging
@@ -73,22 +74,45 @@ def get_query_log(limit: int = 50) -> List[Dict[str, Any]]:
     return list(reversed(QUERY_LOG[-limit:]))
 
 
+PENDING_MSG = "Max pending queries exceeded"
+RETRY_BUDGET_S = 5.0
+
+
 def _robust_query(g, cypher: str, params: Optional[Dict[str, Any]] = None):
-    for attempt in range(6):
+    """FalkorDB sheds load with 'Max pending queries exceeded' when many threads queue at once. That is back-pressure, not a failure:
+    wait with jittered exponential backoff (about five seconds in all) and try again; any other error is raised at once."""
+    deadline = time.monotonic() + RETRY_BUDGET_S
+    delay = 0.005
+    while True:
         try:
             return g.query(cypher, params) if params else g.query(cypher)
         except Exception as e:
-            if "Max pending queries exceeded" in str(e) and attempt < 5:
-                time.sleep(0.005 * (2 ** attempt))
-                continue
-            raise
+            if PENDING_MSG not in str(e) or time.monotonic() >= deadline:
+                raise
+            time.sleep(delay * (0.5 + random.random()))
+            delay = min(delay * 2, 0.25)
+
+
+class _RetryingGraph:
+    """A FalkorDB graph whose query() waits out back-pressure; everything else (name, delete, ro_query...) is the real graph's."""
+
+    def __init__(self, graph):
+        self._g = graph
+
+    def query(self, cypher: str, params: Optional[Dict[str, Any]] = None, *args, **kwargs):
+        if args or kwargs:
+            return self._g.query(cypher, params, *args, **kwargs)
+        return _robust_query(self._g, cypher, params)
+
+    def __getattr__(self, name: str):
+        return getattr(self._g, name)
 
 
 def get_graph(tenant_id: str, kind: str = "commons"):
     clean_tenant = tenant_id[7:] if tenant_id.startswith("tenant_") else tenant_id
     graph_name = f"tenant_{clean_tenant}:{kind}"
     db = get_db()
-    g = db.select_graph(graph_name)
+    g = _RetryingGraph(db.select_graph(graph_name))
     # Ensure Meta node exists
     try:
         res = _robust_query(g, "MATCH (m:Meta {id: 'meta'}) RETURN m.epoch")
