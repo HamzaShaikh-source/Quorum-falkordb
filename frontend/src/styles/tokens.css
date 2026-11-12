@@ -1,0 +1,59 @@
+/*
+ * Design direction: a print proof room (shared with the landing page).
+ * Graphite surfaces, one signal colour per state, card-style evidence nodes on a dot grid,
+ * big numerals for the numbers that matter.
+ */
+:root {
+  --bg: #f3f5f2;
+  --bg-2: #ffffff;
+  --bg-3: #eef1ed;
+  --bg-4: #e3e8e2;
+  --line: rgb(11 18 24 / 12%);
+  --line-2: rgb(11 18 24 / 26%);
+  --line-3: rgb(11 18 24 / 58%);
+
+  --text: #0b1218;
+  --text-2: #46525e;
+  --text-3: #5d6975;
+
+  --ok: #07745e;
+  --ok-dim: rgb(7 116 94 / 12%);
+  --ok-line: rgb(7 116 94 / 55%);
+  --bad: #c93420;
+  --bad-dim: rgb(201 52 32 / 10%);
+  --bad-line: rgb(201 52 32 / 55%);
+  --warn: #8f5a00;
+  --warn-dim: rgb(184 117 0 / 14%);
+  --warn-line: rgb(184 117 0 / 55%);
+  --person: #3b3fd1;
+  --person-dim: rgb(59 63 209 / 9%);
+  --person-line: rgb(59 63 209 / 50%);
+  --ghost: #6b7783;
+
+  --mint: #3ddbb0;
+  --redfill: #ff6a55;
+  --on-light: #ffffff;
+
+  --font-ui: 'Schibsted Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --f-display: 'Bricolage Grotesque Variable', 'Schibsted Grotesk', system-ui, sans-serif;
+  --f-pixel: 'Silkscreen', 'JetBrains Mono', monospace;
+
+  --t12: 12px;
+  --t13: 13px;
+  --t14: 14px;
+  --t16: 16px;
+  --t20: 20px;
+  --t28: 28px;
+  --t44: 44px;
+
+  --r-s: 6px;
+  --r-m: 12px;
+  --r-l: 18px;
+  --r-pill: 999px;
+
+  --shadow-1: none;
+  --shadow-2: 6px 6px 0 var(--text);
+  --hard: 8px 8px 0 var(--text);
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}

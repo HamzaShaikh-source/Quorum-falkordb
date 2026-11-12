@@ -1,0 +1,21 @@
+/** Mirrors the CSS tokens in styles/tokens.css. Cytoscape cannot read CSS variables. */
+export const P = {
+  ink: '#0b1218',
+  bg: '#f3f5f2',
+  bg2: '#ffffff',
+  bg3: '#ffffff',
+  bg4: '#e3e8e2',
+  text: '#0b1218',
+  text2: '#46525e',
+  ok: '#07745e',
+  okFill: '#d9f2e9',
+  bad: '#c93420',
+  badFill: '#fbe3de',
+  badText: '#8c2112',
+  warn: '#b87500',
+  person: '#3b3fd1',
+  ghost: '#6b7783',
+  ghostFill: '#eef1ed',
+  edge: 'rgba(11,18,24,0.5)',
+  nodeBorder: 'rgba(11,18,24,0.8)',
+} as const;

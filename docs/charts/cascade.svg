@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 290" width="860" height="290" role="img" aria-labelledby="t d">
+<title id="t">Correct, quarantine, block, compensate</title><desc id="d">A four-step flow: correct a fact, quarantine everything built on it, block dependent actions, compensate those that already ran.</desc>
+<rect width="860" height="290" rx="14" fill="#f3f5f2"/>
+<rect x="1" y="1" width="858" height="288" rx="13" fill="none" stroke="#14181a" stroke-width="1.5"/>
+<text x="28" y="40" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#14181a" text-anchor="start">Correct, quarantine, block, compensate</text>
+<text x="28" y="62" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#5c6a66" text-anchor="start">One step in; four effects out. All of it is a graph operation, none of it asks a model.</text>
+<rect x="28" y="90" width="192" height="150" rx="12" fill="#fff" stroke="#14181a" stroke-width="2"/>
+<rect x="28" y="90" width="192" height="8" rx="4" fill="#14181a"/>
+<text x="42" y="128" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#14181a" text-anchor="start">1  Correct</text>
+<text x="42" y="154" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">A reviewer marks a fact</text>
+<text x="42" y="172" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">wrong</text>
+<rect x="232" y="90" width="192" height="150" rx="12" fill="#fff" stroke="#d6453d" stroke-width="2"/>
+<rect x="232" y="90" width="192" height="8" rx="4" fill="#d6453d"/>
+<text x="246" y="128" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#14181a" text-anchor="start">2  Quarantine</text>
+<text x="246" y="154" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">One traversal in</text>
+<text x="246" y="172" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">FalkorDB: every</text>
+<text x="246" y="190" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">conclusion and action</text>
+<text x="246" y="208" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">built on it, with hop</text>
+<text x="246" y="226" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">depth</text>
+<rect x="436" y="90" width="192" height="150" rx="12" fill="#fff" stroke="#d6453d" stroke-width="2"/>
+<rect x="436" y="90" width="192" height="8" rx="4" fill="#d6453d"/>
+<text x="450" y="128" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#14181a" text-anchor="start">3  Block</text>
+<text x="450" y="154" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">Pending actions whose</text>
+<text x="450" y="172" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">ancestry is no longer</text>
+<text x="450" y="190" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">healthy are refused</text>
+<rect x="640" y="90" width="192" height="150" rx="12" fill="#fff" stroke="#17b890" stroke-width="2"/>
+<rect x="640" y="90" width="192" height="8" rx="4" fill="#17b890"/>
+<text x="654" y="128" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#14181a" text-anchor="start">4  Compensate</text>
+<text x="654" y="154" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">Actions that already ran</text>
+<text x="654" y="172" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">are reversed through an</text>
+<text x="654" y="190" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">outbox, or a correction</text>
+<text x="654" y="208" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">notice is drafted</text>
+<path d="M222 165 h12" stroke="#14181a" stroke-width="2"/><path d="M229 160 l6 5 l-6 5" fill="none" stroke="#14181a" stroke-width="2"/>
+<path d="M426 165 h12" stroke="#14181a" stroke-width="2"/><path d="M433 160 l6 5 l-6 5" fill="none" stroke="#14181a" stroke-width="2"/>
+<path d="M630 165 h12" stroke="#14181a" stroke-width="2"/><path d="M637 160 l6 5 l-6 5" fill="none" stroke="#14181a" stroke-width="2"/>
+<text x="28" y="268" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#5c6a66" text-anchor="start">Later retrievals never return the quarantined facts until an authorised person restores them.</text>
+</svg>

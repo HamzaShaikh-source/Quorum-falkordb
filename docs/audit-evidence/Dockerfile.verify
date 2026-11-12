@@ -1,0 +1,17 @@
+# CI-equivalent Python runtime; no mounted Windows filesystem or customer credentials.
+FROM python:3.12-slim
+WORKDIR /workspace
+COPY backend/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt ruff mypy pytest-cov hypothesis
+COPY backend/ backend/
+COPY tests/ tests/
+COPY graph/ graph/
+COPY agents/ agents/
+COPY mcp/ mcp/
+COPY scripts/ scripts/
+COPY mock_helpdesk/ mock_helpdesk/
+COPY bench/ bench/
+COPY contracts/ contracts/
+COPY conftest.py pytest.ini mypy.ini ruff.toml .coveragerc README.md .env.example .env.production.example docker-compose.yml docker-compose.production.yml ./
+ENV PYTHONPATH=/workspace/backend:/workspace
+CMD ["python", "-m", "pytest", "-q", "--cov=backend/app", "--cov-report=term-missing:skip-covered", "--cov-fail-under=90"]

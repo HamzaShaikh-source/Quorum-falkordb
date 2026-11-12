@@ -1,0 +1,39 @@
+{
+  "engine": "FalkorDB persisted API graph + in-process ranking",
+  "dataset_nodes": 2000,
+  "healthy_candidates": 100,
+  "concurrency": 1,
+  "ranking": "default hybrid/local embeddings",
+  "hardware": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 142 Stepping 10, GenuineIntel",
+    "python": "3.13.15",
+    "cpus": 8
+  },
+  "initial_persistence_ms": 5618.845599999986,
+  "full_retrieval_service": {
+    "cold_ms": 18.801499999881344,
+    "warm_p50_ms": 2.614799999719253,
+    "warm_p95_ms": 3.396299999621988,
+    "samples": 15
+  },
+  "rest_context_preview": {
+    "cold_ms": 1818.0704999999762,
+    "warm_p50_ms": 1352.5673000003735,
+    "warm_p95_ms": 2572.230000000218,
+    "samples": 5
+  },
+  "boundaries": {
+    "service": "full retrieval service, ranking, baseline evidence and delivery tracking; excludes HTTP and commit",
+    "rest": "FastAPI TestClient request through real middleware, auth, context comparison and diff sync; excludes TCP and external actions",
+    "initial_persistence": "one initial commit only; separate from retrieval",
+    "external_call_ms": "not applicable"
+  },
+  "selected_ids": [
+    "fact_00003",
+    "fact_00000",
+    "fact_00001",
+    "fact_00002",
+    "fact_00005"
+  ]
+}

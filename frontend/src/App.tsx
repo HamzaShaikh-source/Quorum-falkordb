@@ -1,0 +1,38 @@
+// Copyright (c) 2026 Aaditya Arunpal, Hamza Shaikh, and Janani S. All Rights Reserved.
+// SPDX-License-Identifier: AGPL-3.0-only
+// Dual-licensed under GNU AGPLv3 and Commercial License (see COMMERCIAL_LICENSE.md).
+
+import { lazy, Suspense, useEffect } from 'react';
+import { useRoute } from './landing/hooks';
+import { AuthProvider, initAutoAuth } from './context/AuthContext';
+
+// Ensure auto-login token is initialized early for first-time evaluators
+initAutoAuth();
+
+// The landing page and the console are separate bundles: the graph engine and the sample backend
+// are not downloaded until someone opens the console.
+const Landing = lazy(() => import('./landing/Landing').then((m) => ({ default: m.Landing })));
+const ConsoleApp = lazy(() => import('./ConsoleApp'));
+
+function RouteFallback({ landing }: { landing: boolean }) {
+  return (
+    <div className={landing ? 'route-fallback light' : 'route-fallback'} role="status" aria-label="Loading">
+      <span className="route-dot" />
+    </div>
+  );
+}
+
+export function App() {
+  const route = useRoute();
+  useEffect(() => {
+    document.body.classList.toggle('on-landing', route === 'landing');
+  }, [route]);
+
+  return (
+    <AuthProvider>
+      <Suspense fallback={<RouteFallback landing={route === 'landing'} />}>
+        {route === 'landing' ? <Landing /> : <ConsoleApp />}
+      </Suspense>
+    </AuthProvider>
+  );
+}

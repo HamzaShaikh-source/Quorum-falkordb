@@ -1,0 +1,129 @@
+services:
+  falkordb:
+    image: falkordb/falkordb:latest
+    container_name: quorum-falkordb
+    ports:
+      - "6379:6379"
+    volumes:
+      - falkordb_data:/var/lib/falkordb/data
+      - ./scripts/users.acl:/etc/redis/users.acl:ro
+    restart: unless-stopped
+    command: ["--loadmodule", "/usr/lib/redis/modules/falkordb.so"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  falkordb-browser:
+    image: falkordb/falkordb-browser:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - FALKORDB_HOST=falkordb
+      - FALKORDB_PORT=6379
+    depends_on:
+      falkordb:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: ["tools"]
+
+  mock-helpdesk:
+    build:
+      context: ./mock_helpdesk
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    restart: unless-stopped
+
+  # The API. MCP is served from the same process (QUORUM_EMBED_MCP=1) so agents and the console share one graph
+  # and one event stream. Everything is stored in FalkorDB; without it the API answers 503 and the console shows
+  # the setup screen.
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - QUORUM_FALKORDB_URL=redis://falkordb:6379
+      - QUORUM_EMBED_MCP=1
+      - QUORUM_MODE=replay
+      # This file is the local demo, so it runs in development (demo tokens, ad-hoc tokens). A real deployment uses
+      # docker-compose.production.yml on top of it: docker compose -f docker-compose.yml -f docker-compose.production.yml up -d
+      - QUORUM_ENV=${QUORUM_ENV:-development}
+      # A fresh install is an empty workspace. QUORUM_DEMO=1 turns on the guided poisoned-webhook story and its sample agents.
+      - QUORUM_DEMO=${QUORUM_DEMO:-0}
+      - HELPDESK_URL=http://mock-helpdesk:8002
+      # Where other machines reach this hub (shown on the Connect page), e.g. https://quorum.example.com:8443
+      - QUORUM_PUBLIC_URL=${QUORUM_PUBLIC_URL:-}
+      # Only the TLS proxy (pinned to 172.29.77.10 below) may tell the hub who the real client is. The private ranges are NOT
+      # trusted: a client reaching the published port arrives from the Docker gateway and must not be able to spoof X-Forwarded-For.
+      - QUORUM_TRUSTED_PROXIES=${QUORUM_TRUSTED_PROXIES:-127.0.0.1,::1,172.29.77.10}
+    depends_on:
+      falkordb:
+        condition: service_healthy
+      mock-helpdesk:
+        condition: service_started
+    restart: unless-stopped
+
+  # Optional: a separate MCP server process. Not needed with the embedded MCP above, and it shares FalkorDB, not memory.
+  mcp-server:
+    build:
+      context: .
+      dockerfile: mcp/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - QUORUM_FALKORDB_URL=redis://falkordb:6379
+      - HELPDESK_URL=http://mock-helpdesk:8002
+    depends_on:
+      falkordb:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: ["standalone-mcp"]
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: quorum-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - QUORUM_BACKEND=http://backend:8000
+      - QUORUM_MCP=http://backend:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Optional HTTPS front door for a team: docker compose --profile tls up -d   (see deploy/Caddyfile, docs/SETUP.md)
+  proxy:
+    image: caddy:2-alpine
+    container_name: quorum-proxy
+    networks:
+      default:
+        ipv4_address: 172.29.77.10
+    ports:
+      - "8443:8443"
+    environment:
+      - QUORUM_DOMAIN=${QUORUM_DOMAIN:-localhost}
+      - QUORUM_TLS=${QUORUM_TLS:-internal}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    profiles: ["tls"]
+
+volumes:
+  falkordb_data:
+  caddy_data:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.29.77.0/24

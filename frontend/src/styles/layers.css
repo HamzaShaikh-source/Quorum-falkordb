@@ -1,0 +1,445 @@
+/*
+ * Layering and overlays. Everything that floats lives on this scale, so nothing fights for the same z-index,
+ * and the canvas overlays sit in a grid so they cannot land on top of each other.
+ */
+:root {
+  --z-canvas: 1;
+  --z-overlay: 4;
+  --z-chrome: 20;
+  --z-popover: 40;
+  --z-dev: 50;
+  --z-menu: 60;
+  --z-modal: 80;
+  --z-toast: 90;
+}
+
+.header {
+  z-index: var(--z-chrome);
+}
+.popover,
+.filters {
+  z-index: var(--z-popover);
+}
+.ctxmenu {
+  z-index: var(--z-menu);
+}
+.modal-back,
+.palette-back {
+  z-index: var(--z-modal);
+}
+.toasts {
+  z-index: var(--z-toast);
+}
+.dev-toggle {
+  z-index: var(--z-dev);
+}
+
+/* ---- canvas overlay grid ---- */
+.cy {
+  inset: 134px 64px 56px 0;
+}
+.has-mini .cy {
+  inset: 134px 64px 150px 0;
+}
+.rail-label {
+  top: 104px;
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 48px 1fr auto;
+  padding: 12px;
+  gap: 8px 10px;
+  pointer-events: none;
+}
+.overlay > * {
+  pointer-events: none;
+}
+.overlay :is(.search, .seg, .btn, .iconbtn, .filters-wrap, .status-chip, .minimap, .legend, .zoomdock) {
+  pointer-events: auto;
+}
+.ov-toolbar {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  position: static;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+.ov-status {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 48px;
+}
+.ov-bl {
+  grid-column: 1;
+  grid-row: 4;
+  align-self: end;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+.ov-br {
+  grid-column: 2;
+  grid-row: 4;
+  align-self: end;
+}
+
+/* reset the old absolute positions: the grid places these now */
+.canvas-tools,
+.zoomdock,
+.legend,
+.minimap {
+  position: static;
+}
+.search {
+  flex: 1 1 140px;
+  min-width: 96px;
+  max-width: 220px;
+}
+.search input {
+  width: 100%;
+  min-width: 0;
+}
+.legend {
+  position: relative;
+  max-width: none;
+}
+.legend-body {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  width: 360px;
+  z-index: var(--z-popover);
+  margin: 0;
+}
+.minimap {
+  flex: none;
+}
+.zoomdock {
+  flex-direction: column;
+}
+
+/* one status line, in priority order */
+.status-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 6px 8px 6px 14px;
+  border-radius: var(--r-pill);
+  font-size: var(--t13);
+  font-weight: 600;
+  border: 1.5px solid var(--text);
+  background: #fff;
+  box-shadow: 3px 3px 0 var(--text);
+  animation: chip-in 0.18s var(--ease);
+}
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.status-chip.past {
+  background: var(--person);
+  border-color: var(--text);
+  color: #fff;
+}
+.status-chip.past .btn {
+  background: #fff;
+  color: var(--text);
+  padding: 3px 12px;
+}
+.status-chip.path {
+  background: var(--person);
+  color: #fff;
+  padding: 3px 4px 3px 14px;
+}
+.status-chip.path .iconbtn {
+  color: #fff;
+  min-width: 26px;
+  height: 26px;
+}
+.status-chip.path .iconbtn:hover {
+  background: rgb(255 255 255 / 22%);
+  color: #fff;
+}
+.status-chip.dry {
+  background: #fff;
+  border-color: var(--bad);
+  color: var(--bad);
+  box-shadow: 3px 3px 0 var(--bad);
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+.status-chip.dry span {
+  font-weight: 500;
+  color: var(--text-2);
+}
+.status-chip.hint {
+  border-radius: 16px;
+  padding: 8px 8px 8px 12px;
+  max-width: min(640px, 100%);
+  font-weight: 400;
+  align-items: center;
+  gap: 12px;
+}
+.status-chip.hint .hint-ico {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: var(--mint);
+  border: 1.5px solid var(--text);
+  color: var(--text);
+}
+.status-chip.hint strong {
+  font-family: var(--f-display);
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.status-chip.hint .hint-text {
+  font-size: var(--t13);
+  color: var(--text-2);
+  line-height: 1.35;
+  align-self: center;
+}
+
+/* ---- toasts: stacked, auto-dismissing, paused while hovered or focused ---- */
+.toasts {
+  position: fixed;
+  right: 20px;
+  bottom: calc(var(--timeline-h, 120px) + var(--dock-h, 0px));
+  width: min(380px, calc(100vw - 40px));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: start;
+  padding: 11px 8px 13px 14px;
+  pointer-events: auto;
+  box-shadow: 4px 4px 0 var(--mint);
+}
+.toast.tone-warn {
+  box-shadow: 4px 4px 0 #f2b705;
+}
+.toast.tone-bad {
+  box-shadow: 4px 4px 0 var(--redfill);
+}
+.toast.tone-good {
+  box-shadow: 4px 4px 0 var(--mint);
+}
+.toast > .icon {
+  margin-top: 2px;
+}
+.toast-text {
+  line-height: 1.4;
+}
+.toast-count {
+  margin-left: 8px;
+  padding: 0 7px;
+  border-radius: var(--r-pill);
+  background: #fff;
+  color: var(--text);
+  font-size: 11px;
+}
+.toast-life {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background: var(--mint);
+  transform-origin: left;
+  animation: toast-life linear forwards;
+}
+.toast.tone-warn .toast-life {
+  background: #f2b705;
+}
+.toast.tone-bad .toast-life {
+  background: var(--redfill);
+}
+.toast-life.paused {
+  animation-play-state: paused;
+}
+@keyframes toast-life {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* ---- dev console: docked below the stage, never floating over content ---- */
+.dev-toggle {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  float: none;
+}
+.dev-drawer {
+  position: relative;
+  flex: none;
+  height: 128px;
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-top: 1.5px solid var(--text);
+}
+.dev-drawer header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line-2);
+  font-size: var(--t13);
+}
+.dev-drawer header strong {
+  font-family: var(--f-display);
+  letter-spacing: -0.02em;
+}
+.dev-drawer header .grow {
+  margin-left: auto;
+}
+.dev-drawer .dev-log {
+  overflow-y: auto;
+  padding: 8px 16px 12px;
+  flex: 1;
+}
+
+@media (max-width: 1279px) {
+  .seg-label {
+    display: none;
+  }
+  .search {
+    flex-basis: 110px;
+  }
+  .legend-body {
+    width: 300px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .status-chip {
+    animation: none;
+  }
+}
+
+.dev-resize {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -5px;
+  height: 10px;
+  cursor: row-resize;
+  z-index: 1;
+}
+.dev-resize::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 3px;
+  width: 44px;
+  height: 4px;
+  margin-left: -22px;
+  border-radius: 2px;
+  background: var(--text);
+  opacity: 0.35;
+}
+.dev-resize:hover::after,
+.dev-resize:focus-visible::after {
+  opacity: 1;
+}
+.dev-empty {
+  padding: 8px 16px;
+}
+
+.route-fallback {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+}
+.route-fallback.light {
+  background: #f3f5f2;
+}
+.route-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text);
+  animation: route-pulse 0.9s ease-in-out infinite alternate;
+}
+@keyframes route-pulse {
+  to {
+    transform: scale(1.8);
+    opacity: 0.25;
+  }
+}
+.tab-fallback {
+  padding: 16px;
+}
+
+/* accessibility helpers */
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.seg-btn { min-height: 28px; }
+.story-btn { min-height: 28px; display: inline-flex; align-items: center; }
+
+/* selects and fields never outgrow their card */
+.field,
+.field select,
+.ins-card select,
+.history select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+}
+.field { display: grid; }
+
+/* story rail: History keeps a real height and its filter tabs wrap instead of clipping */
+.col.left > .history { flex: 1 0 auto; min-height: 280px; }
+.history .seg { display: flex; flex-wrap: wrap; border-radius: 16px; }
+.history .seg-btn { min-width: 0; padding: 4px 6px; }
+.history .feed { max-height: 42vh; }
+.history .seg-btn { flex: 1 0 auto; gap: 2px; padding: 4px 8px; }
+
+/* insights reflows to the width it is given instead of overflowing the pane */
+.insights { overflow-x: hidden; min-width: 0; }
+.ins-kpis { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); }
+.ins-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+.ins-card.span2 { grid-column: 1 / -1; }
+.ins-card svg { max-width: 100%; height: auto; }
+.center-body, .col.center > * { min-width: 0; }
+.scenario-extra { display: flex; flex-wrap: wrap; gap: 4px 8px; }
+.scenario-extra .btn { flex: 1 1 auto; justify-content: center; white-space: nowrap; }
+
+/* the tab bar collapses to icons (active tab keeps its label) when the centre column is narrow */
+.col.center { container-type: inline-size; }
+.center-head .seg { max-width: 100%; }
+@container (max-width: 560px) {
+  .center-head .seg-btn:not(.on) .tab-label { display: none; }
+  .center-head .seg-btn:not(.on) { padding-inline: 10px; }
+}
