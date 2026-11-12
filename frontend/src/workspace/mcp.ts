@@ -76,7 +76,7 @@ export interface SetupInput {
 }
 
 export const DEFAULT_MCP_URL = 'http://localhost:8000/mcp';
-export const DEFAULT_REPO = 'path/to/iFone';
+export const DEFAULT_REPO = 'path/to/Quorum-falkordb';
 export const TOKEN_PLACEHOLDER = '<YOUR_TOKEN>';
 
 /** Clients that can attach an Authorization header to a remote server. ChatGPT connectors cannot. */

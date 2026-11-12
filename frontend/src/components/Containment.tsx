@@ -144,10 +144,10 @@ export function Containment() {
                 marginTop: '12px',
                 marginBottom: '12px',
                 padding: '12px 14px',
-                background: 'var(--warn-dim, rgba(184, 117, 0, 0.14))',
-                border: '1px solid var(--warn-line, #b87500)',
+                background: '#fff3d6',
+                border: '1.5px solid var(--text, #0b1218)',
                 borderRadius: 'var(--r-m, 12px)',
-                boxShadow: 'var(--shadow-2, 3px 3px 0 #000)',
+                boxShadow: '4px 4px 0 var(--text, #0b1218)',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
@@ -160,11 +160,8 @@ export function Containment() {
                 Quarantined irreversible action (<span className="mono">{activeNotice.target_action_id}</span>) requires human review. Check the draft, recipient and verified replacement facts before approval.
               </p>
               <button
-                className="btn review"
+                className="btn primary"
                 style={{
-                  background: 'var(--warn, #8f5a00)',
-                  color: '#fff',
-                  fontWeight: 600,
                   width: '100%',
                   padding: '8px 12px',
                   fontSize: '0.82rem',

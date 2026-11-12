@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { copy } from '../copy';
-import type { GraphNode } from '../api/schemas';
+import type { GraphEdge, GraphNode } from '../api/schemas';
 import { graphBus } from '../graph/bus';
 import { actionDisplayState, actionTone } from '../state/actionState';
 import { getCypher, getNode } from '../state/endpoints';
@@ -20,6 +20,56 @@ function kindIcon(n: GraphNode) {
 
 function statusTone(n: GraphNode) {
   return n.status === 'QUARANTINED' ? 'bad' : n.status === 'HEALTHY' ? 'good' : 'neutral';
+}
+
+export function computeLocalProvenance(
+  target: GraphNode,
+  nodesMap: Record<string, GraphNode>,
+  edgesList: GraphEdge[],
+): {
+  path: GraphNode[];
+  descendantCount: number;
+  statusHistory: { ts: number; status: string; reason: string }[];
+} {
+  const path: GraphNode[] = [target];
+  let currId = target.id;
+  const visited = new Set<string>([currId]);
+  while (true) {
+    const parentEdge = edgesList.find(
+      (e) => e.target === currId && (e.type === 'LEADS_TO' || e.type === 'FROM_SOURCE'),
+    );
+    if (!parentEdge || visited.has(parentEdge.source)) break;
+    const parentNode = nodesMap[parentEdge.source];
+    if (!parentNode) break;
+    path.unshift(parentNode);
+    visited.add(parentNode.id);
+    currId = parentNode.id;
+  }
+
+  const descendantCount = edgesList.filter((e) => e.source === target.id).length;
+  const baseTs = target.valid_from ?? 0;
+  const statusHistory: { ts: number; status: string; reason: string }[] = [
+    {
+      ts: baseTs,
+      status: 'HEALTHY',
+      reason: 'Node created from source',
+    },
+  ];
+  if (target.status === 'QUARANTINED') {
+    statusHistory.push({
+      ts: target.quarantined_at ?? baseTs,
+      status: 'QUARANTINED',
+      reason: `Cascade invalidation from root ${target.quarantine_root ?? 'poison'}`,
+    });
+  } else if (target.status === 'SUPERSEDED') {
+    statusHistory.push({
+      ts: baseTs,
+      status: 'SUPERSEDED',
+      reason: `Superseded by ${target.superseded_by ?? 'newer source'}`,
+    });
+  }
+
+  return { path, descendantCount, statusHistory };
 }
 
 function PathTab({ nodes }: { nodes: GraphNode[] }) {
@@ -152,16 +202,23 @@ function Cypher({ text }: { text: string }) {
 function LinksTab({ node }: { node: GraphNode }) {
   const nodesRec = useStore((s) => s.nodes);
   const edgesRec = useStore((s) => s.edges);
+  const asOf = useStore((s) => s.asOf);
+  const pastGraph = useStore((s) => s.past);
   const set = useStore((s) => s.set);
-  const all = Object.values(nodesRec);
-  const adj = adjacency(all, Object.values(edgesRec));
+
+  const all = asOf && pastGraph ? pastGraph.nodes : Object.values(nodesRec);
+  const activeEdges = asOf && pastGraph ? pastGraph.edges : Object.values(edgesRec);
+  const lookup: Record<string, GraphNode> =
+    asOf && pastGraph ? Object.fromEntries(pastGraph.nodes.map((n) => [n.id, n])) : nodesRec;
+
+  const adj = adjacency(all, activeEdges);
   const list = (ids: string[]) =>
     ids.length === 0 ? (
       <p className="muted small">{tools.links.none}</p>
     ) : (
       <ul className="links-list">
         {ids.map((i) => {
-          const n = nodesRec[i];
+          const n = lookup[i];
           return n ? (
             <li key={i}>
               <button
@@ -229,9 +286,25 @@ export function Inspector() {
   const asOf = useStore((s) => s.asOf);
   const set = useStore((s) => s.set);
   const q = useQuery({ queryKey: ['node', id], queryFn: () => getNode(id as string), enabled: !!id && !asOf });
-  const live = useStore((s) => (id ? s.nodes[id] : undefined));
-  const past = useStore((s) => (id && s.past ? s.past.nodes.find((n) => n.id === id) : undefined));
+  const nodesRec = useStore((s) => s.nodes);
+  const edgesRec = useStore((s) => s.edges);
+  const pastGraph = useStore((s) => s.past);
+  const live = id ? nodesRec[id] : undefined;
+  const past = id && pastGraph ? pastGraph.nodes.find((n) => n.id === id) : undefined;
   const node = asOf ? past : (live ?? q.data?.node);
+
+  const activeNodesMap: Record<string, GraphNode> =
+    asOf && pastGraph ? Object.fromEntries(pastGraph.nodes.map((n) => [n.id, n])) : nodesRec;
+  const activeEdgesList: GraphEdge[] =
+    asOf && pastGraph ? pastGraph.edges : Object.values(edgesRec);
+
+  const localProv = node ? computeLocalProvenance(node, activeNodesMap, activeEdgesList) : null;
+  const pathNodes =
+    !asOf && q.data
+      ? q.data.path.map((p) => nodesRec[p.id] ?? p)
+      : (localProv?.path ?? (node ? [node] : []));
+  const descendantsCount = !asOf && q.data ? q.data.descendant_count : (localProv?.descendantCount ?? 0);
+  const statusHistory = !asOf && q.data ? q.data.status_history : (localProv?.statusHistory ?? []);
 
   return (
     <section className="card inspector" aria-label={copy.inspector.title}>
@@ -286,10 +359,9 @@ export function Inspector() {
           <div className="tabbody" role="tabpanel">
             {q.isLoading && !node && <Skeleton lines={5} />}
             {q.isError && !node && <ErrorState error={q.error} onRetry={() => void q.refetch()} />}
-            {tab === 'path' && q.data && <PathTab nodes={q.data.path.map((p) => (asOf ? p : (useStore.getState().nodes[p.id] ?? p)))} />}
-            {tab === 'path' && asOf && node && <PathTab nodes={[node]} />}
+            {tab === 'path' && node && <PathTab nodes={pathNodes} />}
             {tab === 'details' && node && (
-              <DetailsTab node={node} descendants={q.data?.descendant_count ?? 0} history={q.data?.status_history ?? []} />
+              <DetailsTab node={node} descendants={descendantsCount} history={statusHistory} />
             )}
             {tab === 'links' && node && <LinksTab node={node} />}
             {tab === 'cypher' && <CypherTab nodeId={id} />}

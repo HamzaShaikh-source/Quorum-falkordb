@@ -159,7 +159,7 @@ export function Overview() {
                 <ul className="ov-people">
                   {ws.members.slice(0, 8).map((m) => (
                     <li key={m.id} title={`${m.name}: ${m.status}`}>
-                      <span className="avatar">{m.name.slice(0, 1)}</span>
+                      <span className="avatar">{[...m.name][0] ?? ''}</span>
                       <i className={`pres ${m.status === 'unknown' ? 'offline' : m.status}`} aria-hidden="true" />
                       <span className="ov-name">{m.name}</span>
                       <span className="sr-only">{m.status}</span>

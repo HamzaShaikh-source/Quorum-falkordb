@@ -149,19 +149,22 @@ function ActiveSessionPill() {
          localStorage.getItem('quorum:token'))
       : null) ?? 'token_human';
 
-  // Determine role label & icon
+  // Determine role label, icon, and canonical option value
   let roleLabel = 'Admin';
   let roleIcon = '👑';
+  let selectValue = 'token_human';
   if (currentRole === 'auditor' || token.includes('auditor')) {
     roleLabel = 'Auditor';
     roleIcon = '🛡️';
+    selectValue = 'token_acme_auditor';
   } else if (currentRole === 'agent' || token.includes('agent')) {
     roleLabel = 'Worker Agent';
     roleIcon = '🤖';
+    selectValue = 'token_acme_agent';
   }
 
   const handleRoleChange = async (targetToken: string) => {
-    if (targetToken === token) return;
+    if (targetToken === selectValue && targetToken === token) return;
     setSwitching(true);
     try {
       const res = await signIn(targetToken);
@@ -191,7 +194,7 @@ function ActiveSessionPill() {
           className="session-pill-select"
           aria-label="Switch evaluator role"
           disabled={switching}
-          value={token}
+          value={selectValue}
           onChange={(e) => void handleRoleChange(e.target.value)}
         >
           <option value="token_human">👑 Admin (token_human)</option>

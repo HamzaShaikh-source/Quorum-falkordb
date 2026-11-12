@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ApiError } from '../api/client';
 import { copy } from '../copy';
 import { startAutopilot, stopAutopilot } from '../state/autopilot';
@@ -15,13 +15,15 @@ export function ScenarioControls() {
   const autopilot = useStore((s) => s.autopilot);
   const pushToast = useStore((s) => s.pushToast);
   const [pending, setPending] = useState<string | null>(null);
+  const inFlightRef = useRef(false);
   const active = scenario.active ?? pending;
 
   const done = new Set(eventLog.filter((e) => e.type === 'scenario_progress' && e.state === 'finished').map((e) => e.step ?? ''));
   const next = STORY.find((s) => !done.has(s));
 
   async function go(step: string) {
-    if (active || pending) return;
+    if (active || pending || inFlightRef.current) return;
+    inFlightRef.current = true;
     setPending(step);
     try {
       await runStep(step);
@@ -30,6 +32,7 @@ export function ScenarioControls() {
       if (e instanceof ApiError && e.code === 'FORBIDDEN_ROLE') pushToast(copy.errors.forbiddenRoleScenario);
       else pushToast(copy.errors.generic(e instanceof ApiError ? e.code : 'ERROR', e instanceof ApiError ? e.message : 'Request failed'));
     } finally {
+      inFlightRef.current = false;
       setPending(null);
     }
   }

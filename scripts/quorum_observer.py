@@ -4,8 +4,8 @@ without the agent calling any tool.
 
 Add to .claude/settings.json (project) or ~/.claude/settings.json (everywhere):
 
-  {"hooks": {"Stop":       [{"hooks": [{"type": "command", "command": "python /path/to/iFone/scripts/quorum_observer.py"}]}],
-             "PreCompact": [{"hooks": [{"type": "command", "command": "python /path/to/iFone/scripts/quorum_observer.py"}]}]}}
+  {"hooks": {"Stop":       [{"hooks": [{"type": "command", "command": "python /path/to/Quorum-falkordb/scripts/quorum_observer.py"}]}],
+             "PreCompact": [{"hooks": [{"type": "command", "command": "python /path/to/Quorum-falkordb/scripts/quorum_observer.py"}]}]}}
 
   QUORUM_URL     the hub, default http://localhost:8000
   QUORUM_TOKEN   an agent or human token (a member token from the Team page is best)

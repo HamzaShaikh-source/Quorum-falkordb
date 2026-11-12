@@ -55,6 +55,23 @@ body {
   border-color: var(--text);
   color: var(--text);
 }
+.session-pill-label {
+  background: #fff;
+  border: 1.5px solid var(--text);
+  color: var(--text);
+}
+.session-pill-label:hover {
+  background: var(--bg-4);
+  border-color: var(--text);
+}
+.session-pill-label:focus-within {
+  outline: 2px solid var(--person);
+  outline-offset: 2px;
+}
+.session-pill-select option {
+  background: #fff;
+  color: var(--text);
+}
 .pill.sample {
   background: var(--warn-dim);
   color: var(--warn);

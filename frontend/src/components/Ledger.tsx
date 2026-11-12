@@ -103,10 +103,10 @@ function HandoffCard({ h, onOpenNotice }: { h: Handoff; onOpenNotice?: (n: Corre
           <button
             className="btn"
             style={{
-              borderColor: 'var(--warn-line, #b87500)',
-              background: 'var(--warn-dim, rgba(184, 117, 0, 0.14))',
-              color: 'var(--text)',
-              fontWeight: 600,
+              borderColor: 'var(--text, #0b1218)',
+              background: '#fff3d6',
+              color: 'var(--text, #0b1218)',
+              fontWeight: 700,
             }}
             onClick={() => onOpenNotice(h.correction_notice!)}
           >
@@ -151,14 +151,14 @@ export function Ledger() {
           style={{
             gridColumn: '1 / -1',
             padding: '14px 18px',
-            background: 'var(--warn-dim, rgba(184, 117, 0, 0.14))',
-            border: '1px solid var(--warn-line, #b87500)',
+            background: '#fff3d6',
+            border: '1.5px solid var(--text, #0b1218)',
             borderRadius: 'var(--r-m, 12px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: '12px',
-            boxShadow: 'var(--shadow-2, 4px 4px 0 #000)',
+            boxShadow: '4px 4px 0 var(--text, #0b1218)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -173,12 +173,9 @@ export function Ledger() {
             </div>
           </div>
           <button
-            className="btn review"
+            className="btn primary"
             onClick={() => setModalNotice(activeNotice)}
             style={{
-              background: 'var(--warn, #8f5a00)',
-              color: '#fff',
-              fontWeight: 600,
               whiteSpace: 'nowrap',
             }}
           >
@@ -192,8 +189,8 @@ export function Ledger() {
           style={{
             gridColumn: '1 / -1',
             padding: '12px 18px',
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px dashed var(--line-2, #334155)',
+            background: '#ffffff',
+            border: '1.5px dashed var(--line-2, #cfd5cf)',
             borderRadius: 'var(--r-m, 12px)',
             display: 'flex',
             alignItems: 'center',
@@ -212,7 +209,7 @@ export function Ledger() {
               </span>
             </div>
           </div>
-          <span className="badge small muted" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', border: '1px solid var(--line-2)' }}>
+          <span className="badge small muted" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', border: '1px solid var(--line-2)', background: 'var(--bg-3, #f9faf8)', color: 'var(--text-2, #2d3842)' }}>
             Zero pending retractions
           </span>
         </div>
@@ -250,10 +247,10 @@ export function Ledger() {
                       className="btn ghost small"
                       style={{
                         marginLeft: 'auto',
-                        borderColor: 'var(--warn-line, #b87500)',
-                        background: 'var(--warn-dim, rgba(184, 117, 0, 0.14))',
-                        color: 'var(--text)',
-                        fontWeight: 600,
+                        borderColor: 'var(--text, #0b1218)',
+                        background: '#fff3d6',
+                        color: 'var(--text, #0b1218)',
+                        fontWeight: 700,
                         fontSize: '0.78rem',
                         padding: '2px 8px',
                       }}

@@ -1144,7 +1144,7 @@ button,
   pointer-events: auto;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
-  background: rgb(10 16 23 / 50%);
+  background: rgb(243 245 242 / 86%);
   text-align: center;
   box-sizing: border-box;
 }

@@ -162,7 +162,7 @@ function Setup() {
             )}
             {tr === 'stdio' && (
               <label className="field inline">
-                <span>Path to the iFone repo (for mcp/bridge.py)</span>
+                <span>Path to the Quorum repo (for mcp/bridge.py)</span>
                 <input value={repo} onChange={(e) => setRepo(e.target.value)} spellCheck={false} />
               </label>
             )}
