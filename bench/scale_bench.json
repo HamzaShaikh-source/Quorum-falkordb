@@ -1,0 +1,51 @@
+{
+  "latency": [
+    {
+      "facts": 1000,
+      "cold_first_answer_ms": 309,
+      "warm_median_ms": 14,
+      "warm_p95_ms": 15
+    },
+    {
+      "facts": 5000,
+      "cold_first_answer_ms": 957,
+      "warm_median_ms": 70,
+      "warm_p95_ms": 80
+    },
+    {
+      "facts": 20000,
+      "cold_first_answer_ms": 5667,
+      "warm_median_ms": 457,
+      "warm_p95_ms": 697
+    }
+  ],
+  "session_model": {
+    "turns": 60,
+    "facts": 5000,
+    "fixed_prompt_tokens": 37000,
+    "strategies": [
+      {
+        "strategy": "top-8 retriever, full JSON",
+        "tool_result_tokens": 29654,
+        "whole_session_input_tokens": 3123241,
+        "tool_result_saving_pct": 0.0,
+        "whole_session_saving_pct": 0.0
+      },
+      {
+        "strategy": "Quorum compact lines",
+        "tool_result_tokens": 16783,
+        "whole_session_input_tokens": 2726966,
+        "tool_result_saving_pct": 43.4,
+        "whole_session_saving_pct": 12.7
+      },
+      {
+        "strategy": "Quorum compact + delta on follow-ups",
+        "tool_result_tokens": 15960,
+        "whole_session_input_tokens": 2702164,
+        "tool_result_saving_pct": 46.2,
+        "whole_session_saving_pct": 13.5
+      }
+    ]
+  },
+  "note": "Latency is this machine, in process, no network. The session is a model from measured answer sizes, not a real-AI run."
+}

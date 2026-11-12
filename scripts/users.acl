@@ -1,0 +1,9 @@
+# Redis ACL configuration for Quorum multi-tenant graph isolation
+# Admin user
+user default on nopass ~* &* +@all
+
+# Tenant Acme: restricted to tenant_acme:* graphs/keys only
+user tenant_acme on >acme_secret ~tenant_acme:* &* +@all
+
+# Tenant Globex: restricted to tenant_globex:* graphs/keys only (used for denied-read proof)
+user tenant_globex on >globex_secret ~tenant_globex:* &* +@all

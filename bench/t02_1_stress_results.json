@@ -1,0 +1,349 @@
+{
+  "timestamp": 1792038458.049388,
+  "tenant": "subagent_01_procedural_test",
+  "tests": {
+    "test_1_concurrent_upsert": {
+      "status": "PASSED",
+      "created_count": 50,
+      "db_count_after_create": 50,
+      "db_count_after_reupsert": 50,
+      "errors_create": [],
+      "errors_reupsert": [],
+      "attribute_mismatches": [],
+      "wall_time_s": 0.048,
+      "throughput_ops_sec": 1043.5,
+      "stats_create_latency_ms": {
+        "count": 50,
+        "min_ms": 3.03,
+        "p50_ms": 7.25,
+        "p90_ms": 12.47,
+        "p95_ms": 14.36,
+        "p99_ms": 15.54,
+        "max_ms": 15.54,
+        "avg_ms": 7.57
+      },
+      "stats_match_latency_ms": {
+        "count": 50,
+        "min_ms": 2.19,
+        "p50_ms": 5.47,
+        "p90_ms": 8.97,
+        "p95_ms": 10.61,
+        "p99_ms": 13.69,
+        "max_ms": 13.69,
+        "avg_ms": 6.0
+      }
+    },
+    "test_2_interleaved_scoring": {
+      "status": "PASSED",
+      "total_updates": 500,
+      "successful_api_calls": 500,
+      "errors": [],
+      "wall_time_s": 0.335,
+      "throughput_ops_sec": 1493.3,
+      "stats_latency_ms": {
+        "count": 500,
+        "min_ms": 1.86,
+        "p50_ms": 9.3,
+        "p90_ms": 15.51,
+        "p95_ms": 17.79,
+        "p99_ms": 22.69,
+        "max_ms": 25.81,
+        "avg_ms": 10.06
+      },
+      "total_db_uses": 500,
+      "total_db_successes": 326,
+      "total_db_failures": 174,
+      "counter_mismatches_count": 0,
+      "counter_mismatches_sample": []
+    },
+    "test_3_laplace_formula": {
+      "status": "PASSED",
+      "procedures_verified": 50,
+      "formula_mismatches": [],
+      "invariant_violations": []
+    },
+    "test_4_boundary_conditions": {
+      "status": "PASSED",
+      "results": {
+        "zero_uses": {
+          "passed": true,
+          "details": {
+            "id": "proc_boundary_zero_uses",
+            "name": "Zero Uses Test",
+            "rank": 0.5,
+            "uses": 0,
+            "successes": 0,
+            "failures": 0,
+            "steps": [
+              "step1"
+            ]
+          }
+        },
+        "all_successes": {
+          "passed": true,
+          "progression": [
+            {
+              "step": 1,
+              "actual_rank": 0.6667,
+              "expected_rank": 0.6667,
+              "diff": 3.333333333332966e-05
+            },
+            {
+              "step": 2,
+              "actual_rank": 0.75,
+              "expected_rank": 0.75,
+              "diff": 0.0
+            },
+            {
+              "step": 5,
+              "actual_rank": 0.8571,
+              "expected_rank": 0.8571,
+              "diff": 4.285714285712228e-05
+            },
+            {
+              "step": 10,
+              "actual_rank": 0.9167,
+              "expected_rank": 0.9167,
+              "diff": 3.333333333332966e-05
+            },
+            {
+              "step": 50,
+              "actual_rank": 0.9808,
+              "expected_rank": 0.9808,
+              "diff": 3.076923076927862e-05
+            },
+            {
+              "step": 100,
+              "actual_rank": 0.9902,
+              "expected_rank": 0.9902,
+              "diff": 3.921568627385241e-06
+            }
+          ]
+        },
+        "all_failures": {
+          "passed": true,
+          "progression": [
+            {
+              "step": 1,
+              "actual_rank": 0.3333,
+              "expected_rank": 0.3333,
+              "diff": 3.333333333332966e-05
+            },
+            {
+              "step": 2,
+              "actual_rank": 0.25,
+              "expected_rank": 0.25,
+              "diff": 0.0
+            },
+            {
+              "step": 5,
+              "actual_rank": 0.1429,
+              "expected_rank": 0.1429,
+              "diff": 4.285714285715003e-05
+            },
+            {
+              "step": 10,
+              "actual_rank": 0.0833,
+              "expected_rank": 0.0833,
+              "diff": 3.333333333332966e-05
+            },
+            {
+              "step": 50,
+              "actual_rank": 0.0192,
+              "expected_rank": 0.0192,
+              "diff": 3.076923076923352e-05
+            },
+            {
+              "step": 100,
+              "actual_rank": 0.0098,
+              "expected_rank": 0.0098,
+              "diff": 3.921568627451161e-06
+            }
+          ]
+        },
+        "large_counts": {
+          "passed": true,
+          "1m_result": {
+            "success": true,
+            "procedure_id": "proc_boundary_large_1m",
+            "uses": 1000001,
+            "successes": 750001,
+            "failures": 250000,
+            "rank": 0.75
+          },
+          "10m_result": {
+            "success": true,
+            "procedure_id": "proc_boundary_large_10m",
+            "uses": 10000001,
+            "successes": 9000000,
+            "failures": 1000001,
+            "rank": 0.9
+          }
+        },
+        "non_existent_proc": {
+          "passed": true,
+          "result": {
+            "success": false,
+            "error": "Procedure not found"
+          }
+        },
+        "invalid_outcome_handling": {
+          "passed": true,
+          "result": {
+            "success": true,
+            "procedure_id": "proc_boundary_invalid_outcome",
+            "uses": 1,
+            "successes": 0,
+            "failures": 0,
+            "rank": 0.3333
+          }
+        },
+        "special_chars_empty_steps": {
+          "passed": true
+        }
+      }
+    },
+    "test_5_rank_ordering": {
+      "status": "PASSED",
+      "global_descending_sorted": true,
+      "domain_descending_sorted": true,
+      "limit_pagination_valid": true,
+      "dynamic_rerank_climbed": true,
+      "total_ranked_count": 57,
+      "top_5": [
+        {
+          "id": "proc_boundary_all_success",
+          "name": "All Successes",
+          "rank": 0.9902,
+          "uses": 100,
+          "successes": 100,
+          "failures": 0,
+          "steps": [
+            "step1"
+          ]
+        },
+        {
+          "id": "proc_bench_005",
+          "name": "Automated Task Procedure 005 [Updated]",
+          "rank": 0.9,
+          "uses": 8,
+          "successes": 8,
+          "failures": 0,
+          "steps": [
+            "step_5_prep",
+            "step_5_exec",
+            "step_5_verify",
+            "step_audit"
+          ]
+        },
+        {
+          "id": "proc_boundary_large_10m",
+          "name": "10M Uses Scale",
+          "rank": 0.9,
+          "uses": 10000001,
+          "successes": 9000000,
+          "failures": 1000001,
+          "steps": [
+            "step"
+          ]
+        },
+        {
+          "id": "proc_bench_022",
+          "name": "Automated Task Procedure 022 [Updated]",
+          "rank": 0.8333,
+          "uses": 4,
+          "successes": 4,
+          "failures": 0,
+          "steps": [
+            "step_22_prep",
+            "step_22_exec",
+            "step_22_verify",
+            "step_audit"
+          ]
+        },
+        {
+          "id": "proc_bench_035",
+          "name": "Automated Task Procedure 035 [Updated]",
+          "rank": 0.8,
+          "uses": 8,
+          "successes": 7,
+          "failures": 1,
+          "steps": [
+            "step_35_prep",
+            "step_35_exec",
+            "step_35_verify",
+            "step_audit"
+          ]
+        }
+      ],
+      "bottom_5": [
+        {
+          "id": "proc_bench_046",
+          "name": "Automated Task Procedure 046 [Updated]",
+          "rank": 0.375,
+          "uses": 6,
+          "successes": 2,
+          "failures": 4,
+          "steps": [
+            "step_46_prep",
+            "step_46_exec",
+            "step_46_verify",
+            "step_audit"
+          ]
+        },
+        {
+          "id": "proc_boundary_invalid_outcome",
+          "name": "Invalid Outcome",
+          "rank": 0.3333,
+          "uses": 1,
+          "successes": 0,
+          "failures": 0,
+          "steps": [
+            "step"
+          ]
+        },
+        {
+          "id": "proc_bench_006",
+          "name": "Automated Task Procedure 006 [Updated]",
+          "rank": 0.3,
+          "uses": 8,
+          "successes": 2,
+          "failures": 6,
+          "steps": [
+            "step_6_prep",
+            "step_6_exec",
+            "step_6_verify",
+            "step_audit"
+          ]
+        },
+        {
+          "id": "proc_bench_043",
+          "name": "Automated Task Procedure 043 [Updated]",
+          "rank": 0.2857,
+          "uses": 5,
+          "successes": 1,
+          "failures": 4,
+          "steps": [
+            "step_43_prep",
+            "step_43_exec",
+            "step_43_verify",
+            "step_audit"
+          ]
+        },
+        {
+          "id": "proc_boundary_all_failure",
+          "name": "All Failures",
+          "rank": 0.0098,
+          "uses": 100,
+          "successes": 0,
+          "failures": 100,
+          "steps": [
+            "step1"
+          ]
+        }
+      ]
+    }
+  },
+  "verdict": "PASSED",
+  "errors": []
+}

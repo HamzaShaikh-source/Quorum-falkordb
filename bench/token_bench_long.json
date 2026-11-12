@@ -1,0 +1,124 @@
+{
+  "generated_at": 1791834667904,
+  "runs_per_arm": 2,
+  "scenario": "long",
+  "memory": {
+    "facts": 160,
+    "conclusions": 8,
+    "fact_text": "about 120 words each"
+  },
+  "questions": 5,
+  "summary": {
+    "plain": {
+      "runs": 2,
+      "correct_median": 5,
+      "turns_median": 7,
+      "session_input_tokens_median": 166875,
+      "session_output_tokens_median": 790,
+      "cost_usd_median": 0.229,
+      "tool_result_tokens_per_run": 10811,
+      "tool_calls_per_run": 5
+    },
+    "compact": {
+      "runs": 2,
+      "correct_median": 5,
+      "turns_median": 7,
+      "session_input_tokens_median": 159248,
+      "session_output_tokens_median": 968,
+      "cost_usd_median": 0.186,
+      "tool_result_tokens_per_run": 2347,
+      "tool_calls_per_run": 5
+    },
+    "mapped": {
+      "runs": 2,
+      "correct_median": 5,
+      "turns_median": 8,
+      "session_input_tokens_median": 213284,
+      "session_output_tokens_median": 1069,
+      "cost_usd_median": 0.209,
+      "tool_result_tokens_per_run": 2818,
+      "tool_calls_per_run": 6
+    }
+  },
+  "versus_plain": {
+    "compact": {
+      "tool_result_saving_pct": 78,
+      "session_input_saving_pct": 5,
+      "cost_saving_pct": 19
+    },
+    "mapped": {
+      "tool_result_saving_pct": 74,
+      "session_input_saving_pct": -28,
+      "cost_saving_pct": 9
+    }
+  },
+  "sessions": [
+    {
+      "arm": "plain",
+      "turns": 7,
+      "cost": 0.2288076,
+      "input": 166844,
+      "cacheRead": 137512,
+      "output": 772,
+      "correct": 5,
+      "answer": "1. 19 2. 33 3. 36 4. 56 5. 47",
+      "seconds": 22
+    },
+    {
+      "arm": "compact",
+      "turns": 7,
+      "cost": 0.1859037,
+      "input": 159248,
+      "cacheRead": 137559,
+      "output": 968,
+      "correct": 5,
+      "answer": "1. 19 (F3) 2. 33 (F45) 3. 36 (F62) 4. 56 (F124) 5. 47 (F101)",
+      "seconds": 30
+    },
+    {
+      "arm": "mapped",
+      "turns": 8,
+      "cost": 0.2090727,
+      "input": 213284,
+      "cacheRead": 190639,
+      "output": 1069,
+      "correct": 5,
+      "answer": "1. 19 (F3) 2. 33 (F45) 3. 36 (F62) 4. 56 (F124) 5. 47 (F101)",
+      "seconds": 27
+    },
+    {
+      "arm": "compact",
+      "turns": 7,
+      "cost": 0.1859403,
+      "input": 159242,
+      "cacheRead": 137541,
+      "output": 966,
+      "correct": 5,
+      "answer": "1. 19 (F3) 2. 33 (F45) 3. 36 (F62) 4. 56 (F124) 5. 47 (F101)",
+      "seconds": 26
+    },
+    {
+      "arm": "mapped",
+      "turns": 8,
+      "cost": 0.2086554,
+      "input": 213223,
+      "cacheRead": 190598,
+      "output": 1050,
+      "correct": 5,
+      "answer": "1. 19 (F3) 2. 33 (F45) 3. 36 (F62) 4. 56 (F124) 5. 47 (F101)",
+      "seconds": 29
+    },
+    {
+      "arm": "plain",
+      "turns": 7,
+      "cost": 0.2292636,
+      "input": 166875,
+      "cacheRead": 137512,
+      "output": 790,
+      "correct": 5,
+      "answer": "1. 19 2. 33 3. 36 4. 56 5. 47",
+      "seconds": 21
+    }
+  ],
+  "note": "Session totals include Claude Code's own fixed prompt (about 37k tokens, re-read every turn), which Quorum cannot change. Tool-result tokens are what Quorum controls."
+}

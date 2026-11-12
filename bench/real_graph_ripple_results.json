@@ -1,0 +1,20 @@
+{
+  "params": {
+    "script": "bench/real_graph_ripple.py",
+    "source": "backend/app import graph (ast)"
+  },
+  "summary": {
+    "modules": 70,
+    "import_edges": 300,
+    "cycle_closing_edges_refused": 2,
+    "roots_checked": 70,
+    "ripple_recall": 1.0,
+    "ripple_precision": 1.0,
+    "mismatches": 0,
+    "widest_ripple": "app.models.common -> 53 modules",
+    "ms_median": 29.78,
+    "ms_p99": 101.21,
+    "engine": "falkordb"
+  },
+  "limits": "A real graph, but a small one, and 'depends on' is not the same as 'derived from a belief'. It validates the traversal, not belief semantics."
+}

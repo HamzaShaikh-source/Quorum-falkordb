@@ -1,0 +1,285 @@
+{
+  "test_1_tree": {
+    "success": true,
+    "nodes": {
+      "fact": 1,
+      "conclusion": 1,
+      "decisions": 3,
+      "actions": 5
+    }
+  },
+  "test_2_call": {
+    "success": true,
+    "old_fact_key": "policy_window",
+    "new_fact_id": "fact_tier_2",
+    "stale_propagated": 9,
+    "review_handoffs_created": 3,
+    "handoffs": [
+      {
+        "handoff_id": "review_dec_1_1792038606048",
+        "decision_id": "dec_1",
+        "assigned_to": "ops-team"
+      },
+      {
+        "handoff_id": "review_dec_2_1792038606048",
+        "decision_id": "dec_2",
+        "assigned_to": "ops-team"
+      },
+      {
+        "handoff_id": "review_dec_3_1792038606048",
+        "decision_id": "dec_3",
+        "assigned_to": "ops-team"
+      }
+    ]
+  },
+  "test_3_supersedes_edge": {
+    "new_to_old_exists": true,
+    "old_to_new_exists": false,
+    "edge_properties": [
+      "SUPERSEDES",
+      1792038606048
+    ],
+    "facts": {
+      "fact_tier_1": {
+        "status": "SUPERSEDED",
+        "stale": false,
+        "value": "30",
+        "superseded_at": 1792038606048
+      },
+      "fact_tier_2": {
+        "status": "HEALTHY",
+        "stale": false,
+        "value": "45",
+        "superseded_at": null
+      }
+    }
+  },
+  "test_4_stale_cascade": {
+    "all_conclusions_stale": true,
+    "all_decisions_stale": true,
+    "all_actions_stale": true,
+    "full_cascade_to_all_downstream": true,
+    "stale_map": {
+      "conc_tier_1": {
+        "labels": [
+          "MemoryNode",
+          "Conclusion"
+        ],
+        "stale": true,
+        "stale_since": 1792038606048
+      },
+      "dec_1": {
+        "labels": [
+          "MemoryNode",
+          "Decision"
+        ],
+        "stale": true,
+        "stale_since": 1792038606048
+      },
+      "dec_2": {
+        "labels": [
+          "MemoryNode",
+          "Decision"
+        ],
+        "stale": true,
+        "stale_since": 1792038606048
+      },
+      "dec_3": {
+        "labels": [
+          "MemoryNode",
+          "Decision"
+        ],
+        "stale": true,
+        "stale_since": 1792038606048
+      },
+      "act_1": {
+        "labels": [
+          "MemoryNode",
+          "Action"
+        ],
+        "stale": true,
+        "stale_since": 1792038606048
+      },
+      "act_2": {
+        "labels": [
+          "MemoryNode",
+          "Action"
+        ],
+        "stale": true,
+        "stale_since": 1792038606048
+      },
+      "act_3": {
+        "labels": [
+          "MemoryNode",
+          "Action"
+        ],
+        "stale": true,
+        "stale_since": 1792038606048
+      },
+      "act_4": {
+        "labels": [
+          "MemoryNode",
+          "Action"
+        ],
+        "stale": true,
+        "stale_since": 1792038606048
+      },
+      "act_5": {
+        "labels": [
+          "MemoryNode",
+          "Action"
+        ],
+        "stale": true,
+        "stale_since": 1792038606048
+      }
+    }
+  },
+  "test_5_review_handoffs": {
+    "count": 3,
+    "expected_count": 3,
+    "all_decisions_covered": true,
+    "context_root_properly_set": true,
+    "kind_is_review": true,
+    "handoffs": [
+      {
+        "decision_id": "dec_1",
+        "handoff_id": "review_dec_1_1792038606048",
+        "kind": "REVIEW",
+        "status": "PENDING",
+        "context_root": "dec_1",
+        "assigned_to": "ops-team",
+        "reason": "Policy fact 'policy_window' superseded \u2192 decision flagged stale"
+      },
+      {
+        "decision_id": "dec_2",
+        "handoff_id": "review_dec_2_1792038606048",
+        "kind": "REVIEW",
+        "status": "PENDING",
+        "context_root": "dec_2",
+        "assigned_to": "ops-team",
+        "reason": "Policy fact 'policy_window' superseded \u2192 decision flagged stale"
+      },
+      {
+        "decision_id": "dec_3",
+        "handoff_id": "review_dec_3_1792038606048",
+        "kind": "REVIEW",
+        "status": "PENDING",
+        "context_root": "dec_3",
+        "assigned_to": "ops-team",
+        "reason": "Policy fact 'policy_window' superseded \u2192 decision flagged stale"
+      }
+    ]
+  },
+  "test_6_chain": {
+    "sup_1_result": {
+      "success": true,
+      "old_fact_key": "shipping_fee",
+      "new_fact_id": "fact_v2",
+      "stale_propagated": 3,
+      "review_handoffs_created": 1,
+      "handoffs": [
+        {
+          "handoff_id": "review_dec_v1_1792038606077",
+          "decision_id": "dec_v1",
+          "assigned_to": "ops-team"
+        }
+      ]
+    },
+    "sup_2_result": {
+      "success": true,
+      "old_fact_key": "shipping_fee",
+      "new_fact_id": "fact_v3",
+      "stale_propagated": 6,
+      "review_handoffs_created": 2,
+      "handoffs": [
+        {
+          "handoff_id": "review_dec_v1_1792038606087",
+          "decision_id": "dec_v1",
+          "assigned_to": "ops-team"
+        },
+        {
+          "handoff_id": "review_dec_v2_1792038606087",
+          "decision_id": "dec_v2",
+          "assigned_to": "ops-team"
+        }
+      ]
+    },
+    "facts": [
+      {
+        "id": "fact_v1",
+        "value": "5",
+        "status": "SUPERSEDED",
+        "stale": false
+      },
+      {
+        "id": "fact_v2",
+        "value": "7",
+        "status": "SUPERSEDED",
+        "stale": false
+      },
+      {
+        "id": "fact_v3",
+        "value": "10",
+        "status": "HEALTHY",
+        "stale": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "fact_v2",
+        "rel": "SUPERSEDES",
+        "to": "fact_v1"
+      },
+      {
+        "from": "fact_v3",
+        "rel": "SUPERSEDES",
+        "to": "fact_v2"
+      }
+    ],
+    "branch_stale": {
+      "conc_v1": {
+        "labels": [
+          "MemoryNode",
+          "Conclusion"
+        ],
+        "stale": true
+      },
+      "dec_v1": {
+        "labels": [
+          "MemoryNode",
+          "Decision"
+        ],
+        "stale": true
+      },
+      "act_v1": {
+        "labels": [
+          "MemoryNode",
+          "Action"
+        ],
+        "stale": true
+      },
+      "conc_v2": {
+        "labels": [
+          "MemoryNode",
+          "Conclusion"
+        ],
+        "stale": true
+      },
+      "dec_v2": {
+        "labels": [
+          "MemoryNode",
+          "Decision"
+        ],
+        "stale": true
+      },
+      "act_v2": {
+        "labels": [
+          "MemoryNode",
+          "Action"
+        ],
+        "stale": true
+      }
+    },
+    "v3_node_count": 1
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "params": {
+    "seed": 7,
+    "script": "bench/real_corpus_eval.py"
+  },
+  "summary": {
+    "corpus": {
+      "packages": 437,
+      "facts": 1326,
+      "conclusions": 1326,
+      "causal_edges": 3779,
+      "cycle_closing_requirements_dropped": 0,
+      "build_seconds": 6.5,
+      "source": "importlib.metadata of the Python environment"
+    },
+    "questions": {
+      "total": 120,
+      "version": 50,
+      "requirement": 50,
+      "nonexistent": 20,
+      "top_k": 8
+    },
+    "answers": {
+      "plain": {
+        "version_correct_pct": 100.0,
+        "requirement_correct_pct": 100.0,
+        "cited_to_the_right_metadata_pct": 100.0,
+        "abstained_on_nonexistent_pct": 0.0,
+        "median_ms": 1.87
+      },
+      "quorum": {
+        "version_correct_pct": 100.0,
+        "requirement_correct_pct": 98.0,
+        "cited_to_the_right_metadata_pct": 100.0,
+        "abstained_on_nonexistent_pct": 100.0,
+        "median_ms": 24.19
+      }
+    },
+    "impact_question": {
+      "quorum": {
+        "questions": 30,
+        "mean_recall_pct": 100.0,
+        "exact_set_pct": 100.0,
+        "wrong_packages_named": 0
+      },
+      "plain": {
+        "questions": 30,
+        "mean_recall_pct": 51.3,
+        "exact_set_pct": 10.0,
+        "wrong_packages_named": 0
+      }
+    },
+    "ripple": {
+      "roots": 40,
+      "recall": 1.0,
+      "precision": 1.0,
+      "mismatches": 0,
+      "flat_store_recall": 0.0,
+      "widest": "typing-extensions -> 385 nodes",
+      "ms_median": 180.2,
+      "ms_p99": 422.9,
+      "engine": "falkordb"
+    }
+  },
+  "limits": "Corpus is whatever is installed where this was run; questions are generated from metadata by a seeded script; the 'compatible' and 'installable' conclusions are ours, so propagation validates the traversal on a real dependency structure, not any claim about pip."
+}

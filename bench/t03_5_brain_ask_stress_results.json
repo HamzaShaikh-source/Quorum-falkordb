@@ -1,0 +1,44 @@
+{
+  "track": "T03-5",
+  "name": "Answers with Clear Sources (brain_ask query & citation enforcement)",
+  "timestamp_ms": 1792039046376,
+  "status": "PASS",
+  "tests": {
+    "test_1_vector_and_keyword_retrieval": {
+      "status": "PASS"
+    },
+    "test_2_stale_facts_strictly_excluded": {
+      "status": "PASS"
+    },
+    "test_3_structured_refusal_and_threshold": {
+      "status": "PASS"
+    },
+    "test_4_citation_provenance_and_author_tiers": {
+      "status": "PASS"
+    },
+    "test_5_concurrency_under_mutation": {
+      "success": true,
+      "total_queries": 100,
+      "concurrency_threads": 10,
+      "duration_s": 0.2368,
+      "throughput_qps": 422.25,
+      "latencies_ms": {
+        "min": 7.8,
+        "p50": 22.44,
+        "p95": 33.81,
+        "p99": 56.56,
+        "max": 56.56
+      },
+      "mutations": {
+        "adds": 11,
+        "supersedes": 5,
+        "errors": 0
+      },
+      "grounded_count": 100,
+      "refused_count": 0,
+      "valid_citations": 300,
+      "race_condition_leaks": 0,
+      "post_concurrency_leaks": 0
+    }
+  }
+}

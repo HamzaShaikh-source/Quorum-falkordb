@@ -1,0 +1,97 @@
+{
+  "single_dag": {
+    "trials": 10,
+    "containment_latency": {
+      "mean_ms": 5.07,
+      "median_ms": 4.73,
+      "p95_ms": 6.03,
+      "min_ms": 4.39,
+      "max_ms": 6.13,
+      "std_ms": 0.67
+    },
+    "roundtrip_latency": {
+      "mean_ms": 5.76,
+      "median_ms": 5.34,
+      "p95_ms": 6.82,
+      "min_ms": 4.93,
+      "max_ms": 6.84,
+      "std_ms": 0.79
+    },
+    "containment_integrity": {
+      "nodes_quarantined": 131,
+      "expected_nodes": 131,
+      "all_131_quarantined": true,
+      "invariants_passed": true,
+      "compensations_created": 20,
+      "unexecuted_actions_blocked": true
+    }
+  },
+  "precision": {
+    "tree_a_quarantined": 131,
+    "tree_b_healthy": 131,
+    "false_positives": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "specificity": 1.0,
+    "containment_ms": 5.32,
+    "invariants_passed": true,
+    "fork_subsystem_isolated": true
+  },
+  "stress_50": {
+    "concurrency": 50,
+    "total_nodes": 6550,
+    "wall_clock_ms": 179.69,
+    "throughput_cascades_per_sec": 278.26,
+    "throughput_quarantined_nodes_per_sec": 36452.42,
+    "errors": [],
+    "roundtrip_latency_ms": {
+      "mean": 38.21,
+      "median": 34.83,
+      "min": 10.39,
+      "max": 99.74,
+      "p50": 34.83,
+      "p90": 64.74,
+      "p95": 65.35,
+      "p99": 97.09,
+      "std": 18.73
+    },
+    "containment_internal_latency_ms": {
+      "mean": 17.84,
+      "median": 17.21,
+      "min": 4.47,
+      "max": 42.29,
+      "p50": 17.21,
+      "p95": 33.67,
+      "p99": 40.87
+    },
+    "audit": {
+      "total_nodes_in_db": 6550,
+      "quarantined_nodes": 6550,
+      "healthy_nodes": 0,
+      "distinct_quarantine_roots": 50,
+      "all_nodes_quarantined": true,
+      "invariants_passed": true,
+      "healthy_children_under_quarantined": 0,
+      "actions_executed_after_ancestor_quarantined": 0,
+      "final_meta_epoch": 51
+    }
+  },
+  "architecture_verdict": {
+    "depth_limit": {
+      "max_supported_hops": 15,
+      "hop_15_quarantined": true,
+      "hop_16_remains_healthy": true,
+      "exceeds_15_hops_behavior": "Silently truncated at hop 15; leaves deeper descendants HEALTHY (orphaned)"
+    },
+    "diamond_deduplication": {
+      "physical_nodes": 4,
+      "reported_affected_count": 5,
+      "actual_db_quarantined": 4,
+      "has_multipath_duplication": true
+    },
+    "label_restriction": {
+      "root_must_be_fact": true
+    }
+  },
+  "total_suite_time_s": 0.69
+}

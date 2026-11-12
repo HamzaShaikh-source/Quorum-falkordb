@@ -1,0 +1,119 @@
+{
+  "timestamp": 1792039255.8375158,
+  "verdict": "PASSED",
+  "total_time_s": 0.9,
+  "total_errors": 0,
+  "results": {
+    "test_1": {
+      "test": "test_1_seed_execution_and_corpus_counts",
+      "passed": true,
+      "seed_duration_ms": 123.93784523010254,
+      "counts": {
+        "sources_total": 25,
+        "sources_by_kind": {
+          "CHAT": 8,
+          "DOC": 9,
+          "TICKET": 8
+        },
+        "people": 12,
+        "teams": 4,
+        "projects": 3,
+        "systems": 3,
+        "topics": 3,
+        "facts": 25,
+        "agents": 6,
+        "procedures": 2
+      },
+      "errors": []
+    },
+    "test_2": {
+      "test": "test_2_concurrent_reseed_3_tenants",
+      "passed": true,
+      "rounds": 5,
+      "total_operations": 15,
+      "latency_stats": {
+        "count": 15,
+        "min_ms": 133.06,
+        "p50_ms": 139.5,
+        "p95_ms": 160.35,
+        "p99_ms": 160.35,
+        "max_ms": 160.35,
+        "avg_ms": 143.34
+      },
+      "tenant_checks": {
+        "s06_tenant_alpha": {
+          "sources": 25,
+          "people": 12,
+          "teams": 4,
+          "projects": 3,
+          "systems": 3,
+          "facts": 25
+        },
+        "s06_tenant_beta": {
+          "sources": 25,
+          "people": 12,
+          "teams": 4,
+          "projects": 3,
+          "systems": 3,
+          "facts": 25
+        },
+        "s06_tenant_gamma": {
+          "sources": 25,
+          "people": 12,
+          "teams": 4,
+          "projects": 3,
+          "systems": 3,
+          "facts": 25
+        }
+      },
+      "errors": []
+    },
+    "test_3": {
+      "test": "test_3_vector_embeddings_verification",
+      "passed": true,
+      "facts_evaluated": 25,
+      "sources_evaluated": 25,
+      "dimensions": 384,
+      "norm_summary": {
+        "avg_norm": 1.0,
+        "min_norm": 1.0,
+        "max_norm": 1.0
+      },
+      "vector_search_latency_ms": 1.13,
+      "vector_search_hits": 5,
+      "errors": []
+    },
+    "test_4": {
+      "test": "test_4_edge_schema_integrity",
+      "passed": true,
+      "counts": {
+        "authors": 25,
+        "owns": 31,
+        "resolves": 8,
+        "supports": 8
+      },
+      "breakdowns": {
+        "owns_by_target": {
+          "Project": 3,
+          "System": 3,
+          "Source": 25
+        },
+        "supports_by_pattern": {
+          "System->Project": 3,
+          "Source->Project": 3,
+          "Fact->Conclusion": 1,
+          "Fact->Action": 1
+        }
+      },
+      "errors": []
+    },
+    "test_5": {
+      "test": "test_5_query_integration",
+      "passed": true,
+      "top_refunds_experts": 6,
+      "top_fraud_experts": 3,
+      "provenance_records": 1,
+      "errors": []
+    }
+  }
+}
