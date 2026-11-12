@@ -1,0 +1,98 @@
+[
+ {
+  "text": "",
+  "tokens": 0
+ },
+ {
+  "text": "refund window is 30 days",
+  "tokens": 7
+ },
+ {
+  "text": "The quick brown fox jumps over the lazy dog.",
+  "tokens": 13
+ },
+ {
+  "text": "{\"id\": \"fact_30d\", \"kind\": \"fact\", \"status\": \"HEALTHY\"}",
+  "tokens": 27
+ },
+ {
+  "text": "F3|Refund window is 30 days|Refunds are allowed within 30 days of purchase.|<S1",
+  "tokens": 25
+ },
+ {
+  "text": "line one\nline two\n\nline four",
+  "tokens": 7
+ },
+ {
+  "text": "   leading and trailing   ",
+  "tokens": 5
+ },
+ {
+  "text": "snake_case_identifier and camelCaseIdentifier",
+  "tokens": 14
+ },
+ {
+  "text": "https://acme.example/policy?x=1&y=2#frag",
+  "tokens": 21
+ },
+ {
+  "text": "a",
+  "tokens": 1
+ },
+ {
+  "text": "ab",
+  "tokens": 1
+ },
+ {
+  "text": "abcd",
+  "tokens": 1
+ },
+ {
+  "text": "abcde",
+  "tokens": 2
+ },
+ {
+  "text": "abcdefghi",
+  "tokens": 2
+ },
+ {
+  "text": "abcdefghij",
+  "tokens": 3
+ },
+ {
+  "text": "Café résumé naïve Zürich",
+  "tokens": 7
+ },
+ {
+  "text": "1234567890 1234567890123",
+  "tokens": 6
+ },
+ {
+  "text": "!!!???...,,,;;;",
+  "tokens": 14
+ },
+ {
+  "text": "tab\tseparated\tvalues",
+  "tokens": 5
+ },
+ {
+  "text": "{\n  \"nodes\": [\n    {\n      \"id\": \"n1\",\n      \"label\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n      \"text\": \"y y y y y y y y y y y y y y y y y y y y y y y y y y y y y y \"\n    }\n  ]\n}",
+  "tokens": 73
+ },
+ {
+  "text": "Quarantined 7 nodes · epoch 3 → rolled back",
+  "tokens": 14
+ },
+ {
+  "text": "emoji 🙂 stays as symbols",
+  "tokens": 8
+ },
+ {
+  "text": "mixed 日本語 text",
+  "tokens": 6
+ },
+ {
+  "text": "# context · \"refund window\"\nF1|Refund window is 30 days|<S1\nF2|Order 1042 is 75 days old",
+  "tokens": 31
+ }
+]

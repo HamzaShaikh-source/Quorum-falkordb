@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quorum.local/contracts/replay.schema.json",
+  "title": "Quorum Replay Fixtures Schema",
+  "description": "Schema for deterministic agent replay fixtures keyed by (agent, scenario_step, seed).",
+  "type": "object",
+  "patternProperties": {
+    "^(scout|analyst|refunder|comms|[a-zA-Z0-9_-]+)$": {
+      "type": "object",
+      "description": "Agent mapping to scenario steps",
+      "patternProperties": {
+        "^(inject_poison|run_agents|audit|supersede|restore|reset|[a-zA-Z0-9_-]+)$": {
+          "type": "object",
+          "description": "Scenario step mapping to seeds (e.g. 'default', 'seed_42')",
+          "patternProperties": {
+            "^[a-zA-Z0-9_-]+$": {
+              "type": "object",
+              "required": ["calls"],
+              "properties": {
+                "thought": { "type": "string" },
+                "session_summary": { "type": "string" },
+                "calls": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["tool", "arguments"],
+                    "properties": {
+                      "tool": { "type": "string" },
+                      "arguments": { "type": "object" },
+                      "thought": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

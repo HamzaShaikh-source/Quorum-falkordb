@@ -1,0 +1,9 @@
+[run]
+source = backend/app
+omit =
+    backend/app/services/llm.py
+    backend/app/mcp_embed.py
+
+[report]
+show_missing = True
+skip_covered = True

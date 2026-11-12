@@ -1,0 +1,62 @@
+"""
+The MCP tool catalog, read from the tools themselves (signature and docstring) plus a small table of who may call a tool
+and what it saves. The console's Connect page fetches this instead of keeping its own copy.
+"""
+import inspect
+from typing import Any, Dict, List
+
+# tool -> (who, writes, what it saves, one-line summary for people)
+META: Dict[str, tuple] = {
+    "retrieve_context": ("any", False, "Compact lines with short ids and provenance, trimmed to your budget", 'Healthy, in-scope facts for a query, best match first. format="compact" costs a fraction of the tokens'),
+    "remember_fact": ("agent", True, "Store once, reference by id everywhere", 'Store a fact with its source. scope="team" keeps it private to your team (and linked teams)'),
+    "observe": ("agent", True, "Facts are captured from what you already wrote, with no extra tool call per fact", "Save the facts in text you already produced (numbers with units, policies, limits, dates), each with its source sentence"),
+    "derive": ("agent", True, "Conclusions are linked, not re-explained", "Record a conclusion or decision from parent facts"),
+    "stage_action": ("agent", True, "One call replaces a long approval thread", "Stage an action; the quorum gate decides"),
+    "execute_action": ("agent", True, "No retries from stale context", "Run a staged action under the atomic guard"),
+    "claim_handoff": ("agent", True, "Two agents never do the same work", "Claim a task with an atomic lease"),
+    "quarantine": ("auditor", True, "Bad context is removed, not re-read", "Quarantine a fact and everything built on it"),
+    "restore": ("auditor", True, "Undo without re-ingesting", "Restore a quarantined fact and valid descendants"),
+    "explain_blast_radius": ("auditor", False, "Ids only, no node bodies", "Dry run: what a quarantine would touch"),
+    "review_handoff": ("human", True, "Humans decide once, agents read the verdict", "Approve or reject a gate-blocked review"),
+    "get_map": ("any", False, "Orientation in a few hundred tokens, for long sessions or an unfamiliar memory", "A small index of the shared memory: areas, hubs, how to ask"),
+    "get_node": ("any", False, "A few lines instead of a document", "One node with its parents and children, by short id (F3) or full id"),
+    "delta": ("any", False, "Refresh without re-reading", "What stopped being true since your last read, plus new matches"),
+    "announce_work": ("agent", True, "Two agents never redo or break each other's work", "Say what you are about to work on; get a warning if someone else is on it or near it"),
+    "recall_as_of": ("any", False, "Answers about the past without re-reading history", "What the team believed at an earlier time, and what happened to those facts since"),
+    "quorum_help": ("any", False, "One short list instead of reading documentation", "Every command and what it does"),
+    "quorum_guide": ("any", False, "The manual is in the chat, so nobody opens a browser tab", "The full use guide by topic, and the install plan that teaches this AI how to use Quorum"),
+    "quorum_start": ("any", True, "Setup happens in the chat, not in a console", "Guided setup: team size, name, focus, capture, teammates"),
+    "quorum_status": ("any", False, "A few lines instead of a dashboard", "What is remembered, what will be, what is shared with whom"),
+    "quorum_manage": ("human", True, "Team changes without leaving the chat", "Teams, people, permission levels, tokens and sharing links"),
+    "quorum_discover": ("any", False, "Find teammates without typing addresses", "Other Quorum hubs on this network"),
+    "quorum_connect": ("human", True, "Join a teammate's memory with one sentence", "Ask to join a discovered hub; its admin is notified"),
+    "quorum_inbox": ("human", False, "Requests reach you in the chat you already use", "Connection requests waiting for you"),
+    "quorum_respond": ("human", True, "One decision, access follows automatically", "Approve or decline a request and pick a level"),
+    "quorum_connections": ("human", False, "Connection state and settings in one call", "Hubs you are connected to and requests you sent"),
+    "peer_retrieve": ("human", False, "Read a teammate's shared context without copying it", "Ask a connected hub a question within your granted scope"),
+    "find_path": ("any", False, "Provenance without the whole subgraph", "Shortest causal chain between two nodes"),
+}
+
+
+def _summary(doc: str) -> str:
+    doc = " ".join((doc or "").split())
+    first = doc.split(". ")[0].rstrip(".")
+    return first[:220]
+
+
+def catalog() -> List[Dict[str, Any]]:
+    from app.mcp_embed import active_tools
+    from app.services import mcp_tools
+
+    out = []
+    for name in active_tools():
+        fn = getattr(mcp_tools, name)
+        who, writes, saves, summary = META.get(name, ("any", False, "", _summary(inspect.getdoc(fn) or "")))
+        args = []
+        for p in inspect.signature(fn).parameters.values():
+            if p.name == "ctx":
+                continue
+            req = p.default is inspect.Parameter.empty
+            args.append({"name": p.name, "required": req and p.name != "token", "default": None if req else p.default})
+        out.append({"name": name, "summary": summary, "doc": inspect.getdoc(fn) or "", "args": args, "who": who, "writes": writes, "saves": saves})
+    return out

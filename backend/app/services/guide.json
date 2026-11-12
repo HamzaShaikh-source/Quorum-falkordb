@@ -1,0 +1,194 @@
+{
+  "intro": "Quorum is shared memory for AI agents and teammates. Every fact, conclusion and action is a node in a causal graph in FalkorDB, so when something turns out to be wrong, one step pulls it and everything built on it out of circulation, blocks actions that depend on it, and compensates the ones that already ran.",
+  "topics": [
+    {
+      "id": "start",
+      "title": "Start here",
+      "summary": "First-time setup, done by chatting.",
+      "steps": [
+        "Call quorum_start with no arguments. It returns five questions: team size, team name, what you use it for, save facts from chats automatically or not, look for teammates on the network.",
+        "Ask the person those questions one at a time, then call quorum_start again with the answers (team_size, team_name, focus, auto_remember, look_for_teammates). It is safe to run again.",
+        "Call quorum_status to show what is remembered, what will be remembered and who it is shared with.",
+        "Call quorum_guide(topic='install', client='<your AI>') and follow it once, so this AI knows the working agreement."
+      ],
+      "say": ["Set up Quorum for us.", "What can you do with Quorum?", "Show me the status."],
+      "tools": ["quorum_start", "quorum_status", "quorum_help", "quorum_guide"]
+    },
+    {
+      "id": "remember",
+      "title": "Saving what you learn",
+      "summary": "Two ways to save, and what the write gate does with them.",
+      "steps": [
+        "remember_fact(key, value, text) saves one fact. Keep text to one plain sentence; put the exact number or name in value. Add quote when you have the source sentence.",
+        "observe(text) saves every durable fact in text you already wrote (numbers with units, policies, limits, dates). Use it once at the end of a task instead of many remember_fact calls; dry_run=true previews.",
+        "scope='team' keeps a fact private to your team and teams linked to it; the default shares it with the whole workspace.",
+        "If you are restating a fact you read elsewhere, set copied_from to its id. A copy is never counted as a second witness.",
+        "Every write returns an outcome: ACCEPT, SUPERSEDE (it replaced an older conflicting fact), REJECT (a stronger fact contradicts it) or REVIEW (a person was asked to settle a conflict), with a plain receipt.",
+        "Credentials, control characters, oversize fields and malformed ids are refused before anything is stored. Never put a secret in a fact."
+      ],
+      "say": ["Remember that refunds are allowed within 30 days of delivery.", "Save the facts from what you just wrote."],
+      "tools": ["remember_fact", "observe"]
+    },
+    {
+      "id": "ask",
+      "title": "Asking memory",
+      "summary": "Look things up cheaply, and trust a refusal.",
+      "steps": [
+        "retrieve_context(query, format='compact') is the default lookup: short ids, provenance, trimmed to a token budget. Cite the ids it gives you.",
+        "If the outcome is NOT_IN_MEMORY, memory does not know. Say so; do not guess and do not save a guess as a fact.",
+        "get_map() orients you in a few hundred tokens at the start of a long session. get_node(id) shows one fact with its parents and children. find_path(from_id, to_id) shows how two facts connect.",
+        "delta() tells you what stopped being true since you last read, so you refresh instead of re-reading everything. Call it when the epoch in a response changes.",
+        "Quarantined facts never come back from a lookup. You only see healthy, in-scope facts."
+      ],
+      "say": ["What do we know about refunds?", "Has anything changed since you last checked?"],
+      "tools": ["retrieve_context", "get_map", "get_node", "find_path", "delta"]
+    },
+    {
+      "id": "derive",
+      "title": "Conclusions and actions",
+      "summary": "Record reasoning so a wrong parent can take it back.",
+      "steps": [
+        "derive(text, parent_ids) records a conclusion (is_decision=true for a decision) from the facts it rests on. This is what lets a later correction reach it. A conclusion written as a plain fact has no parents and cannot be taken back.",
+        "stage_action(label, action_type, reversibility, parent_ids) proposes an action. reversibility is reversible, compensable or irreversible. The quorum gate decides: irreversible actions need root-tier backing or an independent corroborating fact, otherwise a person is asked to review.",
+        "execute_action(id) runs a staged action under the atomic guard. It is refused if any fact behind it is quarantined, and it runs at most once.",
+        "A person with the Admin level approves or rejects a review with review_handoff(id, decision, note). Contributors claim tasks with claim_handoff(id); the lease is exclusive."
+      ],
+      "say": ["Record that order 1042 is eligible, based on the policy fact.", "Stage a refund for order 1042."],
+      "tools": ["derive", "stage_action", "execute_action", "claim_handoff", "review_handoff"]
+    },
+    {
+      "id": "correct",
+      "title": "Correcting a wrong belief",
+      "summary": "Git revert for beliefs: correct, quarantine, block, compensate.",
+      "steps": [
+        "explain_blast_radius(root_id) is the dry run: which facts, conclusions and actions are built on this one. It changes nothing.",
+        "quarantine(root_id, reason) (Reviewer or Admin) pulls the fact and everything built on it out of circulation. The traversal runs in FalkorDB and follows the chain to its end, with hop depth.",
+        "Actions that depend on it are blocked from then on. Actions that already ran are compensated through an outbox with idempotency keys; anything that cannot be undone gets a drafted correction notice for a person.",
+        "restore(root_id) brings it back, only where every parent is healthy again. An executed action is never silently restored.",
+        "A correction that withdraws a fact does not replace it. Record the true fact separately if there is one."
+      ],
+      "say": ["That partner feed was wrong. What depends on it?", "Quarantine it.", "Restore it, we were mistaken."],
+      "tools": ["explain_blast_radius", "quarantine", "restore"]
+    },
+    {
+      "id": "team",
+      "title": "Teams, people and permission levels",
+      "summary": "Run the workspace by asking, not in a console.",
+      "steps": [
+        "Levels: Contributor (reads, saves, proposes and runs actions, claims tasks), Reviewer (also quarantines and restores), Admin (also approves reviews and manages people, teams, links and tokens).",
+        "quorum_manage(action='overview') lists teams, people, levels and links. Other actions: team_create, team_seats, team_remove, member_add, member_set_level, member_move, member_new_token, member_remove, leaver_report, link, pause_link, resume_link, unlink.",
+        "member_add returns the new person's token once, with ready-to-paste settings. Treat it as a password. A level change applies on that person's next call.",
+        "link shares context between two people (scope 'team' or 'commons'); pause_link ends access at once without deleting the link."
+      ],
+      "say": ["Add Priya to Support as a contributor.", "Make Priya a reviewer.", "Pause the link between Priya and Quinn."],
+      "tools": ["quorum_manage"]
+    },
+    {
+      "id": "connect",
+      "title": "Connecting to teammates",
+      "summary": "Find other hubs on your network and join them, with approval.",
+      "steps": [
+        "quorum_discover lists Quorum hubs visible on your network by name (found by the beacon that setup starts).",
+        "quorum_connect(peer) asks to join one by name, or by address (http://192.168.1.20:8000) when a network blocks discovery. Its admin is notified in the chat they are already in.",
+        "They answer with quorum_inbox and quorum_respond(request_id, decision, level). You receive access automatically; no token is pasted by hand. Check with quorum_connections.",
+        "peer_retrieve(peer, query) reads their shared memory within the level they granted. quorum_connections(reveal=true) prints the settings to attach their hub to an AI client."
+      ],
+      "say": ["Who is on my network?", "Connect me to Maya's Quorum.", "Anyone asking to join?"],
+      "tools": ["quorum_discover", "quorum_connect", "quorum_inbox", "quorum_respond", "quorum_connections", "peer_retrieve"]
+    },
+    {
+      "id": "coordinate",
+      "title": "Not stepping on each other",
+      "summary": "Collision warnings that understand dependency.",
+      "steps": [
+        "announce_work(target, intent) before you start on a file, an order, a ticket or a fact id. It warns if someone announced the same thing or something inside it in the last half hour.",
+        "If the target is a fact id it also warns about work within three causal hops, upstream or downstream, even when no name matches.",
+        "announce_work(target, done=true) releases your note. Notes expire by themselves and are not facts.",
+        "In Claude Code, scripts/quorum_conflict_hook.py makes the same check automatically before every edit (guide topic 'install')."
+      ],
+      "say": ["Tell the team you are working on the refund policy."],
+      "tools": ["announce_work"]
+    },
+    {
+      "id": "time",
+      "title": "What did we believe then?",
+      "summary": "Ask about the past.",
+      "steps": [
+        "recall_as_of(query, minutes_ago=60) or recall_as_of(query, as_of=<milliseconds>) returns what was believed at that time.",
+        "Each fact says what happened to it since: still believed, replaced, or quarantined since.",
+        "The console's time-travel slider and compare view read the same data."
+      ],
+      "say": ["What did we believe about refunds an hour ago?"],
+      "tools": ["recall_as_of"]
+    },
+    {
+      "id": "people",
+      "title": "When someone leaves",
+      "summary": "What leaves with a person.",
+      "steps": [
+        "quorum_manage(action='leaver_report', member='Name') lists the facts only that person recorded, how much is built on each, the tasks they hold and the teammates who already read their material.",
+        "member_remove revokes their token. Their facts stay in memory with their provenance.",
+        "The Team page has the same report behind the What leaves button."
+      ],
+      "say": ["What leaves with Lee if they go?"],
+      "tools": ["quorum_manage"]
+    },
+    {
+      "id": "console",
+      "title": "The console, page by page",
+      "summary": "Everything above is also a click away.",
+      "steps": [
+        "Overview: charts of what is remembered, what is quarantined, who is active and what the AIs have been doing.",
+        "Console: the causal graph. Click a node for provenance and the Cypher behind it; use the time slider to go back; the containment report shows the blast radius of a quarantine.",
+        "Context: the memory as an agent receives it, with live token numbers against a top-8 retriever.",
+        "Connect: connection status, the prompt that sets everything up from your AI, settings for each AI client and a live feed of tool calls.",
+        "Team: plan, teams, people, permission levels, tokens, links, requests from teammates (approve with a level) and What leaves.",
+        "Activity: the audit log in plain sentences, filterable, with a CSV export.",
+        "Keys: 1 to 6 switch pages (0 to 9 in the guided demo), Ctrl K searches and runs commands, / searches beliefs, F fits the graph, L toggles list view, P presentation mode, G opens the glossary, ? lists shortcuts."
+      ],
+      "say": [],
+      "tools": []
+    },
+    {
+      "id": "troubleshoot",
+      "title": "When something goes wrong",
+      "summary": "Common messages and what to do.",
+      "steps": [
+        "401 or 'Missing or invalid token': the token is wrong, expired or revoked. An admin can issue a new one (member_new_token).",
+        "'cannot do X, that needs Reviewer or Admin': your level is too low. An admin changes it with quorum_manage(action='member_set_level').",
+        "NOT_IN_MEMORY: memory has no relevant fact. That is an answer, not an error.",
+        "'looks like a credential': a field matched a secret pattern and was not stored. Remove the secret.",
+        "'Rate limit reached': slow down; a bulk import needs the limit raised (QUORUM_RATE_LIMIT_TOOLS_PER_MIN, 0 turns it off).",
+        "'FalkorDB is not set up or not running': start Docker and run python scripts/setup.py again. Quorum will not run without it.",
+        "quorum_discover finds nobody: the other hub must run the beacon on the same network, and some guest or corporate networks block UDP broadcast. Use quorum_connect with an address.",
+        "Gate blocked an action: it rests on a fact with no independent corroboration, or on a quarantined fact. Ask a person to review, or find an independent source."
+      ],
+      "say": [],
+      "tools": []
+    }
+  ],
+  "rules": [
+    "Before answering a question about our work, call retrieve_context with format='compact' and cite the ids it returns. If the outcome is NOT_IN_MEMORY, say you do not know; never guess and never save a guess as a fact.",
+    "Save durable facts as one plain sentence with remember_fact, or call observe once on text you wrote. Never put a password, key or token in a fact.",
+    "Record reasoning with derive and parent_ids, never as a plain fact, so a correction can reach it. Set copied_from when you restate a fact you read elsewhere.",
+    "Before starting work on a file, order, ticket or fact, call announce_work. Call it again with done=true when you finish.",
+    "If a fact turns out to be wrong, check explain_blast_radius, then quarantine it. Do not delete it and do not argue around it.",
+    "Do not run an action that depends on a quarantined fact. If the quorum gate blocks an action, say what it needs; do not look for a way around it.",
+    "When unsure what Quorum can do, call quorum_guide(). The person does not need the console."
+  ],
+  "clients": {
+    "claude-code": {"file": "CLAUDE.md (in the project, or ~/.claude/CLAUDE.md for every project)", "hooks": true, "note": "Claude Code can also run the capture and collision hooks below."},
+    "claude-desktop": {"file": "a Project's custom instructions, or the personal preferences box", "hooks": false, "note": "Claude Desktop reaches the hub through the stdio bridge (mcp/bridge.py) with QUORUM_MCP_TOKEN in its config."},
+    "cursor": {"file": ".cursor/rules/quorum.mdc (alwaysApply: true) or the project rules", "hooks": false, "note": ""},
+    "vscode": {"file": ".github/copilot-instructions.md", "hooks": false, "note": "VS Code prompts for the token at start, so it is never stored in the config file."},
+    "windsurf": {"file": ".windsurfrules (or global rules)", "hooks": false, "note": ""},
+    "antigravity": {"file": "GEMINI.md (in the project) or the agent's global rules", "hooks": false, "note": "Add the server with agy mcp add --header, or use the stdio bridge if your version does not forward headers."},
+    "chatgpt": {"file": "Custom instructions", "hooks": false, "note": "ChatGPT cannot send an Authorization header, so the token is a tool argument the model sees. Use a private hub only."},
+    "other": {"file": "wherever this AI keeps standing instructions (a rules file, a system prompt or custom instructions)", "hooks": false, "note": ""}
+  },
+  "hooks": {
+    "capture": "Saves facts from what Claude wrote, with no tool call: add {\"hooks\": {\"Stop\": [{\"hooks\": [{\"type\": \"command\", \"command\": \"python <quorum folder>/scripts/quorum_observer.py\"}]}]}} to .claude/settings.json and set QUORUM_URL and QUORUM_TOKEN in the environment.",
+    "conflict": "Warns before an edit when another agent is on the same file: add {\"hooks\": {\"PreToolUse\": [{\"matcher\": \"Edit|Write|MultiEdit\", \"hooks\": [{\"type\": \"command\", \"command\": \"python <quorum folder>/scripts/quorum_conflict_hook.py\"}]}]}} to .claude/settings.json; QUORUM_CONFLICT_MODE=warn (default), ask or off.",
+    "token": "Give the hooks their own Contributor token (quorum_manage member_add) and put it in the QUORUM_TOKEN environment variable, never in a file you commit."
+  }
+}
